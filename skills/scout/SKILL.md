@@ -116,8 +116,7 @@ Always link back to the Atlas index: `<a href="../../">← Atlas</a>` somewhere 
    - No trailing "References" dump?
    - Metadata block present?
 7. Write to `ATLAS_DIR/research/DATE-SLUG/index.{html,md}`.
-8. Regenerate index: run `bash -c "cd $ATLAS_DIR/.. && node scripts/build_index.js $ATLAS_DIR"` (the `scripts/` dir is in the Scout repo, `ATLAS_DIR` is the atlas checkout).
-9. Report: one-line confirmation with the path written. `run.sh` handles the commit + push.
+8. Report: one-line confirmation with the path written. `run.sh` handles index regeneration, commit, and push — do not do those yourself.
 
 ## Failure modes to avoid
 
