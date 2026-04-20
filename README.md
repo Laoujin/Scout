@@ -8,7 +8,7 @@ Trigger [`research.yml`](https://github.com/Laoujin/Scout/actions/workflows/rese
 GitHub Action to let Claude Code perform research and publish the result to
 [Atlas](https://github.com/Laoujin/Atlas), served via [GitHub Pages](https://laoujin.github.io/Atlas/).
 
-## Inputs
+### Inputs
 
 | Field    | Values                      | Default    |
 |----------|-----------------------------|------------|
@@ -18,19 +18,19 @@ GitHub Action to let Claude Code perform research and publish the result to
 
 See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour.
 
-## Setup on Synology NAS (Docker)
+## Setup
 
 GitHub → [`Laoujin/Scout`](https://github.com/Laoujin/Scout/settings/actions/runners/new) → Settings → Actions → Runners → New self-hosted runner → Linux x64. Copy the token.
 
-SSH into your NAS as an admin user (already in the `docker` group).
+SSH into your NAS.
 
 ```bash
-git clone https://github.com/Laoujin/Scout ~/scout
-cd ~/scout/docker
+git clone git@github.com:Laoujin/Scout.git
+cd Scout/docker
 cp .env.example .env
 # paste the token into .env as RUNNER_TOKEN=...
 
-docker compose up -d --build
+docker-compose up -d --build
 ```
 
 ### Atlas SSH deploy key
@@ -50,16 +50,24 @@ docker exec -it scout-runner runuser -u runner -- claude
 # Login, then /exit
 ```
 
-### First research
+## How to research
+
+Trigger [`research.yml`](https://github.com/Laoujin/Scout/actions/workflows/research.yml) in Github.
 
 ```bash
-gh workflow run research.yml --repo Laoujin/Scout \
-  -f topic="test: top 3 static site generators in 2026" \
-  -f depth=ceo -f format=md
+gh workflow run research.yml --repo Laoujin/Scout -f topic="test: top 3 static site generators in 2026" -f depth=ceo -f format=md
 gh run watch --repo Laoujin/Scout
 ```
 
-Result appears at https://laoujin.github.io/Atlas/ within ~1 min of the workflow going green.
+### Slash command
+
+```bash
+mkdir -p ~/.claude/commands
+cp commands/research.md ~/.claude/commands/research.md
+```
+
+In Claude Code: `/research Compare X vs Y depth=deep format=html`
+
 
 ## Troubleshooting
 
@@ -69,14 +77,6 @@ Result appears at https://laoujin.github.io/Atlas/ within ~1 min of the workflow
 - **Claude auth expired** → `docker exec -it scout-runner runuser -u runner -- claude`.
 - **Update Claude CLI** → `docker compose build --pull && docker compose up -d`.
 
-## Slash command
-
-```bash
-mkdir -p ~/.claude/commands
-cp commands/research.md ~/.claude/commands/research.md
-```
-
-Then in any Claude Code session: `/research Compare X vs Y depth=deep format=html`
 
 ## Development
 
@@ -85,7 +85,3 @@ npm test
 ```
 
 Requires [bats](https://bats-core.readthedocs.io/) for slug tests: `apt-get install bats`.
-
-## License
-
-MIT.

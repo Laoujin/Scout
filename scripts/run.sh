@@ -24,15 +24,13 @@ ATLAS_DIR="$SCOUT_DIR/atlas-checkout"
 rm -rf "$ATLAS_DIR"
 git clone --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
 
-TARGET="$ATLAS_DIR/research/${DATE}-${SLUG}"
+# Collision guard against the Jekyll collection file (md or html)
+FINAL_SLUG="$SLUG"
 n=2
-while [ -e "$TARGET" ]; do
-  TARGET="$ATLAS_DIR/research/${DATE}-${SLUG}-${n}"
+while ls "$ATLAS_DIR/_research/${DATE}-${FINAL_SLUG}".{md,html} 2>/dev/null | grep -q .; do
+  FINAL_SLUG="${SLUG}-${n}"
   n=$((n+1))
 done
-FINAL_SLUG="$(basename "$TARGET" | sed "s/^${DATE}-//")"
-
-mkdir -p "$TARGET"
 
 PROMPT="$(cat <<EOF
 TOPIC: ${TOPIC}
@@ -42,7 +40,7 @@ DATE: ${DATE}
 SLUG: ${FINAL_SLUG}
 ATLAS_DIR: ${ATLAS_DIR}
 
-Use the Scout skill. Perform the research and write the artifact to the folder identified by the ATLAS_DIR, DATE, and SLUG values above. Follow the skill's procedure. When done, print the final path.
+Use the Scout skill. Perform the research and write the artifact to ATLAS_DIR/_research/DATE-SLUG.md (for format=md) or ATLAS_DIR/_research/DATE-SLUG.html (for format=html). For format=auto pick the one that fits the topic. Follow the skill's procedure. When done, print the final path.
 EOF
 )"
 

@@ -4,10 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build-index": "node scripts/build_index.js",
-    "test:index": "node --test tests/build_index.test.mjs",
-    "test:slug": "bats tests/test_slug.bats",
-    "test": "npm run test:slug && npm run test:index"
+    "test": "bats tests/test_slug.bats"
   },
   "dependencies": {}
 }
