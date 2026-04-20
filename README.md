@@ -1,6 +1,8 @@
 # Scout
 
-Personal research engine. Trigger from a GitHub Actions workflow; Claude Code performs the research; the result publishes to [Atlas](https://github.com/Laoujin/atlas) and is served via GitHub Pages at https://laoujin.github.io/atlas/.
+## Personal research engine
+
+Trigger GitHub Action to let Claude Code perform research and publish the result to [Atlas](https://github.com/Laoujin/Atlas), served via [GitHub Pages](https://laoujin.github.io/Atlas/).
 
 ## How it works
 
@@ -204,8 +206,12 @@ From any Claude Code session:
 ## Development
 
 ```bash
-npm test          # runs build_index tests
+npm test          # runs slug + build_index tests
+npm run test:slug
+npm run test:index
 ```
+
+Requires [bats](https://bats-core.readthedocs.io/) for the slug tests: `apt-get install bats` / `brew install bats-core`.
 
 ## License
 
