@@ -61,7 +61,8 @@ Pick sources based on the topic. This is not a checklist — consult the categor
 3. **Terse.** No "in conclusion", no filler, no "it is worth noting that".
 4. **No emojis.**
 5. **Label opinions by source.** "r/homelab consensus:", "Wirecutter top pick:", "arXiv 2025 paper claims:".
-6. **If a claim has no URL, do not make the claim.**
+6. **GitHub repos → link + star count.** When the research mentions a tool, library, framework, or project that has a public GitHub repo, the first mention hyperlinks the name to the repo and includes the current star count with the month you looked. Example: `[Astro](https://github.com/withastro/astro) (52 k stars, Apr 2026)`. Stars decay fast; the month keeps it honest.
+7. **If a claim has no URL, do not make the claim.**
 
 ## Frontmatter (required; identical for .md and .html)
 
