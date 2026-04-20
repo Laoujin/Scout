@@ -18,61 +18,60 @@ GitHub Action to let Claude Code perform research and publish the result to
 
 See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour.
 
-## Setup (Synology NAS, DSM 7.2+)
-
-Do each step in order, as the `scout` user unless noted.
-
-### 1. Create the `scout` user (as root)
+## Setup on Synology NAS
 
 ```bash
 synouser --add scout 'temp-password' 'Scout runner' 0 '' 0
+
+# Scout needs temp admin for SSH
+synogroup --memberadd administrators scout
 ```
 
-Set a real password, then SSH in as `scout`.
-
-### 2. Install dependencies
+SSH with `scout`
 
 ```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-exec bash
-nvm install 22 && nvm use 22
+# Synology Node is no good, we need the nvm to install node
+touch ~/.bashrc
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.bashrc
+nvm install 22
+nvm use 22
+npm install -g @anthropic-ai/claude-code
+claude
+# Login!
 
-npm install -g @anthropic-ai/claude-code playwright
+# Add Playwright
+npm install -g playwright
 npx playwright install chromium
-
-# gh: download Linux tarball from https://github.com/cli/cli/releases,
-# extract gh into ~/bin/, then: export PATH="$HOME/bin:$PATH"
 ```
 
-### 3. Authenticate
-
-```bash
-claude         # OAuth; exit with /exit after login
-gh auth login  # GitHub.com, HTTPS, web browser
-```
-
-### 4. Atlas SSH deploy key
+### Atlas SSH deploy key
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/atlas_deploy -C scout-atlas -N ""
 cat ~/.ssh/atlas_deploy.pub
+chmod 600 ~/.ssh/atlas_deploy
 ```
 
 GitHub → [`Laoujin/Atlas`](https://github.com/Laoujin/Atlas) → Settings → Deploy keys → Add deploy key → title `scout-nas`, paste key, check **Allow write access**.
 
-Append to `~/.ssh/config`:
 
-```
+```bash
+cat >> ~/.ssh/config <<'EOF'
+
 Host github.com-atlas
   HostName github.com
   User git
   IdentityFile ~/.ssh/atlas_deploy
   IdentitiesOnly yes
+EOF
+
+chmod 600 ~/.ssh/config
 ```
 
 Verify: `ssh -T github.com-atlas` → "Hi Laoujin/Atlas!…"
 
-### 5. Register the self-hosted runner
+### Register the self-hosted runner
 
 GitHub → [`Laoujin/Scout`](https://github.com/Laoujin/Scout) → Settings → Actions → Runners → New self-hosted runner → Linux x64. Copy the token.
 
@@ -80,6 +79,16 @@ GitHub → [`Laoujin/Scout`](https://github.com/Laoujin/Scout) → Settings → 
 mkdir ~/actions-runner && cd ~/actions-runner
 curl -fsSL -O https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-linux-x64-2.321.0.tar.gz
 tar xzf actions-runner-linux-x64-2.321.0.tar.gz
+
+# config.sh requires ldd (not present on Synology)
+mkdir -p ~/bin
+cat > ~/bin/ldd <<'EOF'
+#!/bin/bash
+exec /lib64/ld-linux-x86-64.so.2 --list "$@"
+EOF
+chmod +x ~/bin/ldd
+export PATH="$HOME/bin:$PATH"
+
 ./config.sh --url https://github.com/Laoujin/Scout --token <TOKEN> --labels scout --name nas-scout --unattended
 
 echo "ATLAS_REPO=git@github.com-atlas:Laoujin/Atlas.git" >> .env
