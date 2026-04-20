@@ -30,5 +30,5 @@ fi
 git -c user.name="Scout" -c user.email="scout@users.noreply.github.com" \
   commit -m "research: ${DATE} ${SLUG}" -m "Topic: ${TOPIC}"
 
-git push origin main
+git push origin master
 echo "Published: https://laoujin.github.io/atlas/research/${DATE}-${SLUG}/"
