@@ -1,0 +1,12 @@
+{
+  "name": "scout",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build-index": "node scripts/build_index.js",
+    "test:index": "node --test tests/build_index.test.mjs",
+    "test": "npm run test:index"
+  },
+  "dependencies": {}
+}
