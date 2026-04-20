@@ -66,3 +66,37 @@ test('does not leak raw scout-meta script into index', () => {
     rmSync(atlas, { recursive: true, force: true });
   }
 });
+
+test('card shows topic, format, citations, reading time, depth accent', () => {
+  const atlas = setupAtlasCopy();
+  try {
+    execFileSync('node', ['scripts/build_index.js', atlas], { stdio: 'pipe' });
+    const html = readFileSync(join(atlas, 'index.html'), 'utf8');
+
+    // topics from each fixture
+    assert.match(html, /entry-prompt[^>]*>Compare X vs Y</);
+    assert.match(html, /entry-prompt[^>]*>Beta tools landscape</);
+    assert.match(html, /entry-prompt[^>]*>Gamma</);
+
+    // format badges
+    assert.match(html, /class="format-badge"[^>]*>html</);
+    assert.match(html, /class="format-badge"[^>]*>md</);
+
+    // citation counts
+    assert.match(html, /18 sources/);
+    assert.match(html, /6 sources/);
+    assert.match(html, /42 sources/);
+
+    // reading times
+    assert.match(html, /~3 min/);
+    assert.match(html, /~1 min/);
+    assert.match(html, /~8 min/);
+
+    // depth data attributes drive the CSS accent
+    assert.match(html, /data-depth="ceo"/);
+    assert.match(html, /data-depth="standard"/);
+    assert.match(html, /data-depth="deep"/);
+  } finally {
+    rmSync(atlas, { recursive: true, force: true });
+  }
+});

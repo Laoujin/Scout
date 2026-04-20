@@ -69,13 +69,32 @@ function loadEntries() {
 function renderEntry(e) {
   const tags = Array.isArray(e.tags) ? e.tags : [];
   const tagHtml = tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join(' ');
+  const depth = e.depth || 'standard';
+  const promptHtml = e.topic
+    ? `<p class="entry-prompt">${escapeHtml(e.topic)}</p>`
+    : '';
+  const formatHtml = e.format
+    ? `<span class="format-badge">${escapeHtml(e.format)}</span>`
+    : '';
+  const citations = Number(e.citations);
+  const citationsHtml = Number.isFinite(citations) && citations >= 0
+    ? `<span class="citation-count">${citations} sources</span>`
+    : '';
+  const readingTime = Number(e.reading_time_min);
+  const readingHtml = Number.isFinite(readingTime) && readingTime >= 1
+    ? `<span class="reading-time">~${readingTime} min</span>`
+    : '';
   return `
-    <article class="entry">
+    <article class="entry" data-depth="${escapeHtml(depth)}">
       <h2><a href="research/${escapeHtml(e.folder)}/">${escapeHtml(e.title)}</a></h2>
       <p>${escapeHtml(e.summary || '')}</p>
+      ${promptHtml}
       <p class="meta">
-        <span class="depth-badge">${escapeHtml(e.depth || 'standard')}</span>
+        <span class="depth-badge">${escapeHtml(depth)}</span>
+        ${formatHtml}
         <time>${escapeHtml(e.date)}</time>
+        ${citationsHtml}
+        ${readingHtml}
         ${tagHtml}
       </p>
     </article>`;

@@ -73,7 +73,7 @@ Every output starts with a metadata block the index regenerator will read.
 
 ```html
 <script type="application/json" id="scout-meta">
-{"title":"…","date":"YYYY-MM-DD","depth":"standard","topic":"…","tags":["…"],"summary":"one sentence"}
+{"title":"…","date":"YYYY-MM-DD","depth":"standard","format":"html","topic":"…","tags":["…"],"summary":"one sentence","citations":12,"reading_time_min":3}
 </script>
 ```
 
@@ -84,11 +84,20 @@ Every output starts with a metadata block the index regenerator will read.
 title: …
 date: YYYY-MM-DD
 depth: standard
+format: md
 topic: …
 tags: [tag1, tag2]
 summary: one sentence
+citations: 12
+reading_time_min: 3
 ---
 ```
+
+Field notes:
+- `format`: the actual format you wrote — `html` or `md`. Never the literal `auto`.
+- `topic`: the raw TOPIC input from the workflow (including any steering hints).
+- `citations`: count of distinct source URLs you cited in the artifact.
+- `reading_time_min`: estimate as `max(1, round(word_count / 200))`.
 
 ## Per-topic HTML layout guidance (when format=html)
 
@@ -114,7 +123,7 @@ Always link back to the Atlas index: `<a href="../../">← Atlas</a>` somewhere 
    - Terse? Kill filler paragraphs.
    - No emojis?
    - No trailing "References" dump?
-   - Metadata block present?
+   - Metadata block present, and: `format` matches what you wrote; `citations` equals the number of distinct URLs you cited; `reading_time_min` reflects length.
 7. Write to `ATLAS_DIR/research/DATE-SLUG/index.{html,md}`.
 8. Report: one-line confirmation with the path written. `run.sh` handles index regeneration, commit, and push — do not do those yourself.
 
