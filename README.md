@@ -18,88 +18,39 @@ GitHub Action to let Claude Code perform research and publish the result to
 
 See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour.
 
-## Setup on Synology NAS
+## Setup on Synology NAS (Docker)
+
+GitHub → [`Laoujin/Scout`](https://github.com/Laoujin/Scout/settings/actions/runners/new) → Settings → Actions → Runners → New self-hosted runner → Linux x64. Copy the token.
+
+SSH into your NAS as an admin user (already in the `docker` group).
 
 ```bash
-synouser --add scout 'temp-password' 'Scout runner' 0 '' 0
+git clone https://github.com/Laoujin/Scout ~/scout
+cd ~/scout/docker
+cp .env.example .env
+# paste the token into .env as RUNNER_TOKEN=...
 
-# Scout needs temp admin for SSH
-synogroup --memberadd administrators scout
-```
-
-SSH with `scout`
-
-```bash
-# Synology Node is no good, we need the nvm to install node
-touch ~/.bashrc
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-source ~/.bashrc
-nvm install 22
-nvm use 22
-npm install -g @anthropic-ai/claude-code
-claude
-# Login!
-
-# Add Playwright
-npm install -g playwright
-npx playwright install chromium
+docker compose up -d --build
 ```
 
 ### Atlas SSH deploy key
 
+The container generates an ed25519 key on first boot and prints the public half to its log.
+
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/atlas_deploy -C scout-atlas -N ""
-cat ~/.ssh/atlas_deploy.pub
-chmod 600 ~/.ssh/atlas_deploy
+docker logs scout-runner 2>&1 | grep '^ssh-ed25519'
 ```
 
 GitHub → [`Laoujin/Atlas`](https://github.com/Laoujin/Atlas) → Settings → Deploy keys → Add deploy key → title `scout-nas`, paste key, check **Allow write access**.
 
+### Authenticate Claude
 
 ```bash
-cat >> ~/.ssh/config <<'EOF'
-
-Host github.com-atlas
-  HostName github.com
-  User git
-  IdentityFile ~/.ssh/atlas_deploy
-  IdentitiesOnly yes
-EOF
-
-chmod 600 ~/.ssh/config
+docker exec -it scout-runner runuser -u runner -- claude
+# Login, then /exit
 ```
 
-Verify: `ssh -T github.com-atlas` → "Hi Laoujin/Atlas!…"
-
-### Register the self-hosted runner
-
-GitHub → [`Laoujin/Scout`](https://github.com/Laoujin/Scout) → Settings → Actions → Runners → New self-hosted runner → Linux x64. Copy the token.
-
-```bash
-mkdir ~/actions-runner && cd ~/actions-runner
-curl -fsSL -O https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-linux-x64-2.321.0.tar.gz
-tar xzf actions-runner-linux-x64-2.321.0.tar.gz
-
-# config.sh requires ldd (not present on Synology)
-mkdir -p ~/bin
-cat > ~/bin/ldd <<'EOF'
-#!/bin/bash
-exec /lib64/ld-linux-x86-64.so.2 --list "$@"
-EOF
-chmod +x ~/bin/ldd
-export PATH="$HOME/bin:$PATH"
-
-./config.sh --url https://github.com/Laoujin/Scout --token <TOKEN> --labels scout --name nas-scout --unattended
-
-echo "ATLAS_REPO=git@github.com-atlas:Laoujin/Atlas.git" >> .env
-
-sudo ./svc.sh install scout
-sudo ./svc.sh start
-```
-
-No `sudo`? Run `./run.sh` in a DSM Task Scheduler boot-up task instead.
-
-### 6. First research
+### First research
 
 ```bash
 gh workflow run research.yml --repo Laoujin/Scout \
@@ -112,10 +63,11 @@ Result appears at https://laoujin.github.io/Atlas/ within ~1 min of the workflow
 
 ## Troubleshooting
 
-- **Runner offline** → `sudo ~/actions-runner/svc.sh status`; check `~/actions-runner/_diag/`.
-- **Push fails** → `ssh -T github.com-atlas`; verify deploy key has write access.
-- **Claude auth expired** → re-run `claude` as scout.
-- **`--skill` flag error** → CLI version may differ. Symlink `~/.claude/skills/scout` → `~/scout-checkout/skills/scout` and drop `--skill` from `scripts/run.sh`.
+- **Runner offline** → `docker logs scout-runner`; `docker compose restart`.
+- **Token expired** (~1 h after issue) → new token, update `.env`, `docker compose down && docker compose up -d`.
+- **Push fails** → `docker exec scout-runner runuser -u runner -- ssh -T github.com-atlas`; verify deploy key has write access.
+- **Claude auth expired** → `docker exec -it scout-runner runuser -u runner -- claude`.
+- **Update Claude CLI** → `docker compose build --pull && docker compose up -d`.
 
 ## Slash command
 
