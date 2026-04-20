@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "bats tests/test_slug.bats"
+    "test": "node --test tests/slug.test.mjs"
   },
   "dependencies": {}
 }
