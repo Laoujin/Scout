@@ -1,0 +1,50 @@
+name: research
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "What to research (free text; steering hints go here)"
+        required: true
+        type: string
+      depth:
+        description: "Depth of research"
+        required: true
+        default: standard
+        type: choice
+        options: [ceo, standard, deep]
+      format:
+        description: "Output format"
+        required: true
+        default: auto
+        type: choice
+        options: [md, html, auto]
+
+concurrency:
+  group: research-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    runs-on: [self-hosted, scout]
+    timeout-minutes: 45
+    steps:
+      - name: Checkout scout
+        uses: actions/checkout@v4
+
+      - name: Run research
+        env:
+          TOPIC: ${{ inputs.topic }}
+          DEPTH: ${{ inputs.depth }}
+          FORMAT: ${{ inputs.format }}
+        run: bash scripts/run.sh
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Research run" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Topic:** ${{ inputs.topic }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Depth:** ${{ inputs.depth }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Format:** ${{ inputs.format }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Atlas:** https://laoujin.github.io/atlas/" >> "$GITHUB_STEP_SUMMARY"
