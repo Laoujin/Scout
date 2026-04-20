@@ -18,95 +18,47 @@ GitHub Action to let Claude Code perform research and publish the result to
 
 See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour.
 
-## Handoff — what the user still needs to do
+## Setup (Synology NAS, DSM 7.2+)
 
-All local scaffolding is committed on this branch. The remaining steps require owner credentials or NAS access and must be done by you:
+Do each step in order, as the `scout` user unless noted.
 
-1. **Push Scout and create Atlas on GitHub:**
-   ```bash
-   # From Scout (this repo):
-   git push origin master
-
-   # From the sibling atlas directory (../atlas):
-   gh repo create Laoujin/atlas --public --source=. --push
-   gh api -X POST repos/Laoujin/atlas/pages -f source[branch]=main -f source[path]=/
-   ```
-   Atlas Pages will live at https://laoujin.github.io/atlas/ within ~1 minute.
-
-2. **Synology setup** — follow the "Synology setup" section below on the NAS.
-
-3. **First research (smoke test):**
-   ```bash
-   gh workflow run research.yml --repo Laoujin/Scout \
-     -f topic="test: top 3 static site generators in 2026 for a personal notes site" \
-     -f depth=ceo -f format=md
-   gh run watch --repo Laoujin/Scout
-   ```
-   Confirm the artifact appears on Atlas. If any output rule is violated, tune `skills/scout/SKILL.md`, commit, push, and re-run.
-
-## Synology setup
-
-These steps set up a dedicated `scout` user on a Synology NAS (DSM 7.2+) with Container Manager installed. Adapt for your DSM version; edit this section to capture anything that differed on your machine.
-
-### 1. Create the `scout` user
-
-Via DSM Control Panel → User → Create → `scout`, or via SSH as root:
+### 1. Create the `scout` user (as root)
 
 ```bash
-synouser --add scout 'temporary-password' 'Scout runner' 0 '' 0
-# Put scout into the docker group (future-proofing; MVP does not use docker)
-synogroup --member docker scout 2>/dev/null || true
+synouser --add scout 'temp-password' 'Scout runner' 0 '' 0
 ```
 
-Set a real password, then SSH in as `scout` for the rest.
+Set a real password, then SSH in as `scout`.
 
-### 2. Install runtime dependencies as `scout`
+### 2. Install dependencies
 
 ```bash
-# Node.js via nvm (inside scout's home)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-exec bash          # reload shell so nvm is on PATH
-nvm install 22
-nvm use 22
-node --version     # should print v22.x
+exec bash
+nvm install 22 && nvm use 22
 
-# git is pre-installed on DSM; if not: install via Entware.
-
-# gh (GitHub CLI) — download the Linux tarball from
-# https://github.com/cli/cli/releases, extract gh to ~/bin/, add ~/bin to PATH.
-
-# Claude Code
-npm install -g @anthropic-ai/claude-code
-claude --version
-
-# Playwright (fallback path only)
-npm install -g playwright
+npm install -g @anthropic-ai/claude-code playwright
 npx playwright install chromium
+
+# gh: download Linux tarball from https://github.com/cli/cli/releases,
+# extract gh into ~/bin/, then: export PATH="$HOME/bin:$PATH"
 ```
 
-### 3. Authenticate Claude once (interactive)
+### 3. Authenticate
 
 ```bash
-claude                    # interactive OAuth flow
-# Follow the prompts; credentials land in ~/.claude/. Exit with /exit.
-ls -la ~/.claude/
-claude --print "hello" 2>&1 | head -5
+claude         # OAuth; exit with /exit after login
+gh auth login  # GitHub.com, HTTPS, web browser
 ```
 
-### 4. Authenticate gh
+### 4. Atlas SSH deploy key
 
 ```bash
-gh auth login             # GitHub.com, HTTPS, login with web browser (paste device code)
-```
-
-### 5. Atlas SSH deploy key
-
-```bash
-ssh-keygen -t ed25519 -f ~/.ssh/atlas_deploy -C "scout-atlas-deploy" -N ""
+ssh-keygen -t ed25519 -f ~/.ssh/atlas_deploy -C scout-atlas -N ""
 cat ~/.ssh/atlas_deploy.pub
 ```
 
-Copy the printed key. On GitHub → `Laoujin/atlas` → Settings → Deploy keys → Add deploy key → title `scout-nas`, paste public key, check **Allow write access**, Save.
+GitHub → [`Laoujin/Atlas`](https://github.com/Laoujin/Atlas) → Settings → Deploy keys → Add deploy key → title `scout-nas`, paste key, check **Allow write access**.
 
 Append to `~/.ssh/config`:
 
@@ -118,57 +70,27 @@ Host github.com-atlas
   IdentitiesOnly yes
 ```
 
-Verify:
+Verify: `ssh -T github.com-atlas` → "Hi Laoujin/Atlas!…"
+
+### 5. Register the self-hosted runner
+
+GitHub → [`Laoujin/Scout`](https://github.com/Laoujin/Scout) → Settings → Actions → Runners → New self-hosted runner → Linux x64. Copy the token.
 
 ```bash
-ssh -T github.com-atlas 2>&1
-# Expected: "Hi Laoujin/atlas! You've successfully authenticated…"
-```
+mkdir ~/actions-runner && cd ~/actions-runner
+curl -fsSL -O https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-linux-x64-2.321.0.tar.gz
+tar xzf actions-runner-linux-x64-2.321.0.tar.gz
+./config.sh --url https://github.com/Laoujin/Scout --token <TOKEN> --labels scout --name nas-scout --unattended
 
-### 6. Register the GitHub Actions self-hosted runner
+echo "ATLAS_REPO=git@github.com-atlas:Laoujin/Atlas.git" >> .env
 
-From GitHub → `Laoujin/Scout` → Settings → Actions → Runners → New self-hosted runner → Linux x64.
-
-Follow the on-screen download/config. Example (values will differ):
-
-```bash
-cd ~
-mkdir actions-runner && cd actions-runner
-curl -o actions-runner-linux-x64.tar.gz -L \
-  https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-linux-x64-2.321.0.tar.gz
-tar xzf ./actions-runner-linux-x64.tar.gz
-
-./config.sh \
-  --url https://github.com/Laoujin/Scout \
-  --token <token-from-github> \
-  --labels scout \
-  --name nas-scout \
-  --unattended
-```
-
-Install as a service:
-
-```bash
 sudo ./svc.sh install scout
 sudo ./svc.sh start
-sudo ./svc.sh status
 ```
 
-If DSM doesn't allow `sudo`, run under `systemd --user` or DSM Task Scheduler (trigger at boot, command: `/volume1/homes/scout/actions-runner/run.sh`).
+No `sudo`? Run `./run.sh` in a DSM Task Scheduler boot-up task instead.
 
-Configure the Atlas SSH alias for the runner:
-
-Append to `~/actions-runner/.env`:
-
-```
-ATLAS_REPO=git@github.com-atlas:Laoujin/atlas.git
-```
-
-Restart the service: `sudo ./svc.sh stop && sudo ./svc.sh start`.
-
-### 7. First research (smoke test)
-
-From any machine:
+### 6. First research
 
 ```bash
 gh workflow run research.yml --repo Laoujin/Scout \
@@ -177,38 +99,32 @@ gh workflow run research.yml --repo Laoujin/Scout \
 gh run watch --repo Laoujin/Scout
 ```
 
-Expected: run finishes green; https://laoujin.github.io/atlas/ shows a new entry within a minute of the workflow turning green.
+Result appears at https://laoujin.github.io/Atlas/ within ~1 min of the workflow going green.
 
-### Troubleshooting
+## Troubleshooting
 
-- **Runner offline** → `sudo ./svc.sh status`; check `~/actions-runner/_diag/` logs.
-- **Push fails** → `ssh -T github.com-atlas` to re-verify; check deploy key has write access.
-- **Claude auth expired** → SSH in as scout, run `claude`, re-auth, exit.
-- **`--skill` flag error** → your Claude Code CLI version may use a different flag (`--skill` is version-dependent). Run `claude --help` and adjust `scripts/run.sh` accordingly. Common alternatives: place `skills/scout/SKILL.md` at `~/.claude/skills/scout/SKILL.md` (symlink works) and let Claude auto-discover; then drop the `--skill` flag.
+- **Runner offline** → `sudo ~/actions-runner/svc.sh status`; check `~/actions-runner/_diag/`.
+- **Push fails** → `ssh -T github.com-atlas`; verify deploy key has write access.
+- **Claude auth expired** → re-run `claude` as scout.
+- **`--skill` flag error** → CLI version may differ. Symlink `~/.claude/skills/scout` → `~/scout-checkout/skills/scout` and drop `--skill` from `scripts/run.sh`.
 
-## Slash command (`/research`)
+## Slash command
 
 ```bash
 mkdir -p ~/.claude/commands
 cp commands/research.md ~/.claude/commands/research.md
 ```
 
-From any Claude Code session:
-
-```
-/research Compare X vs Y for my Z use case depth=deep format=html
-```
+Then in any Claude Code session: `/research Compare X vs Y depth=deep format=html`
 
 ## Development
 
 ```bash
-npm test          # runs slug + build_index tests
-npm run test:slug
-npm run test:index
+npm test
 ```
 
-Requires [bats](https://bats-core.readthedocs.io/) for the slug tests: `apt-get install bats` / `brew install bats-core`.
+Requires [bats](https://bats-core.readthedocs.io/) for slug tests: `apt-get install bats`.
 
 ## License
 
-MIT. See LICENSE.
+MIT.

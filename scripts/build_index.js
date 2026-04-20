@@ -90,21 +90,29 @@ function render(entries) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Atlas</title>
+  <title>Atlas — Research compiled on demand</title>
   <link rel="icon" type="image/png" href="assets/logo.png">
   <link rel="stylesheet" href="assets/base.css">
 </head>
 <body>
-  <header class="site-header">
-    <img src="assets/logo.png" alt="" class="site-logo" width="96" height="96">
-    <div>
+  <header class="hero">
+    <img src="assets/logo.png" alt="" class="hero-logo" width="160" height="160">
+    <div class="hero-text">
       <h1>Atlas</h1>
-      <p>Research findings. Newest first.</p>
+      <p class="hero-tagline">Research compiled on demand by Scout.</p>
+      <nav class="hero-links">
+        <a href="https://github.com/Laoujin/Scout">Scout engine →</a>
+        <a href="https://github.com/Laoujin/Atlas">Atlas source →</a>
+      </nav>
     </div>
   </header>
   <main>
+    <h2>Findings</h2>
 ${body}
   </main>
+  <footer>
+    <p>Scout researches. Atlas remembers.</p>
+  </footer>
 </body>
 </html>
 `;
