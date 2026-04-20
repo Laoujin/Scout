@@ -1,12 +1,20 @@
-<p align="center"><img src="scout-atlas-logo.png" alt="Scout + Atlas" width="200"></p>
-
-# Scout
-
-## Personal research engine
-
-Trigger [`research.yml`](https://github.com/Laoujin/Scout/actions/workflows/research.yml)
-GitHub Action to let Claude Code perform research and publish the result to
-[Atlas](https://github.com/Laoujin/Atlas), served via [GitHub Pages](https://laoujin.github.io/Atlas/).
+<table>
+  <tr>
+    <td width="220" align="center">
+      <img src="scout-atlas-logo.png" alt="Scout + Atlas" width="200">
+    </td>
+    <td>
+      <h1>Scout</h1>
+      <h2>Personal research engine</h2>
+      <p>
+        Trigger <a href="https://github.com/Laoujin/Scout/actions/workflows/research.yml"><code>research.yml</code></a>
+        GitHub Action to let Claude Code perform research and publish the result to
+        <a href="https://github.com/Laoujin/Atlas">Atlas</a>, served via
+        <a href="https://laoujin.github.io/Atlas/">GitHub Pages</a>.
+      </p>
+    </td>
+  </tr>
+</table>
 
 ### Inputs
 
