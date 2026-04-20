@@ -46,9 +46,11 @@ Use the Scout skill. Perform the research and write the artifact to the folder i
 EOF
 )"
 
+SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout/SKILL.md")"
+
 claude --dangerously-skip-permissions \
        --print \
-       --skill "$SCOUT_DIR/skills/scout/SKILL.md" \
+       --append-system-prompt "$SKILL_CONTENT" \
        "$PROMPT"
 
 TOPIC="$TOPIC" SLUG="$FINAL_SLUG" DATE="$DATE" ATLAS_REPO="$ATLAS_REPO" \

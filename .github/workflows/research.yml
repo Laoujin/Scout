@@ -37,6 +37,7 @@ jobs:
           TOPIC: ${{ inputs.topic }}
           DEPTH: ${{ inputs.depth }}
           FORMAT: ${{ inputs.format }}
+          ATLAS_REPO: git@github.com-atlas:Laoujin/Atlas.git
         run: bash scripts/run.sh
 
       - name: Summary
