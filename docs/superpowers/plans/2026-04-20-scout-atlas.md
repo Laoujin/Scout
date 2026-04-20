@@ -2,6 +2,22 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Amendment — 2026-04-20 (scope adjustment before execution)
+
+**The user's existing `research` repo IS the Scout repo.** Remote is `https://github.com/Laoujin/Scout`, branch is `master` (not `main`).
+
+Apply these substitutions when reading tasks below:
+
+- Paths written as `../scout/X` are actually `X` (relative to the Scout repo root, which is the current working directory).
+- Task 2 Step 1 `mkdir scout && git init`: **skip** — already initialised. Only run the `mkdir -p scripts skills/scout commands tests/fixtures` portion.
+- Task 2 Step 8 `gh repo create Laoujin/scout`: **skip** — remote already exists.
+- Task 11 Step 1 `cd ../scout && git push -u origin main`: becomes `git push origin master`.
+- Scout's branch is `master`; Atlas's branch will be `main` (created fresh in Task 1). The `research.yml` workflow is triggered via `workflow_dispatch` regardless of branch — no change needed.
+- The `docs/superpowers/specs/` and `docs/superpowers/plans/` files already live in this repo — they stay. They are the spec and plan that drove Scout's own construction.
+
+Atlas remains a new sibling repo at `../atlas/` — no substitutions needed for Atlas paths.
+
+
 **Goal:** Build a two-repo personal research pipeline (`scout` engine + `atlas` GitHub Pages site) that researches a topic on demand from a GH Actions workflow and publishes a browsable result.
 
 **Architecture:** `scout` runs on a self-hosted GH Actions runner on the user's Synology NAS under a dedicated `scout` user. `workflow_dispatch` fires Claude Code (`--dangerously-skip-permissions`) with the Scout skill loaded. Claude does the research, writes the artifact into a cloned Atlas working copy, regenerates the index via a small Node script, commits and pushes. Atlas is a static site served by GitHub Pages — no SSG.
