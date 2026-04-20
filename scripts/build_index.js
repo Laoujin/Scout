@@ -91,10 +91,17 @@ function render(entries) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Atlas</title>
+  <link rel="icon" type="image/png" href="assets/logo.png">
   <link rel="stylesheet" href="assets/base.css">
 </head>
 <body>
-  <header><h1>Atlas</h1><p>Research findings. Newest first.</p></header>
+  <header class="site-header">
+    <img src="assets/logo.png" alt="" class="site-logo" width="96" height="96">
+    <div>
+      <h1>Atlas</h1>
+      <p>Research findings. Newest first.</p>
+    </div>
+  </header>
   <main>
 ${body}
   </main>

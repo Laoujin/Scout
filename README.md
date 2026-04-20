@@ -1,24 +1,20 @@
+<p align="center"><img src="scout-atlas-logo.png" alt="Scout + Atlas" width="200"></p>
+
 # Scout
 
 ## Personal research engine
 
-Trigger GitHub Action to let Claude Code perform research and publish the result to [Atlas](https://github.com/Laoujin/Atlas), served via [GitHub Pages](https://laoujin.github.io/Atlas/).
-
-## How it works
-
-1. You trigger `research.yml` (mobile GitHub app, `gh workflow run`, or the `/research` slash command) with a topic, depth, and format.
-2. The workflow runs on a self-hosted GitHub Actions runner installed on the NAS under a dedicated `scout` user.
-3. The runner invokes `claude --dangerously-skip-permissions` with the Scout skill loaded.
-4. Claude researches, writes the artifact into a fresh clone of the Atlas repo.
-5. `scripts/publish.sh` regenerates the Atlas index and pushes. GitHub Pages rebuilds.
+Trigger [`research.yml`](https://github.com/Laoujin/Scout/actions/workflows/research.yml)
+GitHub Action to let Claude Code perform research and publish the result to
+[Atlas](https://github.com/Laoujin/Atlas), served via [GitHub Pages](https://laoujin.github.io/Atlas/).
 
 ## Inputs
 
-| Field | Values | Default |
-|---|---|---|
-| `topic` | Free text (required). Steering hints go here: "NAS replacement, focus on r/homelab" | — |
-| `depth` | `ceo` / `standard` / `deep` | `standard` |
-| `format` | `md` / `html` / `auto` | `auto` |
+| Field    | Values                      | Default    |
+|----------|-----------------------------|------------|
+| `topic`  | Free text                   | —          |
+| `depth`  | `ceo` / `standard` / `deep` | `standard` |
+| `format` | `md` / `html` / `auto`      | `auto`     |
 
 See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour.
 
