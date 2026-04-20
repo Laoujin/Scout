@@ -42,7 +42,7 @@ DATE: ${DATE}
 SLUG: ${FINAL_SLUG}
 ATLAS_DIR: ${ATLAS_DIR}
 
-Use the Scout skill. Perform the research and write the artifact to \$ATLAS_DIR/research/\$DATE-\$SLUG/index.{html,md} per the skill's procedure. When done, print the final path.
+Use the Scout skill. Perform the research and write the artifact to the folder identified by the ATLAS_DIR, DATE, and SLUG values above. Follow the skill's procedure. When done, print the final path.
 EOF
 )"
 
