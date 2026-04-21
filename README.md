@@ -24,7 +24,9 @@
 | `depth`  | `ceo` / `standard` / `deep` | `standard` |
 | `format` | `md` / `html` / `auto`      | `auto`     |
 
-See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour.
+See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour, and [`skills/scout/tighten.md`](skills/scout/tighten.md) for how raw topics get sharpened into research briefs before a run.
+
+Only the repo OWNER's Issues / dispatches trigger the workflow (author-association gate). Forks are safe out of the box — nobody but you can spend your runner.
 
 ## Fork for your own use
 
@@ -72,10 +74,23 @@ docker exec -it scout-runner runuser -u runner -- claude
 
 ## How to research
 
-Trigger [`research.yml`](https://github.com/Laoujin/Scout/actions/workflows/research.yml) in Github.
+### Default: open a research Issue
+
+[Open a new Issue](https://github.com/Laoujin/Scout/issues/new?template=research.yml) using the **Research request** template. Fill in `Topic`, `Depth`, `Format`. Optional: tick **Skip tightening** if your topic is already exactly what you want researched.
+
+Within ~30s Scout replies with a sharpened proposal (or your raw topic when skip is ticked) plus a `- [ ] Start research` checkbox.
+
+- **Tick the checkbox** → research runs, publishes to Atlas, comments the link back, closes the Issue.
+- **Reply with feedback** ("focus on r/homelab", "shorter, decision-only") → Scout posts a revised proposal as a new comment. Loop until happy.
+
+Mobile UX: GitHub mobile app → Scout → New issue → pick the template → confirm via the checkbox on Scout's reply. No workflow form to fill blind.
+
+### Power-user: dispatch the workflow directly
+
+Skips the Issue dance — fires research with your raw topic, no tightening, no Issue created.
 
 ```bash
-gh workflow run research.yml --repo Laoujin/Scout -f topic="test: top 3 static site generators in 2026" -f depth=ceo -f format=md
+gh workflow run research.yml --repo Laoujin/Scout -f topic="top 3 static site generators in 2026" -f depth=ceo -f format=md
 gh run watch --repo Laoujin/Scout
 ```
 
@@ -86,7 +101,10 @@ mkdir -p ~/.claude/commands
 cp commands/research.md ~/.claude/commands/research.md
 ```
 
-In Claude Code: `/research Compare X vs Y depth=deep format=html`
+In Claude Code:
+
+- `/research Compare X vs Y depth=deep format=html` — opens an Issue (default flow).
+- `/research Compare X vs Y --dispatch` — runs immediately via `workflow_dispatch`.
 
 
 ## Troubleshooting
