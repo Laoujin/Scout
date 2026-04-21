@@ -5,7 +5,7 @@ These rules apply to every research run inside this repo.
 ## Output style
 
 - Terse. No filler, no "in conclusion" paragraphs, no prose bloat.
-- When comparing options, use a table. Always. Never prose.
+- Prefer tables for comparisons over measurable axes (specs, numbers, features). When a comparison is about philosophy or fit-for-context rather than attributes, short labeled sections per option are fine — just keep it scannable.
 
 ## Citations (hard rule)
 

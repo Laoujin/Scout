@@ -72,7 +72,7 @@ Pick sources based on the topic. This is not a checklist — consult the categor
    - MD body: `[[1]](https://url)` inline.
    - HTML body: `<sup><a href="url">[1]</a></sup>` inline.
    - A comparison-table row synthesising three sources shows all three URLs in that row.
-2. **Comparisons → tables.** Always. No prose equivalents.
+2. **Comparisons → tables** when the axes are measurable (specs, numbers, features). When the comparison is philosophy or fit-for-context, use short labeled sections per option instead — but keep it scannable, not prose blobs.
 3. **Terse.** No "in conclusion", no filler, no "it is worth noting that".
 4. **No emojis.**
 5. **Label opinions by source.** "r/homelab consensus:", "Wirecutter top pick:", "arXiv 2025 paper claims:".
