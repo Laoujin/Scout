@@ -29,4 +29,8 @@ git -c user.name="${GIT_AUTHOR_NAME:-Scout}" \
   commit -m "research: ${DATE} ${SLUG}" -m "Topic: ${TOPIC}"
 
 git push origin master
-echo "Published: https://laoujin.github.io/Atlas/research/${DATE}-${SLUG}/"
+
+# Derive the Pages URL from ATLAS_REPO (git@github.com-atlas:<owner>/<repo>.git).
+atlas_slug="${ATLAS_REPO#*:}"; atlas_slug="${atlas_slug%.git}"
+owner="${atlas_slug%%/*}"; repo="${atlas_slug##*/}"
+echo "Published: https://${owner,,}.github.io/${repo}/research/${DATE}-${SLUG}/"

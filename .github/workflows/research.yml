@@ -37,7 +37,9 @@ jobs:
           TOPIC: ${{ inputs.topic }}
           DEPTH: ${{ inputs.depth }}
           FORMAT: ${{ inputs.format }}
-          ATLAS_REPO: git@github.com-atlas:Laoujin/Atlas.git
+          # Atlas repo lives under the same owner as Scout. If you renamed your Atlas
+          # repo, set a repo-level variable ATLAS_REPO_NAME (Settings → Actions → Variables).
+          ATLAS_REPO: git@github.com-atlas:${{ github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
           GIT_AUTHOR_NAME: ${{ github.actor }}
           GIT_AUTHOR_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
           GIT_COMMITTER_NAME: ${{ github.actor }}

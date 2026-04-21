@@ -40,11 +40,14 @@ CFG
   chmod 600 "$SSH_DIR/config" "$SSH_DIR/atlas_deploy"
   chmod 644 "$SSH_DIR/atlas_deploy.pub"
 
+  # Derive the "Add deploy key" URL from ATLAS_REPO for clarity in the log message.
+  # ATLAS_REPO looks like: git@github.com-atlas:<owner>/<repo>.git
+  atlas_slug="${ATLAS_REPO#*:}"; atlas_slug="${atlas_slug%.git}"
   echo
   echo "===================================================================="
   echo " First boot: Atlas deploy key generated."
   echo " Add the PUBLIC key below at:"
-  echo "   https://github.com/Laoujin/Atlas/settings/keys/new"
+  echo "   https://github.com/${atlas_slug}/settings/keys/new"
   echo "   title:  scout-nas"
   echo "   Allow write access:  YES"
   echo "===================================================================="

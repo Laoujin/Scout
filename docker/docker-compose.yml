@@ -5,11 +5,11 @@ services:
     container_name: scout-runner
     restart: unless-stopped
     environment:
-      RUNNER_URL: https://github.com/Laoujin/Scout
+      RUNNER_URL: ${RUNNER_URL:?Set RUNNER_URL in .env — e.g. https://github.com/<you>/Scout}
       RUNNER_TOKEN: ${RUNNER_TOKEN:?Set RUNNER_TOKEN in .env}
       RUNNER_LABELS: scout
       RUNNER_NAME: nas-scout
-      ATLAS_REPO: git@github.com-atlas:Laoujin/Atlas.git
+      ATLAS_REPO: ${ATLAS_REPO:?Set ATLAS_REPO in .env — e.g. git@github.com-atlas:<you>/Atlas.git}
     volumes:
       - claude-auth:/home/runner/.claude
       - runner-config:/home/runner/actions-runner

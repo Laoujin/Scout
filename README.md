@@ -28,29 +28,15 @@ See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behavio
 
 ## Fork for your own use
 
-You want your own Scout (engine) and your own Atlas (site). Five steps:
+Everything that needs to vary per-fork now reads from GitHub's own context (`${{ github.repository_owner }}` in the workflow, `site.github.*` in Atlas layouts) or from `docker/.env`. The "fork" is small.
 
-1. **Scout:** click "Use this template" on this repo (or fork) → `<you>/<scout-name>`.
-2. **Atlas:** do the same on [Laoujin/Atlas](https://github.com/Laoujin/Atlas) → `<you>/<atlas-name>`. Enable Pages: Settings → Pages → Source: `Deploy from a branch` → your default branch → Save.
-3. **Rewrite references in your Scout fork** — replace `Laoujin` → `<you>` and `Atlas` → `<atlas-name>` in:
-    - `.github/workflows/research.yml` (`ATLAS_REPO`)
-    - `docker/docker-compose.yml` (`RUNNER_URL`, `ATLAS_REPO`)
-    - `docker/run-init.sh` (deploy-key instruction URL)
-    - `commands/research.md` (`gh workflow run --repo …`)
-    - `scripts/publish.sh` (the "Published:" echo URL)
-    - `README.md` (badges / links — cosmetic)
-4. **Rewrite references in your Atlas fork:**
-    - `_config.yml` — `baseurl: /<atlas-name>`
-    - `_layouts/default.html` — the two `hero-links` URLs point back to your Scout and Atlas repos
-5. Continue with [Setup](#setup) below to wire everything to your NAS.
+1. **Scout:** click "Use this template" on this repo → `<you>/Scout`. Keep the repo name `Scout` if you want zero config; rename freely if you want — you'll just set a repo-level variable `ATLAS_REPO_NAME` below.
+2. **Atlas:** click "Use this template" on [Laoujin/Atlas](https://github.com/Laoujin/Atlas) → `<you>/Atlas`. **Delete the `research/` folder** (that's my published findings, not yours). Enable Pages: Settings → Pages → Source: `Deploy from a branch` → default branch → Save.
+3. **One edit in your Atlas fork:** `_config.yml` → set `baseurl` to `/<your-atlas-repo-name>` (if you renamed Atlas to something other than `Atlas`). If you renamed Scout, also set `scout_repo:` to your Scout fork's name. Push.
+4. **One file to fill in for your Scout fork** — on your NAS, `docker/.env` (copied from `.env.example`): set `RUNNER_URL`, `ATLAS_REPO`, `RUNNER_TOKEN`. That's it.
+5. Continue with [Setup](#setup).
 
-One-liner sanity check from your Scout fork's root:
-
-```bash
-grep -rn --include='*.yml' --include='*.sh' --include='*.md' --include='_layouts/*' -e Laoujin -e '/Atlas' .
-```
-
-Anything it turns up (outside the README's cosmetic links and this section itself) is still pointing at the original — fix it before your first run.
+Nothing in the workflow, scripts, or CSS has to be edited. If you renamed Atlas to a non-default name, set repo variable `ATLAS_REPO_NAME` at `<you>/Scout` → Settings → Secrets and variables → Actions → Variables → New repository variable.
 
 ## Setup
 
