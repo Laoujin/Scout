@@ -196,67 +196,6 @@ section > .container > p.lede {
   margin-top: 6px;
 }
 
-/* ---------- Why (pillars) ---------- */
-.pillars {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
-}
-.pillar {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 22px 20px 20px;
-  position: relative;
-}
-.pillar .n {
-  position: absolute; top: 14px; right: 16px;
-  font: 600 11px ui-monospace, Menlo, monospace;
-  color: var(--fg-faint);
-}
-.pillar h4 { margin: 0 0 8px; font-size: 17px; letter-spacing: -0.01em; }
-.pillar p { margin: 0; color: var(--fg-muted); font-size: 14px; }
-.pillar .icon {
-  color: var(--accent); margin-bottom: 12px;
-}
-
-/* ---------- Examples ---------- */
-.examples-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
-}
-.example {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 18px 20px;
-  transition: transform .15s ease, border-color .15s ease;
-  cursor: pointer;
-}
-.example:hover { transform: translateY(-2px); border-color: var(--accent); }
-.example .prompt-line {
-  display: flex; gap: 8px; align-items: flex-start;
-  font: 500 14px/1.5 ui-monospace, Menlo, monospace;
-  color: var(--fg);
-  margin-bottom: 12px;
-}
-.example .prompt-line::before { content: "▸"; color: var(--accent); font-weight: 700; flex-shrink: 0; }
-.example .arrow { color: var(--fg-faint); margin: 0 6px; }
-.example .tags { display: flex; gap: 6px; flex-wrap: wrap; }
-.example .chip {
-  display: inline-block; padding: 2px 8px; border-radius: 999px;
-  font-size: 11px; color: var(--fg-muted);
-  border: 1px solid var(--border);
-}
-.example .chip::before { content: "#"; opacity: 0.5; }
-.example .chip.depth {
-  background: var(--accent-soft); color: var(--accent); border-color: transparent;
-}
-.example .chip.depth::before { content: ""; margin: 0; }
-
-.example-note {
-  margin-top: 24px; text-align: center;
-  font-size: 13px; color: var(--fg-faint);
-}
-.example-note::before { content: "— "; color: var(--accent); }
-
 /* ---------- How it works (diagram) ---------- */
 .how { background: var(--surface-tint); }
 .how-diagram {
@@ -268,58 +207,6 @@ section > .container > p.lede {
 }
 .how-diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
 
-.how-steps {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-  margin-top: 30px;
-}
-.how-step {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 18px 20px;
-}
-.how-step .n {
-  font: 600 11px ui-monospace, Menlo, monospace;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 6px;
-}
-.how-step h4 { margin: 0 0 6px; font-size: 16px; letter-spacing: -0.01em; }
-.how-step p { margin: 0; color: var(--fg-muted); font-size: 13.5px; }
-.how-step code { font-size: 12px; background: var(--surface-tint); padding: 1px 5px; border-radius: 3px; color: var(--accent); }
-
-/* ---------- Install ---------- */
-.install-steps {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
-  margin-bottom: 28px;
-}
-.install-step {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 22px 22px 20px;
-  position: relative;
-}
-.install-step .num {
-  position: absolute; top: -14px; left: 22px;
-  width: 28px; height: 28px;
-  background: var(--accent); color: #fff;
-  border-radius: 50%;
-  display: grid; place-content: center;
-  font: 700 13px ui-monospace, Menlo, monospace;
-}
-.install-step h4 { margin: 12px 0 8px; font-size: 17px; letter-spacing: -0.01em; }
-.install-step p { margin: 0 0 12px; color: var(--fg-muted); font-size: 13.5px; }
-.install-step .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.install-step .sm-btn {
-  padding: 6px 10px; border-radius: 5px;
-  font: 500 12px/1 -apple-system, system-ui, sans-serif;
-  background: var(--surface-tint);
-  border: 1px solid var(--border);
-  color: var(--fg);
-}
-.install-step .sm-btn.primary { background: var(--fg); color: #fff; border-color: var(--fg); }
-.install-step .sm-btn:hover { border-color: var(--accent); color: var(--accent); }
-.install-step .sm-btn.primary:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 .install-cmd {
   background: #0f1013;
@@ -345,19 +232,18 @@ section > .container > p.lede {
 .install-cmd .copy-btn:hover { color: #f4efe6; border-color: #4a4d52; }
 .install-cmd .copy-btn.ok { color: #61c454; border-color: #61c454; }
 
-/* ---------- Picker ---------- */
-.picker { background: var(--surface-tint); }
-.picker-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
-  align-items: start;
-}
-.picker-controls h3 {
+/* ---------- Your Atlas (controls + live preview) ---------- */
+.your-atlas-section { background: var(--surface-tint); }
+.ya-controls { display: grid; gap: 28px; margin-bottom: 36px; }
+.ya-split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.ya-group { padding: 0; }
+.ya-group h3 {
   margin: 0 0 12px;
   font: 600 12px ui-monospace, Menlo, monospace;
   letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--fg-muted);
 }
-.picker-controls section { padding: 0; margin-bottom: 28px; }
+.ya-sub { color: var(--fg); text-transform: none; font-weight: 400; letter-spacing: 0; }
 
 .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
 .swatch-btn {
@@ -405,129 +291,202 @@ section > .container > p.lede {
 .card-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .card-btn .label { display: block; font-weight: 400; font-size: 10px; opacity: 0.8; margin-top: 2px; }
 
-/* Preview panel */
-.picker-preview {
-  position: sticky; top: 80px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+/* ---------- Atlas live preview ---------- */
+.atlas-preview {
+  background: var(--ap-bg);
+  color: var(--ap-fg);
+  border: 1px solid var(--ap-border);
   border-radius: 14px;
-  padding: 22px 22px 22px;
-}
-.picker-preview h3 {
-  margin: 0 0 14px;
-  font: 600 12px ui-monospace, Menlo, monospace;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--fg-muted);
-}
-.preview-card {
-  background: var(--preview-surface, #fff);
-  color: var(--preview-fg, #1a1a1a);
-  border: 1px solid var(--preview-border, #e8e6e0);
-  border-radius: 10px;
   overflow: hidden;
-  transition: background .2s ease, color .2s ease, border-color .2s ease;
+  transition: background .2s, color .2s, border-color .2s;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 }
-.preview-cover {
-  aspect-ratio: 3/2;
-  background:
-    radial-gradient(circle at 20% 30%, hsla(210, 85%, 70%, .9), transparent 55%),
-    radial-gradient(circle at 85% 70%, hsla(260, 80%, 55%, .85), transparent 60%),
-    linear-gradient(135deg, hsl(210 65% 40%), hsl(240 55% 25%));
-  position: relative;
+.ap-chrome { background: color-mix(in srgb, var(--ap-fg) 6%, transparent); }
+.ap-main { padding: 24px; }
+.ap-cards {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
 }
-.preview-cover::after {
-  content: "SSG"; position: absolute; inset: 0;
-  display: grid; place-content: center;
-  color: rgba(255,255,255,.92);
-  font: italic 700 54px/1 Georgia, serif;
-  letter-spacing: -0.04em;
-  text-shadow: 0 2px 12px rgba(0,0,0,.3);
+
+/* Palettes (set CSS custom properties on .atlas-preview) */
+.atlas-preview.palette-rust        { --ap-bg:#faf9f6; --ap-surface:#ffffff; --ap-fg:#1a1a1a; --ap-fg-muted:#5c5c5c; --ap-fg-faint:#8a8a8a; --ap-border:#e8e6e0; --ap-accent:#c2410c; --ap-accent-soft:#fef3ec; }
+.atlas-preview.palette-paper       { --ap-bg:#fbf7ea; --ap-surface:#fffcf2; --ap-fg:#2a1e12; --ap-fg-muted:#6b5a3f; --ap-fg-faint:#9b8766; --ap-border:#dcd2b8; --ap-accent:#a84a07; --ap-accent-soft:#fbeedd; }
+.atlas-preview.palette-cartography { --ap-bg:#f0ebe0; --ap-surface:#faf6ea; --ap-fg:#1a2e1f; --ap-fg-muted:#4a5d4e; --ap-fg-faint:#7a8a7e; --ap-border:#c9bc9d; --ap-accent:#4a6b3a; --ap-accent-soft:#dce5d1; }
+.atlas-preview.palette-midnight    { --ap-bg:#0f1013; --ap-surface:#1a1c20; --ap-fg:#f0ede6; --ap-fg-muted:#a8a59c; --ap-fg-faint:#6e7079; --ap-border:#2d3036; --ap-accent:#f59e0b; --ap-accent-soft:#3a2f18; }
+.atlas-preview.palette-minimal     { --ap-bg:#ffffff; --ap-surface:#ffffff; --ap-fg:#0a0a0a; --ap-fg-muted:#525252; --ap-fg-faint:#a3a3a3; --ap-border:#e5e5e5; --ap-accent:#2563eb; --ap-accent-soft:#dbeafe; }
+.atlas-preview.palette-fieldnotes  { --ap-bg:#ede6cf; --ap-surface:#f6f0dc; --ap-fg:#3d2914; --ap-fg-muted:#6b5434; --ap-fg-faint:#948066; --ap-border:#c4b88f; --ap-accent:#b54708; --ap-accent-soft:#f3e3bf; }
+
+/* Skeleton chrome */
+.atlas-preview.skeleton-s1 .ap-chrome {
+  padding: 36px 24px; text-align: center;
+  background: color-mix(in srgb, var(--ap-accent) 8%, transparent);
+  border-bottom: 1px solid var(--ap-border);
 }
-.preview-body { padding: 16px 18px 18px; }
-.preview-body .row {
+.atlas-preview.skeleton-s1 .ap-chrome::before {
+  content: "Your Atlas";
+  font-family: "Fraunces", Georgia, serif; font-weight: 600;
+  font-size: 32px; letter-spacing: -0.02em;
+}
+.atlas-preview.skeleton-s2 .ap-chrome {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 10px;
+  padding: 12px 24px;
+  background: var(--ap-surface); border-bottom: 1px solid var(--ap-border);
 }
-.preview-depth {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 2px 8px; border-radius: 3px;
-  font: 700 10px/1.4 ui-monospace, Menlo, monospace;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  background: var(--preview-accent-soft, #fef3ec);
-  color: var(--preview-accent, #c2410c);
+.atlas-preview.skeleton-s2 .ap-chrome::before {
+  content: "Your Atlas";
+  font-family: "Fraunces", Georgia, serif; font-weight: 600; font-size: 18px;
 }
-.preview-depth::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-.preview-fmt {
-  font: 600 10px/1 ui-monospace, Menlo, monospace;
-  padding: 2px 6px; border-radius: 3px;
-  background: var(--preview-accent-soft, #fef3ec);
-  color: var(--preview-accent, #c2410c);
+.atlas-preview.skeleton-s2 .ap-chrome::after {
+  content: "All · AI · Tools · Hardware";
+  font: 600 11px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.06em; color: var(--ap-fg-muted);
 }
-.preview-body h4 { margin: 0 0 6px; font-size: 16px; letter-spacing: -0.01em; }
-.preview-body p { margin: 0 0 10px; color: var(--preview-fg-muted, #5c5c5c); font-size: 13px; }
-.preview-body .tags { display: flex; gap: 6px; margin-bottom: 10px; }
-.preview-body .tags span {
-  display: inline-block; padding: 1px 7px; border-radius: 999px;
-  font-size: 11px; color: var(--preview-fg-muted, #5c5c5c);
-  border: 1px solid var(--preview-border, #e8e6e0);
+.atlas-preview.skeleton-s3 { display: grid; grid-template-columns: 200px 1fr; }
+.atlas-preview.skeleton-s3 .ap-chrome {
+  padding: 24px 16px;
+  background: var(--ap-surface); border-right: 1px solid var(--ap-border);
 }
-.preview-body .tags span::before { content: "#"; opacity: 0.5; }
-.preview-body .meta {
-  font: 500 11px ui-monospace, Menlo, monospace;
-  color: var(--preview-fg-faint, #8a8a8a);
+.atlas-preview.skeleton-s3 .ap-chrome::before {
+  content: "Your Atlas\A\A · All\A · AI\A · Tools\A · Hardware\A · Personal";
+  white-space: pre;
+  font: 13px/1.8 ui-monospace, Menlo, monospace;
+  color: var(--ap-fg);
+}
+.atlas-preview.skeleton-s3 .ap-cards { grid-template-columns: repeat(2, 1fr); }
+.atlas-preview.skeleton-s4 { display: grid; grid-template-columns: 260px 1fr; }
+.atlas-preview.skeleton-s4 .ap-chrome {
+  padding: 32px 24px;
+  background: color-mix(in srgb, var(--ap-accent) 8%, transparent);
+  border-right: 1px solid var(--ap-border);
+}
+.atlas-preview.skeleton-s4 .ap-chrome::before {
+  content: "Your Atlas\AResearch, cited\Aper-line.";
+  white-space: pre;
+  font-family: "Fraunces", Georgia, serif; font-weight: 600;
+  font-size: 24px; line-height: 1.2; letter-spacing: -0.02em;
+}
+.atlas-preview.skeleton-s4 .ap-cards { grid-template-columns: repeat(2, 1fr); }
+.atlas-preview.skeleton-s5 .ap-chrome {
+  padding: 48px 32px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ap-accent) 25%, var(--ap-surface)), var(--ap-surface));
+  border-bottom: 1px solid var(--ap-border);
+}
+.atlas-preview.skeleton-s5 .ap-chrome::before {
+  content: "The latest research\Afrom your shelf.";
+  white-space: pre;
+  font-family: "Fraunces", Georgia, serif; font-weight: 600;
+  font-size: 30px; line-height: 1.15; letter-spacing: -0.03em;
+  color: var(--ap-fg);
+}
+.atlas-preview.skeleton-s6 {
+  background: #0f1013; color: #d6d3cc;
+  --ap-surface: #1a1c20; --ap-fg: #f0ede6; --ap-fg-muted: #a8a59c;
+  --ap-fg-faint: #6e7079; --ap-border: #2d3036;
+  font-family: ui-monospace, Menlo, monospace;
+}
+.atlas-preview.skeleton-s6 .ap-chrome {
+  display: flex; gap: 6px; align-items: center;
+  padding: 10px 14px; border-bottom: 1px solid var(--ap-border);
+}
+.atlas-preview.skeleton-s6 .ap-chrome::before {
+  content: "● ● ●";
+  color: #4a4d52; font-size: 10px; letter-spacing: 2px;
+  flex: 0 0 auto;
+}
+.atlas-preview.skeleton-s6 .ap-chrome::after {
+  content: "atlas — research/";
+  margin-left: auto;
+  font-size: 11px; color: var(--ap-fg-faint);
 }
 
-.config-output {
-  margin-top: 18px;
-  background: #0f1013;
-  color: #d6d3cc;
+/* Atlas preview cards */
+.ap-card {
+  background: var(--ap-surface);
+  border: 1px solid var(--ap-border);
   border-radius: 8px;
-  padding: 12px 14px;
-  font: 12.5px/1.55 ui-monospace, Menlo, monospace;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform .15s ease, border-color .15s ease;
+}
+.ap-card:hover { transform: translateY(-2px); border-color: var(--ap-accent); }
+.ap-card-cover {
+  aspect-ratio: 3/2;
+  background-color: color-mix(in srgb, var(--ap-accent) 18%, var(--ap-surface));
+  background-size: cover; background-position: center;
   position: relative;
 }
-.config-output .key { color: #7cc4a0; }
-.config-output .str { color: #e0c085; }
-.config-output .copy {
-  position: absolute; top: 10px; right: 10px;
-  background: #1a1c20; border: 1px solid #2d3036; color: #a8a59c;
-  border-radius: 4px; padding: 3px 8px; font-size: 10.5px;
+.ap-card-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.ap-card-meta-row { display: flex; justify-content: space-between; align-items: center; }
+.ap-depth {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 1px 7px; border-radius: 3px;
+  font: 700 9px/1.4 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--ap-accent-soft); color: var(--ap-accent);
 }
-.config-output .copy:hover { color: #fff; border-color: #61c454; }
-.config-output .copy.ok { color: #61c454; border-color: #61c454; }
-.config-output + .config-output { margin-top: 10px; }
-.config-output h4 {
-  margin: 0 0 6px; font: 600 10px ui-monospace, Menlo, monospace;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: #6e7079;
+.ap-depth::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.ap-fmt {
+  font: 600 9px/1 ui-monospace, Menlo, monospace;
+  padding: 1px 5px; border-radius: 3px;
+  background: var(--ap-accent-soft); color: var(--ap-accent);
 }
+.ap-card h4 { margin: 0; font-size: 14px; line-height: 1.3; letter-spacing: -0.01em; color: var(--ap-fg); }
+.ap-card p { margin: 0; color: var(--ap-fg-muted); font-size: 12px; line-height: 1.45; }
+.ap-card .ap-meta { font: 500 10px ui-monospace, Menlo, monospace; color: var(--ap-fg-faint); margin-top: auto; }
 
-/* ---------- Footer ---------- */
-.footer {
-  background: var(--fg); color: #d6d3cc;
-  padding: 48px 0 40px;
+/* Card v2: horizontal */
+.atlas-preview.card-v2 .ap-card { flex-direction: row; }
+.atlas-preview.card-v2 .ap-card-cover { aspect-ratio: auto; width: 110px; flex-shrink: 0; }
+
+/* Card v3: hero overlay */
+.atlas-preview.card-v3 .ap-card { position: relative; min-height: 180px; }
+.atlas-preview.card-v3 .ap-card-cover { position: absolute; inset: 0; aspect-ratio: auto; }
+.atlas-preview.card-v3 .ap-card-body {
+  position: relative; z-index: 1;
+  background: linear-gradient(to top, rgba(0,0,0,.75) 0%, rgba(0,0,0,.3) 60%, transparent 100%);
+  color: #fff; margin-top: auto;
 }
-.footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; }
-.footer .brand { font-family: "Fraunces", Georgia, serif; font-weight: 600; letter-spacing: -0.01em; color: #fff; font-size: 22px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-.footer .brand .mark {
-  width: 32px; height: 32px;
-  display: block;
+.atlas-preview.card-v3 .ap-card h4,
+.atlas-preview.card-v3 .ap-card p { color: #fff; }
+.atlas-preview.card-v3 .ap-card .ap-meta { color: rgba(255,255,255,.7); }
+
+/* Card v4: terminal */
+.atlas-preview.card-v4 .ap-card {
+  background: #0f1013; color: #d6d3cc; border-color: #2d3036;
+  font-family: ui-monospace, Menlo, monospace;
 }
-.footer p.tag { color: #8a8a80; font-size: 13px; margin: 0; max-width: 32ch; }
-.footer h5 {
-  margin: 0 0 10px; font: 600 11px ui-monospace, Menlo, monospace;
-  letter-spacing: 0.12em; text-transform: uppercase;
-  color: #6e7079;
+.atlas-preview.card-v4 .ap-card-cover { display: none; }
+.atlas-preview.card-v4 .ap-card h4 { color: #f4efe6; font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+.atlas-preview.card-v4 .ap-card h4::before { content: "$ scout "; color: #c2410c; }
+.atlas-preview.card-v4 .ap-card p { color: #a8a59c; font-size: 11.5px; }
+.atlas-preview.card-v4 .ap-depth,
+.atlas-preview.card-v4 .ap-fmt { background: #2d3036; color: #e0c085; }
+
+/* Card v5: index card (no image, letterpress feel) */
+.atlas-preview.card-v5 .ap-card {
+  background: var(--ap-bg);
+  border: 1px solid var(--ap-fg);
+  box-shadow: 3px 3px 0 var(--ap-fg);
 }
-.footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
-.footer ul a { color: #d6d3cc; font-size: 14px; }
-.footer ul a:hover { color: var(--accent); }
-.footer .btm {
-  margin-top: 40px; padding-top: 20px;
-  border-top: 1px solid #2d3036;
-  color: #6e7079; font-size: 12px;
-  display: flex; justify-content: space-between;
+.atlas-preview.card-v5 .ap-card-cover { display: none; }
+.atlas-preview.card-v5 .ap-card h4 { font-family: "Fraunces", Georgia, serif; font-size: 15px; }
+
+/* Card v6: no image */
+.atlas-preview.card-v6 .ap-card-cover { display: none; }
+
+/* Card v7: compact row */
+.atlas-preview.card-v7 .ap-cards { grid-template-columns: 1fr !important; gap: 0; }
+.atlas-preview.card-v7 .ap-card {
+  flex-direction: row; align-items: center; gap: 10px;
+  border-radius: 0; border-left: 0; border-right: 0; border-top: 0;
+  padding: 8px 14px;
 }
+.atlas-preview.card-v7 .ap-card-cover { display: none; }
+.atlas-preview.card-v7 .ap-card-body { padding: 0; flex-direction: row; align-items: center; gap: 10px; }
+.atlas-preview.card-v7 .ap-card h4 { font-size: 13px; flex: 1; }
+.atlas-preview.card-v7 .ap-card p,
+.atlas-preview.card-v7 .ap-card .ap-meta { display: none; }
+
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
@@ -537,21 +496,17 @@ section > .container > p.lede {
   .hero-grid { grid-template-columns: 1fr; gap: 32px; }
   .what-grid { grid-template-columns: 1fr; }
   .what-arrow { transform: rotate(90deg); }
-  .pillars { grid-template-columns: repeat(2, 1fr); }
-  .examples-grid { grid-template-columns: 1fr; }
-  .how-steps { grid-template-columns: 1fr; }
-  .install-steps { grid-template-columns: 1fr; }
-  .picker-grid { grid-template-columns: 1fr; }
-  .picker-preview { position: static; }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .ya-split { grid-template-columns: 1fr; }
+  .ap-cards { grid-template-columns: repeat(2, 1fr); }
+  .atlas-preview.skeleton-s3,
+  .atlas-preview.skeleton-s4 { grid-template-columns: 1fr; }
   .nav .links a:not(.cta) { display: none; }
   section > .container > h2 { white-space: normal; font-size: 28px; }
 }
 @media (max-width: 600px) {
-  .pillars { grid-template-columns: 1fr; }
+  .ap-cards { grid-template-columns: 1fr; }
   .card-picks { grid-template-columns: repeat(2, 1fr); }
   .layout-picks { grid-template-columns: repeat(2, 1fr); }
-  .footer-grid { grid-template-columns: 1fr; }
   .hero h1 { font-size: 32px; }
   section > .container > h2 { font-size: 24px; }
 }
@@ -564,9 +519,9 @@ section > .container > p.lede {
     <a href="#" class="brand"><img class="mark" src="./scout-atlas-icon.png" alt="" width="28" height="28"> Scout</a>
     <div class="links">
       <a href="#what">What</a>
-      <a href="#how">How</a>
+      <a href="#how">The chain</a>
+      <a href="#your-atlas">Your Atlas</a>
       <a href="#install">Install</a>
-      <a href="#picker">Configure</a>
       <a class="cta" href="https://github.com/Laoujin/Scout" target="_blank" aria-label="Scout on GitHub" title="Scout on GitHub"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.26.82-.577v-2.234c-3.338.725-4.043-1.61-4.043-1.61-.546-1.388-1.333-1.758-1.333-1.758-1.09-.745.083-.73.083-.73 1.205.085 1.838 1.237 1.838 1.237 1.07 1.835 2.807 1.305 3.492.998.108-.776.42-1.305.762-1.605-2.665-.305-5.467-1.335-5.467-5.93 0-1.31.468-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22v3.293c0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/></svg></a>
     </div>
   </div>
@@ -579,10 +534,10 @@ section > .container > p.lede {
   <div class="container hero-grid">
     <div>
       <h1>Research on demand,<br><span class="accent">cited on every line.</span></h1>
-      <p class="tagline">Open an Issue. Scout researches and publishes to your GitHub Pages.</p>
+      <p class="tagline">Open a GitHub issue and Claude Code starts researching your topic.</p>
       <div class="meta-row">
         <span>Self-hosted</span>
-        <span>Your Claude subscription</span>
+        <span>Your Claude</span>
         <span>Docker</span>
         <span>Open source</span>
       </div>
@@ -604,20 +559,13 @@ section > .container > p.lede {
   <div class="container">
     <span class="kicker">Two repos, one flow</span>
     <h2>Scout researches. Atlas publishes.</h2>
-    <p class="lede">You own both. One does the work, the other shows the result.</p>
 
     <div class="what-grid">
       <div class="what-card">
         <img class="icon" src="./scout-logo.svg" alt="Scout" width="44" height="44">
         <div class="role">The researcher</div>
         <h3>Scout</h3>
-        <p>A Docker runner on your NAS, a GitHub Action, and a Claude-Code-based skill that knows how to cite. Give it a topic, depth, and format.</p>
-        <ul>
-          <li>3 depths: <code>ceo</code>, <code>standard</code>, <code>deep</code></li>
-          <li>2 formats: <code>.md</code> or <code>.html</code></li>
-          <li>WebSearch + WebFetch + Playwright fallback</li>
-          <li>5–30 min per topic</li>
-        </ul>
+        <p>GitHub Action in your Docker container with Claude Code tightens your research topic, then starts a <code>ceo</code>, <code>standard</code> or <code>deep</code> research.</p>
       </div>
 
       <div class="what-arrow">
@@ -636,131 +584,19 @@ section > .container > p.lede {
         <img class="icon" src="./atlas-logo.svg" alt="Atlas" width="44" height="44">
         <div class="role">The shelf</div>
         <h3>Atlas</h3>
-        <p>A Jekyll site, served by GitHub Pages. Every research result lands in <code>research/DATE-SLUG/</code> with frontmatter; the index auto-builds.</p>
-        <ul>
-          <li>Cards with cover art and tag filtering</li>
-          <li>Inline citations on every claim</li>
-          <li>Zero ops — GitHub rebuilds on push</li>
-          <li>Yours to fork and customize</li>
-        </ul>
+        <p>Publishes Scout's findings to GitHub Pages with your layout configuration.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- =================================================================== -->
-<!-- WHY                                                                   -->
-<!-- =================================================================== -->
-<section id="why" style="background: var(--surface-tint);">
-  <div class="container">
-    <span class="kicker">Why Scout</span>
-    <h2>A research tool that doesn't lie.</h2>
-    <p class="lede">Four principles that fell out of using LLMs for real research work.</p>
-
-    <div class="pillars">
-      <div class="pillar">
-        <span class="n">01</span>
-        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"/></svg>
-        <h4>Cited per-line</h4>
-        <p>Every factual claim carries its source URL inline. No orphan "references" dump at the bottom. If a claim has no URL, it doesn't get written.</p>
-      </div>
-      <div class="pillar">
-        <span class="n">02</span>
-        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        <h4>Your hardware</h4>
-        <p>Runs in Docker on any always-on Linux device with AVX2 — an old NAS, a mini-PC, a Raspberry Pi 5. No managed service, no vendor lock-in.</p>
-      </div>
-      <div class="pillar">
-        <span class="n">03</span>
-        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="7" y1="12" x2="21" y2="12"/><line x1="11" y1="18" x2="21" y2="18"/></svg>
-        <h4>Three depths</h4>
-        <p><code>ceo</code> for a one-page decision, <code>standard</code> for 2–4 pages with trade-offs, <code>deep</code> for every angle. You pick per-topic.</p>
-      </div>
-      <div class="pillar">
-        <span class="n">04</span>
-        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="m6 8 6-6 6 6"/><path d="m6 16 6 6 6-6"/></svg>
-        <h4>Yours to fork</h4>
-        <p>Every part of the pipeline is in two repos you own. Change the skill, the layout, the cards, the palette. Nothing phones home.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =================================================================== -->
-<!-- EXAMPLES                                                              -->
-<!-- =================================================================== -->
-<section id="examples">
-  <div class="container">
-    <span class="kicker">Example prompts</span>
-    <h2>The kind of thing you throw at it.</h2>
-    <p class="lede">Real prompts from the TODO. A few clicks in GitHub and the artifact lands on your Atlas.</p>
-
-    <div class="examples-grid">
-      <div class="example">
-        <div class="prompt-line">Top 3 static site generators in 2026 <span class="arrow">→</span></div>
-        <div class="tags">
-          <span class="chip depth">Standard</span>
-          <span class="chip">web</span>
-          <span class="chip">tooling</span>
-        </div>
-      </div>
-
-      <div class="example">
-        <div class="prompt-line">Listing of romantic restaurants in Ghent <span class="arrow">→</span></div>
-        <div class="tags">
-          <span class="chip depth">Standard</span>
-          <span class="chip">food</span>
-          <span class="chip">ghent</span>
-        </div>
-      </div>
-
-      <div class="example">
-        <div class="prompt-line">Survey of research agents / deep-research tools in 2026 <span class="arrow">→</span></div>
-        <div class="tags">
-          <span class="chip depth">Deep</span>
-          <span class="chip">ai</span>
-          <span class="chip">agents</span>
-        </div>
-      </div>
-
-      <div class="example">
-        <div class="prompt-line">Always-on replacement for my Synology — AVX2, quiet, under €500 <span class="arrow">→</span></div>
-        <div class="tags">
-          <span class="chip depth">Deep</span>
-          <span class="chip">hardware</span>
-          <span class="chip">homelab</span>
-        </div>
-      </div>
-
-      <div class="example">
-        <div class="prompt-line">Unique birthday gift ideas — not flowers, not dinner <span class="arrow">→</span></div>
-        <div class="tags">
-          <span class="chip depth">CEO</span>
-          <span class="chip">personal</span>
-        </div>
-      </div>
-
-      <div class="example">
-        <div class="prompt-line">Self-hosted MCP servers worth running in production <span class="arrow">→</span></div>
-        <div class="tags">
-          <span class="chip depth">Standard</span>
-          <span class="chip">mcp</span>
-          <span class="chip">self-hosted</span>
-        </div>
-      </div>
-    </div>
-    <p class="example-note">Steering hints inside the topic are honored ("focus on r/homelab", "prioritise academic sources").</p>
-  </div>
-</section>
-
-<!-- =================================================================== -->
-<!-- HOW IT WORKS                                                          -->
+<!-- THE CHAIN                                                             -->
 <!-- =================================================================== -->
 <section id="how" class="how">
   <div class="container">
     <span class="kicker">How it works</span>
-    <h2>Six boxes, one arrow chain.</h2>
-    <p class="lede">You open a GitHub issue. The Action fires on your NAS. Scout researches. Atlas gets a push. Pages rebuilds. Done.</p>
+    <h2>The chain.</h2>
 
     <div class="how-diagram">
       <svg width="1000" height="220" viewBox="0 0 1000 220" xmlns="http://www.w3.org/2000/svg" aria-label="Scout flow diagram">
@@ -846,99 +682,33 @@ section > .container > p.lede {
         </g>
       </svg>
     </div>
-
-    <div class="how-steps">
-      <div class="how-step">
-        <div class="n">01 → 02</div>
-        <h4>Open an issue</h4>
-        <p>Title is your topic. Label sets the depth — <code>ceo</code>, <code>standard</code>, or <code>deep</code>. Works from mobile; one-handed research queueing on the train.</p>
-      </div>
-      <div class="how-step">
-        <div class="n">03</div>
-        <h4>Scout does the work</h4>
-        <p>Runs on your hardware. Hits WebSearch, WebFetch, Playwright as needed. Writes the artifact with inline citations — no claim without a URL.</p>
-      </div>
-      <div class="how-step">
-        <div class="n">04 → 06</div>
-        <h4>Atlas publishes</h4>
-        <p>Scout pushes to <code>research/DATE-SLUG/index.{md,html}</code>. GitHub Pages rebuilds. You read it at your own domain.</p>
-      </div>
-    </div>
   </div>
 </section>
 
 <!-- =================================================================== -->
-<!-- INSTALL                                                               -->
+<!-- YOUR ATLAS (merged controls + live preview)                           -->
 <!-- =================================================================== -->
-<section id="install">
-  <div class="container">
-    <span class="kicker">Install</span>
-    <h2>Three steps. Twenty minutes.</h2>
-    <p class="lede">Assumes you have a Linux device that can run Docker, and a GitHub account.</p>
-
-    <div class="install-steps">
-      <div class="install-step">
-        <span class="num">1</span>
-        <h4>Fork the templates</h4>
-        <p>Scout (the runner) and Atlas (the site) are two repos. Fork both with one click.</p>
-        <div class="actions">
-          <a href="https://github.com/Laoujin/Scout/generate" target="_blank" class="sm-btn primary">Fork Scout ↗</a>
-          <a href="https://github.com/Laoujin/Atlas/generate" target="_blank" class="sm-btn">Fork Atlas ↗</a>
-        </div>
-      </div>
-      <div class="install-step">
-        <span class="num">2</span>
-        <h4>Pick your look</h4>
-        <p>Palette, page layout, card style. The picker below gives you a config string to paste into the install script.</p>
-        <div class="actions">
-          <a href="#picker" class="sm-btn primary">Open the picker ↓</a>
-        </div>
-      </div>
-      <div class="install-step">
-        <span class="num">3</span>
-        <h4>Run install.sh</h4>
-        <p>SSH to your always-on device. Paste the command — walks you through the runner token and deploy key interactively.</p>
-        <div class="actions">
-          <a href="#install-cmd" class="sm-btn primary">See the command ↓</a>
-        </div>
-      </div>
-    </div>
-
-    <div id="install-cmd" class="install-cmd">
-      <button class="copy-btn" data-copy="install-cmd-text">Copy</button>
-      <div class="line" id="install-cmd-text"><span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-fsSL</span> <span class="str">https://raw.githubusercontent.com/Laoujin/Scout/main/install.sh</span> <span class="comment">\</span></div>
-      <div class="line">  | <span class="cmd">bash</span> <span class="flag">-s</span> -- <span class="flag">--config=</span><span class="str" id="cfg-inline">s1.rust.v1</span></div>
-      <div class="line" style="margin-top: 10px;"><span class="comment"># prompts you for the runner token + deploy key interactively.</span></div>
-      <div class="line"><span class="comment"># pick your config above — the flag pre-seeds Atlas with that look.</span></div>
-    </div>
-  </div>
-</section>
-
-<!-- =================================================================== -->
-<!-- PICKER                                                                -->
-<!-- =================================================================== -->
-<section id="picker" class="picker">
+<section id="your-atlas" class="your-atlas-section">
   <div class="container">
     <span class="kicker">Configure</span>
-    <h2>Pick your palette, layout, and card.</h2>
-    <p class="lede">Preview updates live. Copy the config string, paste it into the install command above.</p>
+    <h2>Your Atlas.</h2>
 
-    <div class="picker-grid">
-      <div class="picker-controls">
-        <section>
-          <h3>Palette <span id="pal-label" style="color: var(--fg); text-transform: none; font-weight: 400; letter-spacing: 0;">· Warm rust</span></h3>
-          <div class="swatches" id="palette-picker">
-            <button class="swatch-btn active" data-key="rust" data-name="Warm rust"><span class="sw"><i style="background:#faf9f6"></i><i style="background:#c2410c"></i><i style="background:#1a1a1a"></i></span>Warm rust</button>
-            <button class="swatch-btn" data-key="paper" data-name="Paper &amp; ink"><span class="sw"><i style="background:#fbf7ea"></i><i style="background:#a84a07"></i><i style="background:#2a1e12"></i></span>Paper &amp; ink</button>
-            <button class="swatch-btn" data-key="cartography" data-name="Cartography"><span class="sw"><i style="background:#f0ebe0"></i><i style="background:#4a6b3a"></i><i style="background:#1a2e1f"></i></span>Cartography</button>
-            <button class="swatch-btn" data-key="midnight" data-name="Midnight"><span class="sw"><i style="background:#0f1013"></i><i style="background:#f59e0b"></i><i style="background:#f0ede6"></i></span>Midnight</button>
-            <button class="swatch-btn" data-key="minimal" data-name="Minimal"><span class="sw"><i style="background:#ffffff"></i><i style="background:#2563eb"></i><i style="background:#0a0a0a"></i></span>Minimal</button>
-            <button class="swatch-btn" data-key="fieldnotes" data-name="Field notes"><span class="sw"><i style="background:#ede6cf"></i><i style="background:#b54708"></i><i style="background:#3d2914"></i></span>Field notes</button>
-          </div>
-        </section>
+    <div class="ya-controls">
+      <section class="ya-group">
+        <h3>Palette <span id="pal-label" class="ya-sub">· Warm rust</span></h3>
+        <div class="swatches" id="palette-picker">
+          <button class="swatch-btn active" data-key="rust" data-name="Warm rust"><span class="sw"><i style="background:#faf9f6"></i><i style="background:#c2410c"></i><i style="background:#1a1a1a"></i></span>Warm rust</button>
+          <button class="swatch-btn" data-key="paper" data-name="Paper &amp; ink"><span class="sw"><i style="background:#fbf7ea"></i><i style="background:#a84a07"></i><i style="background:#2a1e12"></i></span>Paper &amp; ink</button>
+          <button class="swatch-btn" data-key="cartography" data-name="Cartography"><span class="sw"><i style="background:#f0ebe0"></i><i style="background:#4a6b3a"></i><i style="background:#1a2e1f"></i></span>Cartography</button>
+          <button class="swatch-btn" data-key="midnight" data-name="Midnight"><span class="sw"><i style="background:#0f1013"></i><i style="background:#f59e0b"></i><i style="background:#f0ede6"></i></span>Midnight</button>
+          <button class="swatch-btn" data-key="minimal" data-name="Minimal"><span class="sw"><i style="background:#ffffff"></i><i style="background:#2563eb"></i><i style="background:#0a0a0a"></i></span>Minimal</button>
+          <button class="swatch-btn" data-key="fieldnotes" data-name="Field notes"><span class="sw"><i style="background:#ede6cf"></i><i style="background:#b54708"></i><i style="background:#3d2914"></i></span>Field notes</button>
+        </div>
+      </section>
 
-        <section>
-          <h3>Layout <span id="skel-label" style="color: var(--fg); text-transform: none; font-weight: 400; letter-spacing: 0;">· Hero + footer</span></h3>
+      <div class="ya-split">
+        <section class="ya-group">
+          <h3>Layout <span id="skel-label" class="ya-sub">· Hero + footer</span></h3>
           <div class="layout-picks" id="skeleton-picker">
             <button class="layout-btn active" data-key="s1" data-name="Hero + footer">
               <svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><rect x="10" y="6" width="60" height="16" rx="1" fill="currentColor" opacity=".15"/><circle cx="40" cy="14" r="3" fill="currentColor"/><rect x="10" y="26" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="30" y="26" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="50" y="26" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="10" y="42" width="60" height="3" rx="1" fill="currentColor" opacity=".2"/></svg>
@@ -967,8 +737,8 @@ section > .container > p.lede {
           </div>
         </section>
 
-        <section>
-          <h3>Card style <span id="card-label" style="color: var(--fg); text-transform: none; font-weight: 400; letter-spacing: 0;">· Image-top</span></h3>
+        <section class="ya-group">
+          <h3>Card style <span id="card-label" class="ya-sub">· Image-top</span></h3>
           <div class="card-picks" id="card-picker">
             <button class="card-btn active" data-key="v1" data-name="Image-top">v1<span class="label">image-top</span></button>
             <button class="card-btn" data-key="v2" data-name="Horizontal">v2<span class="label">horizontal</span></button>
@@ -978,125 +748,77 @@ section > .container > p.lede {
             <button class="card-btn" data-key="v6" data-name="No-image">v6<span class="label">no image</span></button>
             <button class="card-btn" data-key="v7" data-name="Compact">v7<span class="label">compact</span></button>
           </div>
-          <p style="margin-top:14px;color:var(--fg-muted);font-size:13px;">See all variants rendered at full size in <a href="atlas-card-mockups.html" style="color:var(--accent);">card mockups →</a> and <a href="atlas-skeleton-mockups.html" style="color:var(--accent);">skeleton mockups →</a>.</p>
         </section>
       </div>
+    </div>
 
-      <aside class="picker-preview" id="preview-panel">
-        <h3>Preview</h3>
-        <div class="preview-card">
-          <div class="preview-cover"></div>
-          <div class="preview-body">
-            <div class="row">
-              <span class="preview-depth">Standard</span>
-              <span class="preview-fmt">.md</span>
-            </div>
-            <h4>Static site generators in 2026</h4>
-            <p>Astro dominates, Hugo holds the speed crown, Next.js eats both on brand.</p>
-            <div class="tags"><span>web</span><span>tooling</span></div>
-            <div class="meta">2026-04-18 · 18 citations · 4 min</div>
-          </div>
-        </div>
-
-        <div class="config-output" style="margin-top: 18px;">
-          <h4>Config string</h4>
-          <button class="copy" data-copy="cfg-short">Copy</button>
-          <div id="cfg-short">s1.rust.v1</div>
-        </div>
-
-        <div class="config-output">
-          <h4>JSON</h4>
-          <button class="copy" data-copy="cfg-json">Copy</button>
-<pre id="cfg-json" style="margin:0;white-space:pre-wrap;"><span class="key">{</span>
-  <span class="key">"skeleton"</span>: <span class="str">"s1"</span>,
-  <span class="key">"palette"</span>: <span class="str">"rust"</span>,
-  <span class="key">"card"</span>: <span class="str">"v1"</span>
-<span class="key">}</span></pre>
-        </div>
-      </aside>
+    <!-- Live Atlas preview -->
+    <div id="atlas-preview" class="atlas-preview palette-rust skeleton-s1 card-v1">
+      <div class="ap-chrome" aria-hidden="true"></div>
+      <div class="ap-main">
+        <div class="ap-cards"></div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- =================================================================== -->
-<!-- FOOTER                                                                -->
+<!-- GET STARTED NOW (minimal install)                                     -->
 <!-- =================================================================== -->
-<footer class="footer">
+<section id="install">
   <div class="container">
-    <div class="footer-grid">
-      <div>
-        <div class="brand"><img class="mark" src="./scout-atlas-icon.png" alt="" width="32" height="32"> Scout</div>
-        <p class="tag">A personal research engine. Trigger from anywhere, publish to your own GitHub Pages site, cite on every line.</p>
-      </div>
-      <div>
-        <h5>Repos</h5>
-        <ul>
-          <li><a href="https://github.com/Laoujin/Scout" target="_blank">Scout</a></li>
-          <li><a href="https://github.com/Laoujin/Atlas" target="_blank">Atlas</a></li>
-        </ul>
-      </div>
-      <div>
-        <h5>Docs</h5>
-        <ul>
-          <li><a href="https://github.com/Laoujin/Scout/blob/main/README.md" target="_blank">Setup guide</a></li>
-          <li><a href="https://github.com/Laoujin/Scout/blob/main/skills/scout/SKILL.md" target="_blank">Scout skill</a></li>
-        </ul>
-      </div>
-      <div>
-        <h5>Community</h5>
-        <ul>
-          <li><a href="https://github.com/Laoujin/Scout/issues" target="_blank">Issues</a></li>
-          <li><a href="https://laoujin.github.io/Atlas/" target="_blank">Example Atlas</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="btm">
-      <span>Scout · open source</span>
-      <span>Built on GitHub Actions + Claude Code</span>
+    <span class="kicker">Install</span>
+    <h2>Get started now.</h2>
+
+    <div id="install-cmd" class="install-cmd">
+      <button class="copy-btn" data-copy="install-cmd-text">Copy</button>
+      <div class="line" id="install-cmd-text"><span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-fsSL</span> <span class="str">https://raw.githubusercontent.com/Laoujin/Scout/main/install.sh</span> <span class="comment">\</span></div>
+      <div class="line">  | <span class="cmd">bash</span> <span class="flag">-s</span> -- <span class="flag">--config=</span><span class="str" id="cfg-inline">s1.rust.v1</span></div>
     </div>
   </div>
-</footer>
+</section>
 
 <script>
 (function () {
   const state = { palette: 'rust', skeleton: 's1', card: 'v1' };
   const names = { paletteName: 'Warm rust', skeletonName: 'Hero + footer', cardName: 'Image-top' };
 
-  // Palette theme map (for live preview recoloring)
-  const palettes = {
-    rust:         { bg: '#faf9f6', surf: '#ffffff', fg: '#1a1a1a', fgM: '#5c5c5c', fgF: '#8a8a8a', border: '#e8e6e0', accent: '#c2410c', accentSoft: '#fef3ec' },
-    paper:        { bg: '#fbf7ea', surf: '#fffcf2', fg: '#2a1e12', fgM: '#6b5a3f', fgF: '#9b8766', border: '#dcd2b8', accent: '#a84a07', accentSoft: '#fbeedd' },
-    cartography:  { bg: '#f0ebe0', surf: '#faf6ea', fg: '#1a2e1f', fgM: '#4a5d4e', fgF: '#7a8a7e', border: '#c9bc9d', accent: '#4a6b3a', accentSoft: '#dce5d1' },
-    midnight:     { bg: '#0f1013', surf: '#1a1c20', fg: '#f0ede6', fgM: '#a8a59c', fgF: '#6e7079', border: '#2d3036', accent: '#f59e0b', accentSoft: '#3a2f18' },
-    minimal:      { bg: '#ffffff', surf: '#ffffff', fg: '#0a0a0a', fgM: '#525252', fgF: '#a3a3a3', border: '#e5e5e5', accent: '#2563eb', accentSoft: '#dbeafe' },
-    fieldnotes:   { bg: '#ede6cf', surf: '#f6f0dc', fg: '#3d2914', fgM: '#6b5434', fgF: '#948066', border: '#c4b88f', accent: '#b54708', accentSoft: '#f3e3bf' }
-  };
+  const examples = [
+    { title: 'Top 3 static site generators in 2026',   depth: 'Standard', fmt: '.md',   cover: './cover-svg-prototype/static-site-generators.svg', summary: 'Astro dominates, Hugo holds the speed crown, Next.js eats both on brand.', meta: '2026-04-20 · 18 citations · 4 min' },
+    { title: 'Romantic restaurants in Ghent',          depth: 'Standard', fmt: '.md',   cover: './cover-svg-prototype/romantic-restaurants-ghent.svg', summary: 'Ten candlelit rooms within walking distance of the belfry.',               meta: '2026-04-14 · 12 citations · 3 min' },
+    { title: 'Research agents & deep-research tools',  depth: 'Deep',     fmt: '.md',   cover: './cover-svg-prototype/research-agents-2026.svg', summary: 'Landscape of 2026 agents — what to steal for a Scout-shaped tool.',      meta: '2026-04-21 · 23 citations · 9 min' },
+    { title: 'Always-on Synology replacement',          depth: 'Deep',     fmt: '.html', cover: './cover-svg-prototype/replacing-synology.svg', summary: 'AVX2, quiet, under €500 — three mini-PCs and a plan.',                   meta: '2026-04-18 · 27 citations · 11 min' },
+    { title: 'Unique birthday gift ideas',              depth: 'CEO',      fmt: '.html', cover: './cover-svg-prototype/unique-birthday-gifts.svg', summary: 'Decision-oriented shortlist that a time-pressed gift-giver can act on.', meta: '2026-04-21 · 9 citations · 2 min' },
+    { title: 'Self-hosted MCP servers worth running',   depth: 'Standard', fmt: '.md',   cover: './cover-svg-prototype/self-hosted-mcp.svg', summary: 'Six MCP servers that earn their keep in a homelab.',                     meta: '2026-04-10 · 15 citations · 5 min' }
+  ];
+
+  const preview = document.getElementById('atlas-preview');
+  const cardsEl = preview.querySelector('.ap-cards');
+
+  function renderCards() {
+    cardsEl.innerHTML = examples.map(e => `
+      <article class="ap-card">
+        <div class="ap-card-cover" style="background-image: url('${e.cover}')"></div>
+        <div class="ap-card-body">
+          <div class="ap-card-meta-row">
+            <span class="ap-depth">${e.depth}</span>
+            <span class="ap-fmt">${e.fmt}</span>
+          </div>
+          <h4>${e.title}</h4>
+          <p>${e.summary}</p>
+          <div class="ap-meta">${e.meta}</div>
+        </div>
+      </article>
+    `).join('');
+  }
 
   function applyPreview() {
-    const p = palettes[state.palette];
-    const card = document.querySelector('.preview-card');
-    card.style.setProperty('--preview-surface', p.surf);
-    card.style.setProperty('--preview-fg', p.fg);
-    card.style.setProperty('--preview-fg-muted', p.fgM);
-    card.style.setProperty('--preview-fg-faint', p.fgF);
-    card.style.setProperty('--preview-border', p.border);
-    card.style.setProperty('--preview-accent', p.accent);
-    card.style.setProperty('--preview-accent-soft', p.accentSoft);
-    // Panel bg shifts slightly to show the palette against "surface"
-    document.getElementById('preview-panel').style.background = p.surf;
-    document.getElementById('preview-panel').style.borderColor = p.border;
+    preview.className = `atlas-preview palette-${state.palette} skeleton-${state.skeleton} card-${state.card}`;
   }
 
   function updateOutputs() {
     const short = `${state.skeleton}.${state.palette}.${state.card}`;
-    document.getElementById('cfg-short').textContent = short;
     document.getElementById('cfg-inline').textContent = short;
-    const json = `<span class="key">{</span>
-  <span class="key">"skeleton"</span>: <span class="str">"${state.skeleton}"</span>,
-  <span class="key">"palette"</span>: <span class="str">"${state.palette}"</span>,
-  <span class="key">"card"</span>: <span class="str">"${state.card}"</span>
-<span class="key">}</span>`;
-    document.getElementById('cfg-json').innerHTML = json;
     document.getElementById('pal-label').textContent = '· ' + names.paletteName;
     document.getElementById('skel-label').textContent = '· ' + names.skeletonName;
     document.getElementById('card-label').textContent = '· ' + names.cardName;
@@ -1109,12 +831,13 @@ section > .container > p.lede {
         names[nameKey] = btn.dataset.name;
         document.querySelectorAll(`#${containerId} [data-key]`).forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        if (key === 'palette') applyPreview();
+        applyPreview();
         updateOutputs();
       });
     });
   }
 
+  renderCards();
   wire('palette-picker', 'palette', 'paletteName');
   wire('skeleton-picker', 'skeleton', 'skeletonName');
   wire('card-picker', 'card', 'cardName');

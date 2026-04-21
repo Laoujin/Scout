@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="Unique birthday gift ideas">
+  <defs>
+    <linearGradient id="bg5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbeedd"/>
+      <stop offset="1" stop-color="#f0d7b7"/>
+    </linearGradient>
+    <linearGradient id="box5-1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c2410c"/>
+      <stop offset="1" stop-color="#9a3309"/>
+    </linearGradient>
+    <linearGradient id="box5-2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fef3ec"/>
+      <stop offset="1" stop-color="#f5c28a"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg5)"/>
+
+  <!-- background ribbon loops -->
+  <g opacity="0.3" fill="none" stroke-width="2.5">
+    <path d="M-30 80 Q 180 180 380 60 T 640 140" stroke="#c2410c"/>
+    <path d="M-30 340 Q 240 220 400 340 T 640 260" stroke="#d97706"/>
+  </g>
+
+  <!-- back box (amber, larger) -->
+  <g transform="translate(340 90) rotate(8)">
+    <rect width="210" height="230" rx="6" fill="url(#box5-2)" stroke="#c2410c" stroke-opacity="0.25"/>
+    <rect x="0" y="108" width="210" height="14" fill="#c2410c" opacity="0.85"/>
+    <rect x="98" y="0" width="14" height="230" fill="#c2410c" opacity="0.85"/>
+    <ellipse cx="105" cy="115" rx="30" ry="16" fill="#c2410c"/>
+    <circle cx="105" cy="115" r="6" fill="#78350f"/>
+  </g>
+
+  <!-- front box (rust hero) -->
+  <g transform="translate(140 140) rotate(-5)">
+    <rect width="190" height="210" rx="6" fill="url(#box5-1)"/>
+    <rect x="0" y="98" width="190" height="14" fill="#fbbf24" opacity="0.95"/>
+    <rect x="88" y="0" width="14" height="210" fill="#fbbf24" opacity="0.95"/>
+    <ellipse cx="95" cy="105" rx="32" ry="18" fill="#fbbf24"/>
+    <circle cx="95" cy="105" r="7" fill="#78350f"/>
+  </g>
+
+  <!-- confetti -->
+  <g opacity="0.75">
+    <circle cx="60"  cy="70"  r="5"   fill="#c2410c"/>
+    <circle cx="90"  cy="50"  r="3"   fill="#d97706"/>
+    <circle cx="520" cy="320" r="4"   fill="#c2410c"/>
+    <circle cx="560" cy="290" r="3"   fill="#d97706"/>
+    <circle cx="470" cy="330" r="5"   fill="#fbbf24"/>
+    <circle cx="50"  cy="310" r="3"   fill="#fbbf24"/>
+    <rect   x="80"   y="350"  width="6" height="6" fill="#c2410c" transform="rotate(30 83 353)"/>
+    <rect   x="500"  y="70"   width="6" height="6" fill="#d97706" transform="rotate(45 503 73)"/>
+  </g>
+</svg>

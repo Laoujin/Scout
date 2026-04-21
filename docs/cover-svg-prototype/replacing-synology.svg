@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="Replacing Synology with an always-on mini-PC">
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f5f2e8"/>
+      <stop offset="1" stop-color="#e5dec9"/>
+    </linearGradient>
+    <linearGradient id="box-top" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#64748b"/>
+      <stop offset="1" stop-color="#475569"/>
+    </linearGradient>
+    <linearGradient id="box-left" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#334155"/>
+      <stop offset="1" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="box-right" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#475569"/>
+      <stop offset="1" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg4)"/>
+
+  <!-- small box far left (decoration) -->
+  <g transform="translate(60 270) scale(0.7)">
+    <polygon points="0,0 110,-50 220,0 110,50" fill="url(#box-top)" opacity="0.65"/>
+    <polygon points="0,0 0,100 110,150 110,50" fill="url(#box-left)" opacity="0.72"/>
+    <polygon points="220,0 220,100 110,150 110,50" fill="url(#box-right)" opacity="0.72"/>
+  </g>
+
+  <!-- middle box -->
+  <g transform="translate(180 220)" opacity="0.94">
+    <polygon points="0,0 110,-50 220,0 110,50" fill="url(#box-top)"/>
+    <polygon points="0,0 0,100 110,150 110,50" fill="url(#box-left)"/>
+    <polygon points="220,0 220,100 110,150 110,50" fill="url(#box-right)"/>
+    <g opacity="0.5">
+      <line x1="20" y1="30" x2="20" y2="120" stroke="#0f172a" stroke-width="1.2"/>
+      <line x1="28" y1="34" x2="28" y2="124" stroke="#0f172a" stroke-width="1.2"/>
+      <line x1="36" y1="38" x2="36" y2="128" stroke="#0f172a" stroke-width="1.2"/>
+    </g>
+  </g>
+
+  <!-- hero box (top, rust) -->
+  <g transform="translate(280 130)">
+    <polygon points="0,0 110,-50 220,0 110,50" fill="#c2410c"/>
+    <polygon points="0,0 0,100 110,150 110,50" fill="#9a3309"/>
+    <polygon points="220,0 220,100 110,150 110,50" fill="#78350f"/>
+    <!-- LED glow -->
+    <circle cx="180" cy="50" r="5" fill="#fbbf24"/>
+    <circle cx="180" cy="50" r="14" fill="#fbbf24" opacity="0.3"/>
+  </g>
+
+  <!-- power flow arc -->
+  <path d="M 100 80 Q 300 20 500 90" fill="none" stroke="#c2410c" stroke-opacity="0.35" stroke-width="2" stroke-dasharray="4 6"/>
+</svg>

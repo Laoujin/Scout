@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="Self-hosted MCP catalogue">
+  <defs>
+    <linearGradient id="bg6" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#faf8f2"/>
+      <stop offset="1" stop-color="#e0ece6"/>
+    </linearGradient>
+    <linearGradient id="conn-teal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0e7490"/>
+      <stop offset="1" stop-color="#155e75"/>
+    </linearGradient>
+    <linearGradient id="conn-rust" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c2410c"/>
+      <stop offset="1" stop-color="#9a3309"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bg6)"/>
+
+  <!-- left block with tab -->
+  <g transform="translate(80 140)">
+    <rect width="180" height="130" rx="12" fill="url(#conn-teal)"/>
+    <rect x="180" y="35" width="60" height="60" rx="6" fill="url(#conn-teal)"/>
+    <rect x="20" y="22" width="90" height="6" rx="3" fill="#fef3ec" opacity="0.6"/>
+    <rect x="20" y="36" width="64" height="4" rx="2" fill="#fef3ec" opacity="0.35"/>
+    <rect x="20" y="70" width="50" height="30" rx="3" fill="#fef3ec" opacity="0.15"/>
+    <circle cx="160" cy="115" r="6" fill="#fbbf24"/>
+  </g>
+
+  <!-- right block with receiving slot -->
+  <g transform="translate(320 130)">
+    <rect width="200" height="150" rx="12" fill="url(#conn-rust)"/>
+    <rect x="0" y="45" width="60" height="60" rx="6" fill="url(#bg6)"/>
+    <rect x="4" y="49" width="52" height="52" rx="4" fill="#78350f" opacity="0.5"/>
+    <rect x="80" y="26" width="100" height="6" rx="3" fill="#fef3ec" opacity="0.75"/>
+    <rect x="80" y="40" width="80" height="4" rx="2" fill="#fef3ec" opacity="0.4"/>
+    <rect x="80" y="52" width="60" height="4" rx="2" fill="#fef3ec" opacity="0.4"/>
+    <rect x="80" y="80" width="100" height="50" rx="4" fill="#fef3ec" opacity="0.15"/>
+  </g>
+
+  <!-- connection sparks between -->
+  <g opacity="0.9">
+    <circle cx="290" cy="205" r="3"   fill="#fbbf24"/>
+    <circle cx="300" cy="205" r="2"   fill="#fbbf24" opacity="0.7"/>
+    <circle cx="310" cy="205" r="2.5" fill="#fbbf24" opacity="0.9"/>
+    <circle cx="280" cy="205" r="2"   fill="#c2410c" opacity="0.7"/>
+    <circle cx="268" cy="208" r="1.5" fill="#c2410c" opacity="0.5"/>
+  </g>
+
+  <!-- satellite small port -->
+  <g transform="translate(450 320)" opacity="0.55">
+    <rect width="80" height="54" rx="8" fill="url(#conn-teal)"/>
+    <circle cx="65" cy="40" r="4" fill="#fbbf24"/>
+  </g>
+</svg>
