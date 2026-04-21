@@ -49,6 +49,12 @@ jobs:
       ISSUE_BODY: ${{ github.event.issue.body }}
     steps:
       - uses: actions/checkout@v5
+      - name: Ensure scout-research label exists
+        run: |
+          gh label create scout-research \
+            --color c2410c \
+            --description "Scout research request" \
+            --repo "$GH_REPO" 2>/dev/null || true
       - name: Tighten and post proposal
         run: |
           set -euo pipefail
