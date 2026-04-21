@@ -26,6 +26,32 @@
 
 See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour.
 
+## Fork for your own use
+
+You want your own Scout (engine) and your own Atlas (site). Five steps:
+
+1. **Scout:** click "Use this template" on this repo (or fork) → `<you>/<scout-name>`.
+2. **Atlas:** do the same on [Laoujin/Atlas](https://github.com/Laoujin/Atlas) → `<you>/<atlas-name>`. Enable Pages: Settings → Pages → Source: `Deploy from a branch` → your default branch → Save.
+3. **Rewrite references in your Scout fork** — replace `Laoujin` → `<you>` and `Atlas` → `<atlas-name>` in:
+    - `.github/workflows/research.yml` (`ATLAS_REPO`)
+    - `docker/docker-compose.yml` (`RUNNER_URL`, `ATLAS_REPO`)
+    - `docker/run-init.sh` (deploy-key instruction URL)
+    - `commands/research.md` (`gh workflow run --repo …`)
+    - `scripts/publish.sh` (the "Published:" echo URL)
+    - `README.md` (badges / links — cosmetic)
+4. **Rewrite references in your Atlas fork:**
+    - `_config.yml` — `baseurl: /<atlas-name>`
+    - `_layouts/default.html` — the two `hero-links` URLs point back to your Scout and Atlas repos
+5. Continue with [Setup](#setup) below to wire everything to your NAS.
+
+One-liner sanity check from your Scout fork's root:
+
+```bash
+grep -rn --include='*.yml' --include='*.sh' --include='*.md' --include='_layouts/*' -e Laoujin -e '/Atlas' .
+```
+
+Anything it turns up (outside the README's cosmetic links and this section itself) is still pointing at the original — fix it before your first run.
+
 ## Setup
 
 GitHub → [`Laoujin/Scout`](https://github.com/Laoujin/Scout/settings/actions/runners/new) → Settings → Actions → Runners → New self-hosted runner → Linux x64. Copy the token.
