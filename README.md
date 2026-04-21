@@ -1,7 +1,7 @@
 <table>
   <tr>
     <td width="220" align="center">
-      <img src="scout-atlas-logo.png" alt="Scout + Atlas" width="200">
+      <img src="docs/scout-atlas-logo.png" alt="Scout + Atlas" width="200">
     </td>
     <td>
       <h1>Scout</h1>
