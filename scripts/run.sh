@@ -24,18 +24,17 @@ ATLAS_DIR="$SCOUT_DIR/atlas-checkout"
 rm -rf "$ATLAS_DIR"
 git clone --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
 
-# Collision guard against the Jekyll collection file (md or html) or its asset folder
+# Collision guard against the per-research folder
 FINAL_SLUG="$SLUG"
 n=2
-while ls "$ATLAS_DIR/_research/${DATE}-${FINAL_SLUG}".{md,html} 2>/dev/null | grep -q . \
-   || [ -d "$ATLAS_DIR/assets/research/${DATE}-${FINAL_SLUG}" ]; do
+while [ -d "$ATLAS_DIR/research/${DATE}-${FINAL_SLUG}" ]; do
   FINAL_SLUG="${SLUG}-${n}"
   n=$((n+1))
 done
 
-# Pre-create the per-research assets directory so Claude can drop images/data files in.
-ASSETS_DIR="$ATLAS_DIR/assets/research/${DATE}-${FINAL_SLUG}"
-mkdir -p "$ASSETS_DIR"
+# Pre-create the per-research folder so Claude can drop index.{md,html} + assets inside.
+RESEARCH_DIR="$ATLAS_DIR/research/${DATE}-${FINAL_SLUG}"
+mkdir -p "$RESEARCH_DIR"
 
 PROMPT="$(cat <<EOF
 TOPIC: ${TOPIC}
@@ -43,10 +42,9 @@ DEPTH: ${DEPTH}
 FORMAT: ${FORMAT}
 DATE: ${DATE}
 SLUG: ${FINAL_SLUG}
-ATLAS_DIR: ${ATLAS_DIR}
-ASSETS_DIR: ${ASSETS_DIR}
+RESEARCH_DIR: ${RESEARCH_DIR}
 
-Use the Scout skill. Write the research artifact to ATLAS_DIR/_research/DATE-SLUG.md (for format=md) or ATLAS_DIR/_research/DATE-SLUG.html (for format=html); for format=auto pick the one that fits the topic. Save any supporting images or data files into ASSETS_DIR and reference them from the research body. Follow the skill's procedure. When done, print the final path.
+Use the Scout skill. Write the research artifact to RESEARCH_DIR/index.md (for format=md) or RESEARCH_DIR/index.html (for format=html); for format=auto pick the one that fits the topic. Save any supporting images or data files into RESEARCH_DIR and reference them with plain relative paths (e.g. chart.png). Follow the skill's procedure. When done, print the final path.
 EOF
 )"
 
