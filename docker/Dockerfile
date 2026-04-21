@@ -4,11 +4,23 @@ ARG RUNNER_VERSION=2.321.0
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      git curl ca-certificates openssh-client libicu72 util-linux \
+      git curl ca-certificates openssh-client libicu72 util-linux gnupg \
       libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 \
       libxcomposite1 libxdamage1 libxrandr2 libxfixes3 \
       libgbm1 libasound2 libpango-1.0-0 libcairo2 libgtk-3-0 \
       fonts-noto-core \
+    && rm -rf /var/lib/apt/lists/*
+
+# GitHub CLI — used by scripts/issue-comment.sh, publish.sh and the workflow steps
+# to comment/close issues and parse issue bodies. Auth comes from GH_TOKEN env at
+# runtime (provided by the workflow's GITHUB_TOKEN); no `gh auth login` needed.
+RUN install -dm 0755 /etc/apt/keyrings \
+    && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+         -o /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+         > /etc/apt/sources.list.d/github-cli.list \
+    && apt-get update && apt-get install -y --no-install-recommends gh \
     && rm -rf /var/lib/apt/lists/*
 
 # Rename default node user (UID 1000) to runner

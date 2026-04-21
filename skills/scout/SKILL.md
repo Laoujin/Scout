@@ -33,12 +33,14 @@ Create assets only when they add information the text can't convey concisely. Pr
 ## Inputs (parsed from the prompt)
 
 ```
-TOPIC: <free text, may contain steering hints>
+TOPIC: <sharpened topic to research, may contain steering hints>
+RAW_TOPIC: <original raw topic from the user; equal to TOPIC when no tightening was applied>
 DEPTH: <ceo | standard | deep>
 FORMAT: <md | html | auto>
 DATE: <YYYY-MM-DD>
 SLUG: <pre-computed slug>
-ATLAS_DIR: <absolute path to atlas checkout>
+RESEARCH_DIR: <absolute path to per-research folder under atlas/research/>
+ISSUE_NUMBER: <Scout Issue number that drove this run; empty for workflow_dispatch runs>
 ```
 
 Steering hints inside TOPIC ("focus on r/homelab", "prioritise academic sources") are real instructions — honour them.
@@ -87,7 +89,9 @@ title: One-line title
 date: YYYY-MM-DD
 depth: standard
 format: md        # or html — matches the file extension
-topic: "<raw TOPIC from input, including steering hints>"
+topic: "<TOPIC from input — the sharpened version when tightening was applied>"
+topic_raw: "<RAW_TOPIC from input — original user phrasing; equal to topic when no tightening>"
+issue: 42         # Scout issue number; omit the field entirely when ISSUE_NUMBER is empty
 tags: [tag1, tag2]
 summary: One sentence shown on the Atlas index card.
 citations: 12
@@ -97,7 +101,9 @@ reading_time_min: 3
 
 Field notes:
 - `format`: the actual format you wrote — `md` or `html`. Never the literal `auto`.
-- `topic`: the raw TOPIC input from the workflow (quote it if it contains colons).
+- `topic`: the TOPIC input from the workflow (the sharpened version after tightening; quote it if it contains colons).
+- `topic_raw`: the RAW_TOPIC input — original user phrasing before tightening. Equal to `topic` when tightening was skipped.
+- `issue`: the Scout issue number that drove this run. Omit the field when ISSUE_NUMBER is empty (workflow_dispatch path).
 - `citations`: count of distinct source URLs you cited in the artifact.
 - `reading_time_min`: estimate as `max(1, round(word_count / 200))`.
 

@@ -1,0 +1,49 @@
+name: Research request
+description: Ask Scout to research a topic and publish to Atlas.
+title: "[research] "
+labels: [scout-research]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Scout will sharpen your topic and reply with a proposal. Tick the **Start research** box on the proposal you like, or comment with feedback to get a new one.
+  - type: textarea
+    id: topic
+    attributes:
+      label: Topic
+      description: |
+        Free text. Steering hints are honoured verbatim — e.g. "focus on r/homelab", "academic sources only", "must include a comparison table".
+      placeholder: e.g. Survey of static site generators in 2026, focus on Markdown-first
+    validations:
+      required: true
+  - type: dropdown
+    id: depth
+    attributes:
+      label: Depth
+      description: "ceo = one-page decision · standard = 2-4 pages · deep = all angles"
+      options:
+        - ceo
+        - standard
+        - deep
+      default: 1
+    validations:
+      required: true
+  - type: dropdown
+    id: format
+    attributes:
+      label: Format
+      description: "auto = Scout picks · md = markdown body · html = bespoke HTML body"
+      options:
+        - auto
+        - md
+        - html
+      default: 0
+    validations:
+      required: true
+  - type: checkboxes
+    id: options
+    attributes:
+      label: Options
+      options:
+        - label: Skip tightening (use my topic verbatim)
+          required: false

@@ -33,4 +33,12 @@ git push origin master
 # Derive the Pages URL from ATLAS_REPO (git@github.com-atlas:<owner>/<repo>.git).
 atlas_slug="${ATLAS_REPO#*:}"; atlas_slug="${atlas_slug%.git}"
 owner="${atlas_slug%%/*}"; repo="${atlas_slug##*/}"
-echo "Published: https://${owner,,}.github.io/${repo}/research/${DATE}-${SLUG}/"
+ATLAS_URL="https://${owner,,}.github.io/${repo}/research/${DATE}-${SLUG}/"
+echo "Published: ${ATLAS_URL}"
+
+# If this run came from an issue, comment the artifact link and close it.
+if [ -n "${ISSUE_NUMBER:-}" ] && [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ]; then
+  gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" \
+    --body "Published: ${ATLAS_URL}"
+  gh issue close "$ISSUE_NUMBER" --repo "$GH_REPO" --reason completed
+fi

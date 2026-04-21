@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Entrypoint for a research run. Called by the GH Actions workflow.
-# Required env: TOPIC, DEPTH, FORMAT. Optional: ATLAS_REPO.
+# Required env: TOPIC, DEPTH, FORMAT. Optional: ATLAS_REPO, RAW_TOPIC, ISSUE_NUMBER.
 
 set -euo pipefail
 
 : "${TOPIC:?TOPIC is required}"
 : "${DEPTH:=standard}"
 : "${FORMAT:=auto}"
+RAW_TOPIC="${RAW_TOPIC:-$TOPIC}"
 ATLAS_REPO="${ATLAS_REPO:-git@github.com:Laoujin/atlas.git}"
 
 SCOUT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
@@ -38,11 +39,13 @@ mkdir -p "$RESEARCH_DIR"
 
 PROMPT="$(cat <<EOF
 TOPIC: ${TOPIC}
+RAW_TOPIC: ${RAW_TOPIC}
 DEPTH: ${DEPTH}
 FORMAT: ${FORMAT}
 DATE: ${DATE}
 SLUG: ${FINAL_SLUG}
 RESEARCH_DIR: ${RESEARCH_DIR}
+ISSUE_NUMBER: ${ISSUE_NUMBER:-}
 
 Use the Scout skill. Write the research artifact to RESEARCH_DIR/index.md (for format=md) or RESEARCH_DIR/index.html (for format=html); for format=auto pick the one that fits the topic. Save any supporting images or data files into RESEARCH_DIR and reference them with plain relative paths (e.g. chart.png). Follow the skill's procedure. When done, print the final path.
 EOF
@@ -56,4 +59,5 @@ claude --dangerously-skip-permissions \
        "$PROMPT"
 
 TOPIC="$TOPIC" SLUG="$FINAL_SLUG" DATE="$DATE" ATLAS_REPO="$ATLAS_REPO" \
+  ISSUE_NUMBER="${ISSUE_NUMBER:-}" \
   bash "$SCOUT_DIR/scripts/publish.sh"
