@@ -2,7 +2,7 @@ Scout TODO List
 ===============
 
 - [ ] How to make this your own: how to set this up with your own Atlas
-- [ ] RESEARCH: Agents that could be used for doing research for Scout
+- [x] RESEARCH: Agents that could be used for doing research for Scout
 - [ ] RESEARCH: Need an always on something instead of Synology which has problems: need more CPU/RAM, newer kernel, CPU with AVX2, no lock-in with custom DSM/Linux.
 - [ ] Installation in Claude Code (via marketplace?) + In README
 - [ ] Cross reference with my Obsidian (option)
