@@ -16,6 +16,7 @@ Scout TODO List
 - [ ] Generating an image for the research would be very cool (ie give a Nano Banana API key?)
 - [ ] Cross reference with my Obsidian (option)
 - [ ] Frontmatter to hide a "old" research from the index site
+- [ ] We prefer tables... but on mobile tables are not really handy... how do we handle that?
 
 I said:
 
