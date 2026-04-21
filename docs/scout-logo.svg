@@ -1,0 +1,17 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Scout">
+  <rect width="64" height="64" rx="14" fill="#c2410c"/>
+  <g fill="#fbbf24" opacity="0.92">
+    <path d="M47 17 L33 31 L31 29 Z"/>
+    <path d="M47 47 L33 33 L31 35 Z"/>
+    <path d="M17 47 L31 33 L33 35 Z"/>
+    <path d="M17 17 L31 31 L33 29 Z"/>
+  </g>
+  <g fill="#fef3ec">
+    <path d="M32 7  L34 32 L30 32 Z"/>
+    <path d="M57 32 L32 34 L32 30 Z"/>
+    <path d="M32 57 L30 32 L34 32 Z"/>
+    <path d="M7 32  L32 30 L32 34 Z"/>
+  </g>
+  <circle cx="32" cy="32" r="3.6" fill="#c2410c"/>
+  <circle cx="32" cy="32" r="1.6" fill="#fef3ec"/>
+</svg>

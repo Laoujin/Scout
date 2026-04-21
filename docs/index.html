@@ -153,34 +153,15 @@ section > .container > p.lede {
 .btn .arrow { transition: transform .15s ease; }
 .btn:hover .arrow { transform: translateX(3px); }
 
-/* Hero right — fox mascot + Atlas URL badge */
+/* Hero right — fox mascot */
 .hero-art {
-  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  display: flex; flex-direction: column; align-items: center;
 }
 .hero-art .fox {
   display: block; width: 100%; max-width: 400px; height: auto;
   border-radius: 18px;
   box-shadow: 0 20px 60px -20px rgba(0,0,0,.25), 0 4px 12px rgba(0,0,0,.06);
 }
-.hero-art .atlas-badge {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 8px 14px;
-  background: var(--surface-tint);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font: 13px ui-monospace, SFMono-Regular, Menlo, monospace;
-  color: var(--fg-muted);
-  transition: color .15s, border-color .15s;
-}
-.hero-art .atlas-badge:hover {
-  color: var(--accent); border-color: var(--accent);
-}
-.hero-art .atlas-badge .label {
-  font-family: -apple-system, "Segoe UI", sans-serif;
-  color: var(--fg-faint); font-size: 12px; letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-.hero-art .atlas-badge svg { display: block; opacity: .6; }
 
 /* ---------- What (two-column) ---------- */
 .what-grid {
@@ -195,9 +176,7 @@ section > .container > p.lede {
 }
 .what-card .icon {
   width: 44px; height: 44px; border-radius: 10px;
-  background: var(--accent-soft); color: var(--accent);
-  display: grid; place-content: center;
-  font: italic 700 22px/1 Georgia, serif;
+  display: block;
   margin-bottom: 14px;
 }
 .what-card h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.01em; }
@@ -600,11 +579,12 @@ section > .container > p.lede {
   <div class="container hero-grid">
     <div>
       <h1>Research on demand,<br><span class="accent">cited on every line.</span></h1>
-      <p class="tagline">Trigger a GitHub Action with a one-line prompt. Scout researches the web and publishes a fully-cited artifact to your own GitHub Pages site — no orphan reference dump, every claim linked inline.</p>
+      <p class="tagline">Open an Issue. Scout researches and publishes to your GitHub Pages.</p>
       <div class="meta-row">
         <span>Self-hosted</span>
-        <span>Free to operate</span>
-        <span>Your data, your repo</span>
+        <span>Your Claude subscription</span>
+        <span>Docker</span>
+        <span>Open source</span>
       </div>
       <div class="ctas">
         <a href="#install" class="btn btn-primary">Install <span class="arrow">→</span></a>
@@ -613,11 +593,6 @@ section > .container > p.lede {
     </div>
     <div class="hero-art">
       <img class="fox" src="./scout-atlas-logo.png" alt="Scout — the fox mascot standing on a map with compasses overhead" width="400" height="400">
-      <a class="atlas-badge" href="https://laoujin.github.io/Atlas/" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-        <span class="label">Publishes to</span>
-        <span>laoujin.github.io/Atlas</span>
-      </a>
     </div>
   </div>
 </section>
@@ -633,7 +608,7 @@ section > .container > p.lede {
 
     <div class="what-grid">
       <div class="what-card">
-        <div class="icon">S</div>
+        <img class="icon" src="./scout-logo.svg" alt="Scout" width="44" height="44">
         <div class="role">The researcher</div>
         <h3>Scout</h3>
         <p>A Docker runner on your NAS, a GitHub Action, and a Claude-Code-based skill that knows how to cite. Give it a topic, depth, and format.</p>
@@ -658,7 +633,7 @@ section > .container > p.lede {
       </div>
 
       <div class="what-card">
-        <div class="icon">A</div>
+        <img class="icon" src="./atlas-logo.svg" alt="Atlas" width="44" height="44">
         <div class="role">The shelf</div>
         <h3>Atlas</h3>
         <p>A Jekyll site, served by GitHub Pages. Every research result lands in <code>research/DATE-SLUG/</code> with frontmatter; the index auto-builds.</p>
