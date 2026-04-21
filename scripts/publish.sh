@@ -22,7 +22,10 @@ if git diff --cached --quiet; then
   exit 2
 fi
 
-git -c user.name="Scout" -c user.email="scout@users.noreply.github.com" \
+# Commit as the triggering GitHub user. Workflow sets GIT_{AUTHOR,COMMITTER}_{NAME,EMAIL}
+# from ${{ github.actor }} / ${{ github.actor_id }}. Fall back to Scout if run outside CI.
+git -c user.name="${GIT_AUTHOR_NAME:-Scout}" \
+    -c user.email="${GIT_AUTHOR_EMAIL:-scout@users.noreply.github.com}" \
   commit -m "research: ${DATE} ${SLUG}" -m "Topic: ${TOPIC}"
 
 git push origin master

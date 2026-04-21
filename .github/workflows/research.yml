@@ -38,6 +38,10 @@ jobs:
           DEPTH: ${{ inputs.depth }}
           FORMAT: ${{ inputs.format }}
           ATLAS_REPO: git@github.com-atlas:Laoujin/Atlas.git
+          GIT_AUTHOR_NAME: ${{ github.actor }}
+          GIT_AUTHOR_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
+          GIT_COMMITTER_NAME: ${{ github.actor }}
+          GIT_COMMITTER_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
         run: bash scripts/run.sh
 
       - name: Summary
