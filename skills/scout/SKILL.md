@@ -70,16 +70,23 @@ Pick sources based on the topic. This is not a checklist — consult the categor
 
 ## Output contract (hard rules)
 
-1. **Inline citations on every claim.** Never a trailing "References" dump.
+1. **Lead with a TL;DR / decision block.** Every artifact starts with a short block — 1-3 sentences — that gives the reader the answer before anything else. Shape depends on the topic:
+   - **Comparisons / product picks:** "Pick X if …, Y if …, Z if …" (one line per option, with the winner first) or a single "Go with X because …" if there's a clear recommendation.
+   - **Surveys / SOTA:** the main takeaway in plain language — "The field has consolidated around X; Y is the niche-but-real alternative; Z is hype."
+   - **Restaurants / local:** "If you want <vibe>, go to <place>." One or two lines.
+   - **Decision frameworks:** the decision tree compressed to 1-2 sentences.
+   For `depth=ceo` artifacts, the TL;DR IS most of the body. For `standard` / `deep`, it's the top of the page and the rest of the artifact supports it.
+   MD body: render as a `> blockquote` labelled **TL;DR** or **Decision**. HTML body: a `<div class="tldr">` or equivalent that visually anchors at the top. Citations still apply — the TL;DR is a claim, so its sources go inline.
+2. **Inline citations on every claim.** Never a trailing "References" dump.
    - MD body: `[[1]](https://url)` inline.
    - HTML body: `<sup><a href="url">[1]</a></sup>` inline.
    - A comparison-table row synthesising three sources shows all three URLs in that row.
-2. **Comparisons → tables** when the axes are measurable (specs, numbers, features). When the comparison is philosophy or fit-for-context, use short labeled sections per option instead — but keep it scannable, not prose blobs.
-3. **Terse.** No "in conclusion", no filler, no "it is worth noting that".
-4. **No emojis.**
-5. **Label opinions by source.** "r/homelab consensus:", "Wirecutter top pick:", "arXiv 2025 paper claims:".
-6. **GitHub repos → link + star count.** When the research mentions a tool, library, framework, or project that has a public GitHub repo, the first mention hyperlinks the name to the repo and includes the current star count with the month you looked. Example: `[Astro](https://github.com/withastro/astro) (52 k stars, Apr 2026)`. Stars decay fast; the month keeps it honest.
-7. **If a claim has no URL, do not make the claim.**
+3. **Comparisons → tables** when the axes are measurable (specs, numbers, features). When the comparison is philosophy or fit-for-context, use short labeled sections per option instead — but keep it scannable, not prose blobs.
+4. **Terse.** No "in conclusion", no filler, no "it is worth noting that".
+5. **No emojis.**
+6. **Label opinions by source.** "r/homelab consensus:", "Wirecutter top pick:", "arXiv 2025 paper claims:".
+7. **GitHub repos → link + star count.** When the research mentions a tool, library, framework, or project that has a public GitHub repo, the first mention hyperlinks the name to the repo and includes the current star count with the month you looked. Example: `[Astro](https://github.com/withastro/astro) (52 k stars, Apr 2026)`. Stars decay fast; the month keeps it honest.
+8. **If a claim has no URL, do not make the claim.**
 
 ## Frontmatter (required; identical for .md and .html)
 
@@ -130,6 +137,7 @@ Example body structures (not prescriptive):
 4. Track `{claim, url}` pairs. No claim without URL.
 5. Draft the body with inline citations. Use tables for comparisons.
 6. **Self-check before writing:**
+   - Artifact opens with a TL;DR / Decision block (1-3 sentences, cited)?
    - Every claim has ≥1 URL?
    - Comparisons in tables (not prose)?
    - Terse?
@@ -142,7 +150,8 @@ Example body structures (not prescriptive):
 
 ## Failure modes to avoid
 
-- Spending tokens on prose preamble before getting to facts. Start with the TL;DR or the main comparison table.
+- Skipping the TL;DR / Decision block, or burying it under prose preamble. It's the first thing on the page, always.
+- A TL;DR that's just a topic restatement ("This article discusses X") instead of an actual answer — it must carry the main conclusion or recommendation.
 - Over-citing obvious facts (Wikipedia for "X is a country") — cite contested or specific claims.
 - Treating the emphasis hint as optional. If TOPIC said "focus on Reddit", your citations should reflect that.
 - Wrapping the output in `<!doctype html>` + `<body>` — the Jekyll layout handles that; you'd get nested html elements.
