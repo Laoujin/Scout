@@ -7,6 +7,9 @@
 <meta name="description" content="Trigger a GitHub Action, get a cited research artifact published to your personal GitHub Pages site. Runs on your NAS in Docker.">
 <link rel="icon" type="image/png" href="./scout-atlas-icon.png">
 <link rel="apple-touch-icon" href="./scout-atlas-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
 <style>
 /* =========================================================================
    Scout marketing site — mockup
@@ -60,13 +63,14 @@ code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 }
 .nav .brand {
   display: flex; align-items: center; gap: 10px;
-  font-weight: 700; letter-spacing: -0.01em;
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 600; font-size: 22px; letter-spacing: -0.01em;
 }
 .nav .brand .mark {
   width: 28px; height: 28px;
   display: block;
 }
-.nav .links { display: flex; gap: 20px; margin-left: auto; font-size: 14px; }
+.nav .links { display: flex; align-items: center; gap: 20px; margin-left: auto; font-size: 14px; }
 .nav .links a { color: var(--fg-muted); }
 .nav .links a:hover { color: var(--fg); }
 .nav .links a.cta {
@@ -98,7 +102,7 @@ section .kicker::before {
 }
 section > .container > h2 {
   font-size: 34px; letter-spacing: -0.02em; margin: 0 0 12px;
-  max-width: 22ch;
+  white-space: nowrap;
 }
 section > .container > p.lede {
   font-size: 17px; color: var(--fg-muted); margin: 0 0 40px; max-width: 60ch;
@@ -528,7 +532,7 @@ section > .container > p.lede {
   padding: 48px 0 40px;
 }
 .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; }
-.footer .brand { font-weight: 700; letter-spacing: -0.01em; color: #fff; font-size: 18px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.footer .brand { font-family: "Fraunces", Georgia, serif; font-weight: 600; letter-spacing: -0.01em; color: #fff; font-size: 22px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
 .footer .brand .mark {
   width: 32px; height: 32px;
   display: block;
@@ -566,6 +570,7 @@ section > .container > p.lede {
   .picker-preview { position: static; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .nav .links a:not(.cta) { display: none; }
+  section > .container > h2 { white-space: normal; font-size: 28px; }
 }
 @media (max-width: 600px) {
   .pillars { grid-template-columns: 1fr; }
@@ -573,6 +578,7 @@ section > .container > p.lede {
   .layout-picks { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: 1fr; }
   .hero h1 { font-size: 32px; }
+  section > .container > h2 { font-size: 24px; }
 }
 </style>
 </head>
@@ -601,7 +607,6 @@ section > .container > p.lede {
       <p class="tagline">Trigger a GitHub Action with a one-line prompt. Scout researches the web and publishes a fully-cited artifact to your own GitHub Pages site — no orphan reference dump, every claim linked inline.</p>
       <div class="meta-row">
         <span>Self-hosted</span>
-        <span>Runs on your NAS</span>
         <span>Free to operate</span>
         <span>Your data, your repo</span>
       </div>
