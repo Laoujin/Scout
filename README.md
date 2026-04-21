@@ -4,8 +4,10 @@
       <img src="scout-atlas-logo.png" alt="Scout + Atlas" width="200">
     </td>
     <td>
-      <h1>Scout</h1>
-      <h2>Personal research engine</h2>
+      <h1>
+        Scout
+        <small>Personal research engine</small>
+      </h1>
       <p>
         Trigger <a href="https://github.com/Laoujin/Scout/actions/workflows/research.yml"><code>research.yml</code></a>
         GitHub Action to let Claude Code perform research and publish the result to
