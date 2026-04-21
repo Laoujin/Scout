@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scout — research on demand, cited on every line</title>
-<meta name="description" content="Trigger a GitHub Action, get a cited research artifact published to your personal GitHub Pages site. Runs on your NAS in Docker.">
+<meta name="description" content="Trigger a GitHub Action, get a cited research artifact published to your personal GitHub Pages site. Runs on your hardware in Docker.">
 <link rel="icon" type="image/png" href="./scout-atlas-icon.png">
 <link rel="apple-touch-icon" href="./scout-atlas-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,8 +88,8 @@ code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   margin: 0 auto;
   padding: 0 24px;
 }
-section { padding: 96px 0; }
-section.tight { padding: 64px 0; }
+section { padding: 64px 0; }
+section.tight { padding: 48px 0; }
 section .kicker {
   display: inline-flex; align-items: center; gap: 8px;
   font: 600 11px/1 ui-monospace, Menlo, monospace;
@@ -233,7 +233,7 @@ section > .container > p.lede {
 .install-cmd .copy-btn.ok { color: #61c454; border-color: #61c454; }
 
 /* ---------- Your Atlas (controls + live preview) ---------- */
-.your-atlas-section { background: var(--surface-tint); }
+#install { background: var(--surface-tint); }
 .ya-controls { display: grid; gap: 28px; margin-bottom: 36px; }
 .ya-split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
 .ya-group { padding: 0; }
@@ -300,6 +300,7 @@ section > .container > p.lede {
   overflow: hidden;
   transition: background .2s, color .2s, border-color .2s;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  box-shadow: 0 18px 50px -20px rgba(0,0,0,.18), 0 4px 12px rgba(0,0,0,.05);
 }
 .ap-chrome { background: color-mix(in srgb, var(--ap-fg) 6%, transparent); }
 .ap-main { padding: 24px; }
@@ -490,7 +491,7 @@ section > .container > p.lede {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
-  section { padding: 60px 0; }
+  section { padding: 44px 0; }
   .hero { padding: 48px 0 32px; }
   .hero h1 { font-size: 40px; }
   .hero-grid { grid-template-columns: 1fr; gap: 32px; }
@@ -599,7 +600,7 @@ section > .container > p.lede {
     <h2>The chain.</h2>
 
     <div class="how-diagram">
-      <svg width="1000" height="220" viewBox="0 0 1000 220" xmlns="http://www.w3.org/2000/svg" aria-label="Scout flow diagram">
+      <svg width="1000" height="320" viewBox="0 0 1000 320" xmlns="http://www.w3.org/2000/svg" aria-label="Scout flow diagram">
         <defs>
           <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#c2410c"/>
@@ -610,75 +611,66 @@ section > .container > p.lede {
           </linearGradient>
         </defs>
 
-        <!-- Box 1: You -->
-        <g transform="translate(10, 60)">
-          <rect width="130" height="90" rx="10" fill="url(#cardGrad)" stroke="#e8e6e0"/>
-          <text x="65" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">01 · YOU</text>
-          <text x="65" y="52" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">open an</text>
-          <text x="65" y="70" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">issue</text>
-          <text x="65" y="85" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#8a8a8a">from anywhere</text>
+        <!-- Trigger label + arrow into Scout -->
+        <text x="310" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#8a8a8a" letter-spacing="1.2">YOU OPEN A GITHUB ISSUE</text>
+        <line x1="310" y1="40" x2="310" y2="72" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
+
+        <!-- ===== SCOUT big box ===== -->
+        <g transform="translate(30, 80)">
+          <rect width="560" height="220" rx="12" fill="url(#cardGrad)" stroke="#c2410c" stroke-width="1.5"/>
+          <text x="24" y="26" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#c2410c" font-weight="700" letter-spacing="1.2">SCOUT · ON YOUR HARDWARE</text>
+
+          <!-- Sub-card 01: Sharpen (with self-loop) -->
+          <g transform="translate(24, 42)">
+            <rect width="512" height="74" rx="8" fill="#faf9f6" stroke="#e8e6e0"/>
+            <text x="18" y="22" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">01 · SHARPEN</text>
+            <text x="18" y="45" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">Bot proposes a sharpened topic</text>
+            <text x="18" y="63" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#5c5c5c">tick ✓ to confirm · or reply to revise</text>
+
+            <!-- Self-loop: revise -->
+            <path d="M 444 20 A 18 18 0 1 0 444 56" stroke="#c2410c" stroke-width="1.3" fill="none" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+            <text x="480" y="42" font-family="ui-monospace, Menlo, monospace" font-size="9" fill="#8a8a8a">revise</text>
+          </g>
+
+          <!-- Arrow between sub-cards -->
+          <line x1="280" y1="122" x2="280" y2="134" stroke="#c2410c" stroke-width="1.4" marker-end="url(#arr)"/>
+
+          <!-- Sub-card 02: Research -->
+          <g transform="translate(24, 138)">
+            <rect width="512" height="74" rx="8" fill="#faf9f6" stroke="#e8e6e0"/>
+            <text x="18" y="22" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">02 · RESEARCH</text>
+            <text x="18" y="45" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">Claude Code researches &amp; cites every claim</text>
+            <text x="18" y="63" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#5c5c5c">WebSearch · WebFetch · Playwright · 5–30 min</text>
+          </g>
         </g>
 
-        <line x1="145" y1="105" x2="175" y2="105" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
+        <!-- Scout → Atlas arrow -->
+        <line x1="595" y1="190" x2="650" y2="190" stroke="#c2410c" stroke-width="1.8" marker-end="url(#arr)"/>
+        <text x="623" y="180" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="9" fill="#8a8a8a">git push</text>
 
-        <!-- Box 2: GH Action -->
-        <g transform="translate(180, 60)">
-          <rect width="140" height="90" rx="10" fill="url(#cardGrad)" stroke="#e8e6e0"/>
-          <text x="70" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">02 · TRIGGER</text>
-          <text x="70" y="52" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">GitHub Action</text>
-          <text x="70" y="70" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">fires on issue</text>
-          <text x="70" y="85" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#8a8a8a">research.yml</text>
-        </g>
+        <!-- ===== ATLAS big box ===== -->
+        <g transform="translate(660, 80)">
+          <rect width="310" height="220" rx="12" fill="url(#cardGrad)" stroke="#e8e6e0"/>
+          <text x="24" y="26" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#c2410c" font-weight="700" letter-spacing="1.2">ATLAS · GITHUB PAGES</text>
 
-        <line x1="325" y1="105" x2="355" y2="105" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
+          <!-- Sub-card 03: Build -->
+          <g transform="translate(24, 42)">
+            <rect width="262" height="74" rx="8" fill="#faf9f6" stroke="#e8e6e0"/>
+            <text x="18" y="22" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">03 · BUILD</text>
+            <text x="18" y="45" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">GitHub Pages rebuilds</text>
+            <text x="18" y="63" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#5c5c5c">Jekyll · your palette + layout</text>
+          </g>
 
-        <!-- Box 3: Scout runner -->
-        <g transform="translate(360, 40)">
-          <rect width="170" height="130" rx="10" fill="url(#cardGrad)" stroke="#c2410c" stroke-width="1.5"/>
-          <text x="85" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">03 · SCOUT</text>
-          <text x="85" y="50" text-anchor="middle" font-family="system-ui" font-size="14" fill="#1a1a1a" font-weight="700">Docker runner</text>
-          <text x="85" y="68" text-anchor="middle" font-family="system-ui" font-size="12" fill="#5c5c5c">on your NAS</text>
-          <line x1="20" y1="82" x2="150" y2="82" stroke="#e8e6e0"/>
-          <text x="85" y="100" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#5c5c5c">Claude Code +</text>
-          <text x="85" y="116" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#5c5c5c">scout SKILL</text>
-        </g>
+          <!-- Arrow between sub-cards -->
+          <line x1="155" y1="122" x2="155" y2="134" stroke="#c2410c" stroke-width="1.4" marker-end="url(#arr)"/>
 
-        <!-- Branch down to web sources -->
-        <path d="M 445 175 L 445 195 Q 445 200 450 200 L 540 200 Q 545 200 545 195 L 545 175" stroke="#c2410c" stroke-width="1.4" fill="none" stroke-dasharray="3 3"/>
-        <g transform="translate(445, 185)">
-          <text font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#8a8a8a" text-anchor="middle" x="50" y="25">WebSearch · WebFetch · Playwright</text>
-        </g>
-
-        <line x1="535" y1="105" x2="565" y2="105" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
-
-        <!-- Box 4: git push -->
-        <g transform="translate(570, 60)">
-          <rect width="140" height="90" rx="10" fill="url(#cardGrad)" stroke="#e8e6e0"/>
-          <text x="70" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">04 · COMMIT</text>
-          <text x="70" y="52" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">git push</text>
-          <text x="70" y="70" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">to Atlas</text>
-          <text x="70" y="85" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#8a8a8a">via deploy key</text>
-        </g>
-
-        <line x1="715" y1="105" x2="745" y2="105" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
-
-        <!-- Box 5: Pages -->
-        <g transform="translate(750, 60)">
-          <rect width="140" height="90" rx="10" fill="url(#cardGrad)" stroke="#e8e6e0"/>
-          <text x="70" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">05 · BUILD</text>
-          <text x="70" y="52" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">GitHub Pages</text>
-          <text x="70" y="70" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">rebuilds Atlas</text>
-          <text x="70" y="85" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#8a8a8a">Jekyll</text>
-        </g>
-
-        <line x1="895" y1="105" x2="925" y2="105" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
-
-        <!-- Box 6: You read -->
-        <g transform="translate(930, 60)">
-          <rect width="64" height="90" rx="10" fill="#c2410c" stroke="#c2410c"/>
-          <text x="32" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#fef3ec" font-weight="700" letter-spacing="1.2">06</text>
-          <text x="32" y="55" text-anchor="middle" font-family="system-ui" font-size="13" fill="#fff" font-weight="700">Read</text>
-          <text x="32" y="72" text-anchor="middle" font-family="system-ui" font-size="13" fill="#fff" font-weight="700">Atlas</text>
+          <!-- Sub-card 04: Read -->
+          <g transform="translate(24, 138)">
+            <rect width="262" height="74" rx="8" fill="#c2410c" stroke="#c2410c"/>
+            <text x="18" y="22" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#fef3ec" font-weight="700" letter-spacing="1.2">04 · READ</text>
+            <text x="18" y="45" font-family="system-ui" font-size="13" fill="#fff" font-weight="700">You read at your URL</text>
+            <text x="18" y="63" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#fef3ec" opacity=".85">laoujin.github.io/Atlas/</text>
+          </g>
         </g>
       </svg>
     </div>
