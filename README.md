@@ -56,7 +56,7 @@ Anything it turns up (outside the README's cosmetic links and this section itsel
 
 GitHub → [`Laoujin/Scout`](https://github.com/Laoujin/Scout/settings/actions/runners/new) → Settings → Actions → Runners → New self-hosted runner → Linux x64. Copy the token.
 
-SSH into your NAS.
+SSH into your always on device.
 
 ```bash
 git clone git@github.com:Laoujin/Scout.git
