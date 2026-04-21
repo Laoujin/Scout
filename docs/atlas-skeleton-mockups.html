@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas — skeletons + palettes</title>
+<style>
+/* =========================================================================
+   Atlas — page skeleton + palette mockups
+   Six page skeletons × six palettes. Click a palette at the top to recolor
+   every skeleton live. Each skeleton is wrapped in a "browser frame" so
+   you see its full page chrome at realistic proportions.
+   ========================================================================= */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 15px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background: #e8e6e0;
+  color: #1a1a1a;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ---------- Palette definitions ---------- */
+/* --pal-* drives each skeleton's rendering. --meta-* drives the page shell
+   (unchanging surrounding chrome). */
+
+body[data-palette="rust"] {
+  --pal-bg: #faf9f6;       --pal-surface: #ffffff;      --pal-surface-tint: #f5f3ee;
+  --pal-fg: #1a1a1a;       --pal-fg-muted: #5c5c5c;     --pal-fg-faint: #8a8a8a;
+  --pal-border: #e8e6e0;   --pal-accent: #c2410c;       --pal-accent-soft: #fef3ec;
+  --pal-accent-fg: #ffffff;
+}
+body[data-palette="paper"] {
+  --pal-bg: #fbf7ea;       --pal-surface: #fffcf2;      --pal-surface-tint: #f3ecd6;
+  --pal-fg: #2a1e12;       --pal-fg-muted: #6b5a3f;     --pal-fg-faint: #9b8766;
+  --pal-border: #dcd2b8;   --pal-accent: #a84a07;       --pal-accent-soft: #fbeedd;
+  --pal-accent-fg: #fffcf2;
+}
+body[data-palette="cartography"] {
+  --pal-bg: #f0ebe0;       --pal-surface: #faf6ea;      --pal-surface-tint: #e8e0ce;
+  --pal-fg: #1a2e1f;       --pal-fg-muted: #4a5d4e;     --pal-fg-faint: #7a8a7e;
+  --pal-border: #c9bc9d;   --pal-accent: #4a6b3a;       --pal-accent-soft: #dce5d1;
+  --pal-accent-fg: #faf6ea;
+}
+body[data-palette="midnight"] {
+  --pal-bg: #0f1013;       --pal-surface: #1a1c20;      --pal-surface-tint: #23262c;
+  --pal-fg: #f0ede6;       --pal-fg-muted: #a8a59c;     --pal-fg-faint: #6e7079;
+  --pal-border: #2d3036;   --pal-accent: #f59e0b;       --pal-accent-soft: #3a2f18;
+  --pal-accent-fg: #1a1c20;
+}
+body[data-palette="minimal"] {
+  --pal-bg: #ffffff;       --pal-surface: #ffffff;      --pal-surface-tint: #f7f7f7;
+  --pal-fg: #0a0a0a;       --pal-fg-muted: #525252;     --pal-fg-faint: #a3a3a3;
+  --pal-border: #e5e5e5;   --pal-accent: #2563eb;       --pal-accent-soft: #dbeafe;
+  --pal-accent-fg: #ffffff;
+}
+body[data-palette="fieldnotes"] {
+  --pal-bg: #ede6cf;       --pal-surface: #f6f0dc;      --pal-surface-tint: #e0d9bd;
+  --pal-fg: #3d2914;       --pal-fg-muted: #6b5434;     --pal-fg-faint: #948066;
+  --pal-border: #c4b88f;   --pal-accent: #b54708;       --pal-accent-soft: #f3e3bf;
+  --pal-accent-fg: #f6f0dc;
+}
+
+/* ---------- Page shell (unchanging) ---------- */
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 32px 120px;
+}
+.page > header { margin-bottom: 28px; }
+.page > header h1 {
+  margin: 0 0 4px;
+  font-size: 30px; letter-spacing: -0.02em;
+}
+.page > header p {
+  margin: 0; max-width: 68ch;
+  color: #4a4a4a;
+}
+
+/* ---------- Palette picker (sticky) ---------- */
+.picker {
+  position: sticky; top: 12px; z-index: 20;
+  margin: 20px 0 40px;
+  padding: 14px 18px;
+  background: rgba(250,249,246,.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid #d8d6d0;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px -12px rgba(0,0,0,.2);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+}
+.picker .label {
+  font: 600 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: #666; padding-right: 6px;
+}
+.picker button {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; border: 1px solid #ddd; border-radius: 8px;
+  padding: 6px 10px 6px 6px;
+  font-size: 13px; color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color .15s ease, transform .12s ease;
+}
+.picker button:hover { border-color: #bbb; transform: translateY(-1px); }
+.picker button.active { border-color: #1a1a1a; box-shadow: 0 0 0 2px #1a1a1a inset; }
+.picker .swatch { display: flex; gap: 0; border-radius: 4px; overflow: hidden; }
+.picker .swatch span {
+  display: block; width: 12px; height: 18px;
+}
+
+/* ---------- Browser frame ---------- */
+.skel {
+  margin-bottom: 56px;
+  scroll-margin-top: 100px;
+}
+.skel > header { margin-bottom: 14px; }
+.skel > header h2 {
+  margin: 0 0 4px; font-size: 20px;
+  display: flex; align-items: baseline; gap: 10px;
+}
+.skel > header h2 .tag {
+  font-size: 11px; background: #1a1a1a; color: #fff;
+  padding: 2px 8px; border-radius: 10px; font-weight: 500; letter-spacing: 0.02em;
+}
+.skel > header .note {
+  margin: 0; color: #4a4a4a; font-size: 13.5px; max-width: 76ch;
+}
+
+.frame {
+  background: #cfccc5;
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.08),
+    0 12px 32px -10px rgba(0,0,0,.22);
+}
+.frame-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 10px 8px;
+}
+.frame-bar .dots { display: flex; gap: 6px; }
+.frame-bar .dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+.frame-bar .dots span:nth-child(1) { background: #ec6058; }
+.frame-bar .dots span:nth-child(2) { background: #f4be4f; }
+.frame-bar .dots span:nth-child(3) { background: #61c454; }
+.frame-bar .url {
+  flex: 1;
+  background: #fffdf8;
+  border-radius: 5px;
+  padding: 4px 10px;
+  font: 500 11.5px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #5a5a5a;
+  border: 1px solid #d8d6d0;
+}
+.frame-bar .url .scheme { color: #888; }
+.viewport {
+  background: var(--pal-bg);
+  color: var(--pal-fg);
+  border-radius: 6px;
+  min-height: 620px;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+
+/* =========================================================================
+   Shared inside-viewport primitives (cards, chips etc) — all palette-aware
+   ========================================================================= */
+.vp-grid {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(3, 1fr);
+}
+.mini {
+  background: var(--pal-surface);
+  border: 1px solid var(--pal-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.mini .cover {
+  aspect-ratio: 3/2;
+  position: relative;
+  background:
+    radial-gradient(circle at 20% 30%, hsla(var(--h,200), 85%, 70%, .9), transparent 55%),
+    radial-gradient(circle at 85% 70%, hsla(calc(var(--h,200) + 50), 80%, 55%, .85), transparent 60%),
+    linear-gradient(135deg, hsl(var(--h,200) 65% 40%), hsl(calc(var(--h,200) + 30) 55% 25%));
+}
+.mini .cover::after {
+  content: attr(data-mark);
+  position: absolute; inset: 0;
+  display: grid; place-content: center;
+  color: rgba(255,255,255,.92);
+  font: italic 700 34px/1 Georgia, serif;
+  letter-spacing: -0.04em;
+  text-shadow: 0 2px 12px rgba(0,0,0,.3);
+}
+.mini .body { padding: 12px 14px 13px; display: flex; flex-direction: column; gap: 7px; }
+.mini h4 { margin: 0; font-size: 14px; line-height: 1.3; color: var(--pal-fg); }
+.mini .sub { margin: 0; font-size: 12.5px; color: var(--pal-fg-muted); line-height: 1.4; }
+.mini .meta { display: flex; gap: 8px; align-items: center; margin-top: 2px; font-size: 11px; color: var(--pal-fg-faint); font-family: ui-monospace, Menlo, monospace; }
+.mini .chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.vp-chip {
+  display: inline-block; padding: 1px 7px; border-radius: 999px;
+  font-size: 11px; color: var(--pal-fg-muted);
+  border: 1px solid var(--pal-border);
+  background: transparent;
+}
+.vp-chip::before { content: "#"; opacity: 0.5; }
+.vp-chip.solid { background: var(--pal-accent); color: var(--pal-accent-fg); border-color: var(--pal-accent); }
+.vp-chip.solid::before { opacity: 0; margin-right: -2px; }
+
+.vp-depth {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 7px; border-radius: 3px;
+  font: 700 9.5px/1.4 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--pal-surface-tint); color: var(--pal-fg-muted);
+}
+.vp-depth::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--pal-accent); }
+
+/* =========================================================================
+   S1 — Hero + footer (current Atlas)
+   ========================================================================= */
+.s1 { display: flex; flex-direction: column; min-height: 620px; }
+.s1 .hero {
+  padding: 48px 40px 40px;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at top, color-mix(in srgb, var(--pal-accent) 16%, transparent), transparent 60%),
+    var(--pal-bg);
+  border-bottom: 1px solid var(--pal-border);
+}
+.s1 .hero .logo {
+  width: 64px; height: 64px; margin: 0 auto 14px;
+  border-radius: 14px;
+  background: var(--pal-accent); color: var(--pal-accent-fg);
+  display: grid; place-content: center;
+  font: italic 700 34px/1 Georgia, serif;
+}
+.s1 .hero h1 { margin: 0 0 6px; font-size: 32px; letter-spacing: -0.02em; color: var(--pal-fg); }
+.s1 .hero p { margin: 0; color: var(--pal-fg-muted); font-size: 14px; }
+.s1 .filter {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  padding: 14px 40px; border-bottom: 1px solid var(--pal-border);
+}
+.s1 .content { padding: 20px 40px 28px; flex: 1; }
+.s1 .footer {
+  padding: 18px 40px;
+  border-top: 1px solid var(--pal-border);
+  display: flex; justify-content: space-between;
+  color: var(--pal-fg-faint); font-size: 12px;
+  background: var(--pal-surface-tint);
+}
+
+/* =========================================================================
+   S2 — Sticky top bar + footer
+   ========================================================================= */
+.s2 { display: flex; flex-direction: column; min-height: 620px; }
+.s2 .topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 10px 24px;
+  background: var(--pal-surface);
+  border-bottom: 1px solid var(--pal-border);
+  position: sticky; top: 0; z-index: 2;
+}
+.s2 .topbar .brand {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 600; letter-spacing: -0.01em; color: var(--pal-fg);
+}
+.s2 .topbar .brand .mark {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: var(--pal-accent); color: var(--pal-accent-fg);
+  display: grid; place-content: center;
+  font: italic 700 13px/1 Georgia, serif;
+}
+.s2 .topbar .links { display: flex; gap: 14px; margin-left: 10px; }
+.s2 .topbar .links a { font-size: 13px; color: var(--pal-fg-muted); }
+.s2 .topbar .spacer { flex: 1; }
+.s2 .topbar .search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--pal-surface-tint);
+  border: 1px solid var(--pal-border); border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12.5px; color: var(--pal-fg-faint);
+  min-width: 220px;
+}
+.s2 .topbar .search::before { content: "⌕"; font-size: 14px; }
+.s2 .content { padding: 24px 32px; flex: 1; }
+.s2 .content h2 {
+  margin: 0 0 14px; font-size: 18px; letter-spacing: -0.01em; color: var(--pal-fg);
+  display: flex; align-items: center; gap: 10px;
+}
+.s2 .content h2::after {
+  content: ""; flex: 1; height: 1px;
+  background: var(--pal-border);
+}
+.s2 .footer {
+  margin-top: auto;
+  padding: 14px 32px;
+  border-top: 1px solid var(--pal-border);
+  font-size: 12px; color: var(--pal-fg-faint);
+  display: flex; gap: 20px;
+}
+
+/* =========================================================================
+   S3 — Top bar + left sidenav + content
+   ========================================================================= */
+.s3 {
+  display: grid; grid-template-rows: auto 1fr auto;
+  min-height: 620px;
+}
+.s3 .topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 10px 20px; border-bottom: 1px solid var(--pal-border);
+  background: var(--pal-surface);
+}
+.s3 .topbar .brand {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 700; letter-spacing: -0.01em; color: var(--pal-fg);
+}
+.s3 .topbar .brand .mark {
+  width: 26px; height: 26px; border-radius: 6px;
+  background: var(--pal-accent); color: var(--pal-accent-fg);
+  display: grid; place-content: center;
+  font: italic 700 14px/1 Georgia, serif;
+}
+.s3 .topbar .spacer { flex: 1; }
+.s3 .topbar a { font-size: 12.5px; color: var(--pal-fg-muted); }
+.s3 .main { display: grid; grid-template-columns: 200px 1fr; min-height: 0; }
+.s3 .sidenav {
+  padding: 18px 16px;
+  background: var(--pal-surface-tint);
+  border-right: 1px solid var(--pal-border);
+}
+.s3 .sidenav h4 {
+  margin: 0 0 8px; font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--pal-fg-faint);
+}
+.s3 .sidenav ul { list-style: none; margin: 0 0 16px; padding: 0; }
+.s3 .sidenav li {
+  padding: 4px 8px; border-radius: 5px;
+  font-size: 13px; color: var(--pal-fg-muted);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.s3 .sidenav li.active { background: var(--pal-accent); color: var(--pal-accent-fg); }
+.s3 .sidenav li .c { font: 500 10.5px ui-monospace, Menlo, monospace; opacity: 0.7; }
+.s3 .content { padding: 22px 28px; }
+.s3 .footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--pal-border);
+  font-size: 12px; color: var(--pal-fg-faint);
+}
+
+/* =========================================================================
+   S4 — Split: sticky hero left / scrolling content right
+   ========================================================================= */
+.s4 { display: grid; grid-template-columns: 38% 1fr; min-height: 620px; }
+.s4 .hero {
+  padding: 42px 34px;
+  background:
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--pal-accent) 22%, transparent), transparent 60%),
+    var(--pal-surface-tint);
+  border-right: 1px solid var(--pal-border);
+  display: flex; flex-direction: column; gap: 18px;
+}
+.s4 .hero .logo {
+  width: 56px; height: 56px; border-radius: 12px;
+  background: var(--pal-accent); color: var(--pal-accent-fg);
+  display: grid; place-content: center;
+  font: italic 700 30px/1 Georgia, serif;
+}
+.s4 .hero h1 { margin: 0; font-size: 30px; letter-spacing: -0.02em; line-height: 1.15; color: var(--pal-fg); }
+.s4 .hero p { margin: 0; color: var(--pal-fg-muted); font-size: 14px; max-width: 32ch; }
+.s4 .hero .latest {
+  margin-top: 8px; border-top: 1px solid var(--pal-border); padding-top: 14px;
+  font-size: 12px;
+}
+.s4 .hero .latest h4 {
+  margin: 0 0 8px; font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--pal-fg-faint);
+}
+.s4 .hero .latest ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.s4 .hero .latest li {
+  display: flex; gap: 8px; align-items: baseline;
+  color: var(--pal-fg); font-size: 13px;
+}
+.s4 .hero .latest li .d { font: 500 11px ui-monospace, Menlo, monospace; color: var(--pal-fg-faint); min-width: 58px; }
+.s4 .content {
+  padding: 32px 32px;
+  overflow-y: auto;
+}
+.s4 .content h2 { margin: 0 0 16px; font-size: 16px; letter-spacing: -0.01em; color: var(--pal-fg-muted); font-weight: 600; }
+
+/* =========================================================================
+   S5 — Magazine cover (full-bleed fold + scroll)
+   ========================================================================= */
+.s5 { display: flex; flex-direction: column; min-height: 620px; }
+.s5 .fold {
+  position: relative;
+  padding: 56px 48px 64px;
+  background:
+    radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--pal-accent) 30%, transparent), transparent 55%),
+    linear-gradient(135deg, var(--pal-surface-tint), var(--pal-bg));
+  border-bottom: 1px solid var(--pal-border);
+  overflow: hidden;
+  min-height: 360px;
+  display: grid; grid-template-columns: 1fr 380px; gap: 40px; align-items: center;
+}
+.s5 .fold::after {
+  content: "ATLAS"; position: absolute; right: -40px; bottom: -80px;
+  font: italic 900 260px/0.85 Georgia, serif;
+  color: color-mix(in srgb, var(--pal-accent) 10%, transparent);
+  letter-spacing: -0.06em; pointer-events: none; user-select: none;
+}
+.s5 .fold .brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-bottom: 18px;
+  font: 600 11px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--pal-fg-muted);
+}
+.s5 .fold .brand .mark {
+  width: 22px; height: 22px; border-radius: 5px;
+  background: var(--pal-accent); color: var(--pal-accent-fg);
+  display: grid; place-content: center;
+  font: italic 700 12px/1 Georgia, serif;
+}
+.s5 .fold h1 { margin: 0 0 10px; font-size: 44px; line-height: 1.05; letter-spacing: -0.03em; color: var(--pal-fg); }
+.s5 .fold .tag { color: var(--pal-fg-muted); font-size: 15px; max-width: 40ch; }
+.s5 .fold .cta {
+  margin-top: 22px; display: flex; gap: 10px;
+}
+.s5 .fold .cta a {
+  padding: 8px 14px; border-radius: 6px;
+  font-size: 13px; font-weight: 500;
+}
+.s5 .fold .cta a.primary { background: var(--pal-accent); color: var(--pal-accent-fg); }
+.s5 .fold .cta a.ghost   { border: 1px solid var(--pal-border); color: var(--pal-fg-muted); }
+.s5 .fold .featured { position: relative; z-index: 1; }
+.s5 .fold .featured .card {
+  background: var(--pal-surface); border-radius: 10px; overflow: hidden;
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,.2), 0 0 0 1px var(--pal-border);
+}
+.s5 .fold .featured .card .cover { aspect-ratio: 3/2; }
+.s5 .fold .featured .card .body { padding: 14px 16px 16px; }
+.s5 .fold .featured .card h3 { margin: 0 0 4px; font-size: 16px; color: var(--pal-fg); }
+.s5 .fold .featured .card p { margin: 0; font-size: 12.5px; color: var(--pal-fg-muted); }
+.s5 .fold .featured .tag-above {
+  font: 600 10.5px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--pal-accent);
+  margin-bottom: 10px; display: inline-block;
+}
+.s5 .content { padding: 36px 48px 28px; }
+.s5 .content h2 {
+  margin: 0 0 16px; font-size: 16px;
+  color: var(--pal-fg-muted); font-weight: 600;
+  display: flex; align-items: center; gap: 10px;
+}
+.s5 .content h2::after {
+  content: ""; flex: 1; height: 1px; background: var(--pal-border);
+}
+
+/* =========================================================================
+   S6 — Terminal frame (identity theme for Scout power users)
+   ========================================================================= */
+.s6 {
+  background: var(--pal-surface);
+  color: var(--pal-fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  min-height: 620px;
+  display: flex; flex-direction: column;
+}
+.s6 .tabs {
+  display: flex; align-items: flex-end; gap: 2px;
+  padding: 6px 6px 0;
+  background: var(--pal-surface-tint);
+  border-bottom: 1px solid var(--pal-border);
+}
+.s6 .tab {
+  padding: 6px 14px; font-size: 12px;
+  background: var(--pal-surface); color: var(--pal-fg);
+  border: 1px solid var(--pal-border); border-bottom-color: transparent;
+  border-radius: 5px 5px 0 0;
+  margin-bottom: -1px;
+}
+.s6 .tab.bg { background: transparent; color: var(--pal-fg-faint); border-color: transparent; }
+.s6 .body {
+  flex: 1; padding: 16px 22px 10px;
+  background: var(--pal-bg);
+  overflow: hidden;
+}
+.s6 .prompt { color: var(--pal-accent); }
+.s6 .prompt .path { color: var(--pal-fg-muted); }
+.s6 .prompt::before { content: "▸ "; color: var(--pal-accent); }
+.s6 .listing {
+  display: grid;
+  grid-template-columns: 110px 100px 1fr 110px;
+  gap: 4px 18px;
+  margin: 12px 0 14px;
+  font-size: 12.5px;
+}
+.s6 .listing .header {
+  color: var(--pal-fg-faint);
+  border-bottom: 1px dashed var(--pal-border);
+  padding-bottom: 6px; margin-bottom: 2px;
+  text-transform: uppercase; letter-spacing: 0.08em; font-size: 10.5px;
+}
+.s6 .listing .cell { color: var(--pal-fg); padding: 4px 0; }
+.s6 .listing .date { color: var(--pal-fg-muted); }
+.s6 .listing .depth-cell { color: var(--pal-accent); }
+.s6 .listing .cell.title { color: var(--pal-fg); }
+.s6 .statusbar {
+  padding: 6px 16px;
+  background: var(--pal-accent); color: var(--pal-accent-fg);
+  font-size: 11px; font-weight: 600;
+  display: flex; justify-content: space-between;
+  letter-spacing: 0.04em;
+}
+
+/* =========================================================================
+   Footer notes
+   ========================================================================= */
+.end-notes {
+  margin-top: 40px;
+  padding: 20px 0;
+  border-top: 1px solid #d8d6d0;
+  font-size: 13px;
+  color: #444;
+  max-width: 78ch;
+}
+.end-notes p { margin: 0 0 10px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .s3 .main { grid-template-columns: 1fr; }
+  .s3 .sidenav { display: none; }
+  .s4 { grid-template-columns: 1fr; }
+  .s4 .hero { border-right: none; border-bottom: 1px solid var(--pal-border); }
+  .s5 .fold { grid-template-columns: 1fr; padding: 36px 28px; }
+  .vp-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .vp-grid { grid-template-columns: 1fr; }
+  .s6 .listing { grid-template-columns: 1fr; gap: 0; }
+  .s6 .listing .header { display: none; }
+}
+</style>
+</head>
+<body data-palette="rust">
+
+<div class="page">
+
+  <header>
+    <h1>Atlas — page skeletons &amp; palettes</h1>
+    <p>Six page shells (hero+footer, top bar+footer, sidenav, split hero, magazine, terminal) × six palettes. Click any palette below — every skeleton recolors. Cards inside are simplified V1 so the skeleton chrome stays the focus.</p>
+  </header>
+
+  <div class="picker" role="toolbar" aria-label="palette picker">
+    <span class="label">Palette</span>
+    <button data-pal="rust" class="active">
+      <span class="swatch"><span style="background:#faf9f6"></span><span style="background:#c2410c"></span><span style="background:#1a1a1a"></span></span>
+      Warm rust
+    </button>
+    <button data-pal="paper">
+      <span class="swatch"><span style="background:#fbf7ea"></span><span style="background:#a84a07"></span><span style="background:#2a1e12"></span></span>
+      Paper &amp; ink
+    </button>
+    <button data-pal="cartography">
+      <span class="swatch"><span style="background:#f0ebe0"></span><span style="background:#4a6b3a"></span><span style="background:#1a2e1f"></span></span>
+      Cartography
+    </button>
+    <button data-pal="midnight">
+      <span class="swatch"><span style="background:#0f1013"></span><span style="background:#f59e0b"></span><span style="background:#f0ede6"></span></span>
+      Midnight
+    </button>
+    <button data-pal="minimal">
+      <span class="swatch"><span style="background:#ffffff"></span><span style="background:#2563eb"></span><span style="background:#0a0a0a"></span></span>
+      Minimal
+    </button>
+    <button data-pal="fieldnotes">
+      <span class="swatch"><span style="background:#ede6cf"></span><span style="background:#b54708"></span><span style="background:#3d2914"></span></span>
+      Field notes
+    </button>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- S1 — Hero + footer (Atlas current shape)                           -->
+  <!-- ================================================================= -->
+  <section class="skel" id="s1">
+    <header>
+      <h2>S1 · Hero + footer <span class="tag">skeleton</span></h2>
+      <p class="note">Atlas's current shape. Big centered logo, title, tagline. Filter bar beneath. Grid fills the rest. Thin footer. Strong identity, a bit wasteful of first-fold space once the reader already knows the site.</p>
+    </header>
+    <div class="frame">
+      <div class="frame-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="url"><span class="scheme">https://</span>laoujin.github.io/Atlas/</div>
+      </div>
+      <div class="viewport">
+        <div class="s1">
+          <div class="hero">
+            <div class="logo">A</div>
+            <h1>Atlas</h1>
+            <p>Research notes published by Scout.</p>
+          </div>
+          <div class="filter">
+            <span class="vp-chip solid">All · 6</span>
+            <span class="vp-chip">ai · 2</span>
+            <span class="vp-chip">food · 1</span>
+            <span class="vp-chip">hardware · 1</span>
+            <span class="vp-chip">web · 1</span>
+            <span class="vp-chip">mcp · 1</span>
+          </div>
+          <div class="content">
+            <div class="vp-grid">
+              <article class="mini"><div class="cover" data-mark="SSG" style="--h:210"></div><div class="body"><span class="vp-depth">Standard</span><h4>Static site generators in 2026</h4><p class="sub">Astro dominates, Hugo holds the speed crown.</p><div class="chips"><span class="vp-chip">web</span><span class="vp-chip">tooling</span></div><div class="meta">2026-04-18 · 18c · 4m</div></div></article>
+              <article class="mini"><div class="cover" data-mark="GHT" style="--h:350"></div><div class="body"><span class="vp-depth">Standard</span><h4>Romantic restaurants in Ghent</h4><p class="sub">Six spots, ranked by atmosphere.</p><div class="chips"><span class="vp-chip">food</span><span class="vp-chip">ghent</span></div><div class="meta">2026-04-15 · 23c · 6m</div></div></article>
+              <article class="mini"><div class="cover" data-mark="RA" style="--h:270"></div><div class="body"><span class="vp-depth">Deep</span><h4>Research agents in 2026</h4><p class="sub">Perplexity and GPT Researcher lead.</p><div class="chips"><span class="vp-chip">ai</span><span class="vp-chip">agents</span></div><div class="meta">2026-04-12 · 42c · 12m</div></div></article>
+            </div>
+          </div>
+          <div class="footer">
+            <span>Atlas · built by Scout</span>
+            <span>github.com/Laoujin/Atlas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================= -->
+  <!-- S2 — Top bar + footer                                              -->
+  <!-- ================================================================= -->
+  <section class="skel" id="s2">
+    <header>
+      <h2>S2 · Top bar + footer <span class="tag">skeleton</span></h2>
+      <p class="note">Compact sticky top bar (logo · nav · search). Content takes the whole width. Section titles have a self-drawing rule. Web-app feel; less identity, more throughput. Best when the site has many entries and readers return often.</p>
+    </header>
+    <div class="frame">
+      <div class="frame-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="url"><span class="scheme">https://</span>laoujin.github.io/Atlas/</div>
+      </div>
+      <div class="viewport">
+        <div class="s2">
+          <div class="topbar">
+            <div class="brand"><div class="mark">A</div> Atlas</div>
+            <div class="links"><a>Latest</a><a>Tags</a><a>About</a></div>
+            <div class="spacer"></div>
+            <div class="search">Search research…</div>
+          </div>
+          <div class="content">
+            <h2>Recent</h2>
+            <div class="vp-grid">
+              <article class="mini"><div class="cover" data-mark="SSG" style="--h:210"></div><div class="body"><span class="vp-depth">Standard</span><h4>Static site generators in 2026</h4><p class="sub">Astro dominates.</p><div class="chips"><span class="vp-chip">web</span><span class="vp-chip">tooling</span></div><div class="meta">2026-04-18 · 18c · 4m</div></div></article>
+              <article class="mini"><div class="cover" data-mark="GHT" style="--h:350"></div><div class="body"><span class="vp-depth">Standard</span><h4>Romantic restaurants in Ghent</h4><p class="sub">Six spots.</p><div class="chips"><span class="vp-chip">food</span><span class="vp-chip">ghent</span></div><div class="meta">2026-04-15 · 23c · 6m</div></div></article>
+              <article class="mini"><div class="cover" data-mark="RA" style="--h:270"></div><div class="body"><span class="vp-depth">Deep</span><h4>Research agents in 2026</h4><p class="sub">Perplexity and GPT Researcher.</p><div class="chips"><span class="vp-chip">ai</span><span class="vp-chip">agents</span></div><div class="meta">2026-04-12 · 42c · 12m</div></div></article>
+              <article class="mini"><div class="cover" data-mark="NAS" style="--h:150"></div><div class="body"><span class="vp-depth">Deep</span><h4>Replacing Synology</h4><p class="sub">AVX2 mini-PCs.</p><div class="chips"><span class="vp-chip">hardware</span></div><div class="meta">2026-04-08 · 35c · 9m</div></div></article>
+              <article class="mini"><div class="cover" data-mark="GFT" style="--h:30"></div><div class="body"><span class="vp-depth">CEO</span><h4>Unique birthday gift ideas</h4><p class="sub">Twelve unusual options.</p><div class="chips"><span class="vp-chip">personal</span></div><div class="meta">2026-04-02 · 8c · 2m</div></div></article>
+              <article class="mini"><div class="cover" data-mark="MCP" style="--h:190"></div><div class="body"><span class="vp-depth">Standard</span><h4>Self-hosted MCP catalogue</h4><p class="sub">MCP inventory.</p><div class="chips"><span class="vp-chip">mcp</span><span class="vp-chip">ai</span></div><div class="meta">2026-03-28 · 19c · 5m</div></div></article>
+            </div>
+          </div>
+          <div class="footer">
+            <span>Atlas</span>
+            <span>built by Scout · github.com/Laoujin/Atlas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================= -->
+  <!-- S3 — Top bar + left sidenav                                        -->
+  <!-- ================================================================= -->
+  <section class="skel" id="s3">
+    <header>
+      <h2>S3 · Top bar + left sidenav + content <span class="tag">skeleton</span></h2>
+      <p class="note">Persistent left nav with tag + depth filters. Top bar for brand and global links. Docs-site / dashboard vibe — best once you have many entries and filtering is the primary action, not just browsing.</p>
+    </header>
+    <div class="frame">
+      <div class="frame-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="url"><span class="scheme">https://</span>laoujin.github.io/Atlas/</div>
+      </div>
+      <div class="viewport">
+        <div class="s3">
+          <div class="topbar">
+            <div class="brand"><div class="mark">A</div> Atlas</div>
+            <div class="spacer"></div>
+            <a>About</a>
+            <a>Scout ↗</a>
+          </div>
+          <div class="main">
+            <aside class="sidenav">
+              <h4>Filter</h4>
+              <ul>
+                <li class="active">All <span class="c">6</span></li>
+                <li>Latest <span class="c">5</span></li>
+                <li>Unread <span class="c">—</span></li>
+              </ul>
+              <h4>Depth</h4>
+              <ul>
+                <li>CEO <span class="c">1</span></li>
+                <li>Standard <span class="c">3</span></li>
+                <li>Deep <span class="c">2</span></li>
+              </ul>
+              <h4>Tags</h4>
+              <ul>
+                <li>ai <span class="c">2</span></li>
+                <li>food <span class="c">1</span></li>
+                <li>hardware <span class="c">1</span></li>
+                <li>mcp <span class="c">1</span></li>
+                <li>personal <span class="c">1</span></li>
+                <li>web <span class="c">1</span></li>
+              </ul>
+            </aside>
+            <div class="content">
+              <div class="vp-grid" style="grid-template-columns: repeat(2,1fr);">
+                <article class="mini"><div class="cover" data-mark="SSG" style="--h:210"></div><div class="body"><span class="vp-depth">Standard</span><h4>Static site generators in 2026</h4><p class="sub">Astro dominates, Hugo holds the speed crown.</p><div class="chips"><span class="vp-chip">web</span><span class="vp-chip">tooling</span></div><div class="meta">2026-04-18 · 18c · 4m</div></div></article>
+                <article class="mini"><div class="cover" data-mark="GHT" style="--h:350"></div><div class="body"><span class="vp-depth">Standard</span><h4>Romantic restaurants in Ghent</h4><p class="sub">Six spots, ranked by atmosphere.</p><div class="chips"><span class="vp-chip">food</span><span class="vp-chip">ghent</span></div><div class="meta">2026-04-15 · 23c · 6m</div></div></article>
+                <article class="mini"><div class="cover" data-mark="RA" style="--h:270"></div><div class="body"><span class="vp-depth">Deep</span><h4>Research agents in 2026</h4><p class="sub">Perplexity and GPT Researcher lead.</p><div class="chips"><span class="vp-chip">ai</span><span class="vp-chip">agents</span></div><div class="meta">2026-04-12 · 42c · 12m</div></div></article>
+                <article class="mini"><div class="cover" data-mark="NAS" style="--h:150"></div><div class="body"><span class="vp-depth">Deep</span><h4>Replacing Synology</h4><p class="sub">AVX2 mini-PCs under €500.</p><div class="chips"><span class="vp-chip">hardware</span><span class="vp-chip">homelab</span></div><div class="meta">2026-04-08 · 35c · 9m</div></div></article>
+              </div>
+            </div>
+          </div>
+          <div class="footer">Atlas · 6 entries · built by Scout</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================= -->
+  <!-- S4 — Split hero                                                    -->
+  <!-- ================================================================= -->
+  <section class="skel" id="s4">
+    <header>
+      <h2>S4 · Split hero <span class="tag">skeleton</span></h2>
+      <p class="note">Sticky 38%-wide hero column on the left holds the identity and a "latest five" list. Right column scrolls with the full grid. Editorial feel; reads like a Stripe-docs or personal-portfolio landing. Works nicely when branding matters equally alongside content.</p>
+    </header>
+    <div class="frame">
+      <div class="frame-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="url"><span class="scheme">https://</span>laoujin.github.io/Atlas/</div>
+      </div>
+      <div class="viewport">
+        <div class="s4">
+          <div class="hero">
+            <div class="logo">A</div>
+            <h1>Atlas</h1>
+            <p>Personal research notes. Cited on every line. Published automatically by Scout whenever a new topic lands in my inbox.</p>
+            <div class="latest">
+              <h4>Latest</h4>
+              <ul>
+                <li><span class="d">Apr 18</span> Static site generators in 2026</li>
+                <li><span class="d">Apr 15</span> Romantic restaurants in Ghent</li>
+                <li><span class="d">Apr 12</span> Research agents in 2026</li>
+                <li><span class="d">Apr 08</span> Replacing Synology</li>
+                <li><span class="d">Apr 02</span> Unique birthday gifts</li>
+              </ul>
+            </div>
+          </div>
+          <div class="content">
+            <h2>All research</h2>
+            <div class="vp-grid" style="grid-template-columns: repeat(2,1fr);">
+              <article class="mini"><div class="cover" data-mark="SSG" style="--h:210"></div><div class="body"><span class="vp-depth">Standard</span><h4>Static site generators in 2026</h4><div class="chips"><span class="vp-chip">web</span></div><div class="meta">2026-04-18 · 18c</div></div></article>
+              <article class="mini"><div class="cover" data-mark="GHT" style="--h:350"></div><div class="body"><span class="vp-depth">Standard</span><h4>Romantic restaurants in Ghent</h4><div class="chips"><span class="vp-chip">food</span></div><div class="meta">2026-04-15 · 23c</div></div></article>
+              <article class="mini"><div class="cover" data-mark="RA" style="--h:270"></div><div class="body"><span class="vp-depth">Deep</span><h4>Research agents in 2026</h4><div class="chips"><span class="vp-chip">ai</span></div><div class="meta">2026-04-12 · 42c</div></div></article>
+              <article class="mini"><div class="cover" data-mark="NAS" style="--h:150"></div><div class="body"><span class="vp-depth">Deep</span><h4>Replacing Synology</h4><div class="chips"><span class="vp-chip">hardware</span></div><div class="meta">2026-04-08 · 35c</div></div></article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================= -->
+  <!-- S5 — Magazine cover                                                -->
+  <!-- ================================================================= -->
+  <section class="skel" id="s5">
+    <header>
+      <h2>S5 · Magazine cover <span class="tag">skeleton</span></h2>
+      <p class="note">First-fold is a hero spread: identity on the left, the newest research card featured on the right, giant watermark behind. Scroll for the full grid. Expensive-looking; works when the feed is slow (≤1 new entry a week) so the featured piece actually merits the stage.</p>
+    </header>
+    <div class="frame">
+      <div class="frame-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="url"><span class="scheme">https://</span>laoujin.github.io/Atlas/</div>
+      </div>
+      <div class="viewport">
+        <div class="s5">
+          <div class="fold">
+            <div>
+              <div class="brand"><div class="mark">A</div> Atlas · Issue 07</div>
+              <h1>Cited research, automated.</h1>
+              <p class="tag">Every claim carries its URL. Every entry is generated by Scout from a one-line prompt.</p>
+              <div class="cta">
+                <a class="primary">Browse all</a>
+                <a class="ghost">About Scout ↗</a>
+              </div>
+            </div>
+            <div class="featured">
+              <span class="tag-above">Latest · Apr 18</span>
+              <article class="card">
+                <div class="cover mini-cover" data-mark="SSG" style="--h:210;"></div>
+                <div class="body">
+                  <h3>Static site generators in 2026</h3>
+                  <p>Astro dominates, Hugo holds the speed crown, Next.js eats both on brand.</p>
+                </div>
+              </article>
+            </div>
+          </div>
+          <div class="content">
+            <h2>More research</h2>
+            <div class="vp-grid">
+              <article class="mini"><div class="cover" data-mark="GHT" style="--h:350"></div><div class="body"><span class="vp-depth">Standard</span><h4>Romantic restaurants in Ghent</h4><div class="chips"><span class="vp-chip">food</span></div><div class="meta">2026-04-15 · 23c</div></div></article>
+              <article class="mini"><div class="cover" data-mark="RA" style="--h:270"></div><div class="body"><span class="vp-depth">Deep</span><h4>Research agents in 2026</h4><div class="chips"><span class="vp-chip">ai</span></div><div class="meta">2026-04-12 · 42c</div></div></article>
+              <article class="mini"><div class="cover" data-mark="NAS" style="--h:150"></div><div class="body"><span class="vp-depth">Deep</span><h4>Replacing Synology</h4><div class="chips"><span class="vp-chip">hardware</span></div><div class="meta">2026-04-08 · 35c</div></div></article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .s5 .featured .card .cover { aspect-ratio: 3/2; position: relative; background: radial-gradient(circle at 20% 30%, hsla(210, 85%, 70%, .9), transparent 55%), radial-gradient(circle at 85% 70%, hsla(260, 80%, 55%, .85), transparent 60%), linear-gradient(135deg, hsl(210 65% 40%), hsl(240 55% 25%)); }
+    .s5 .featured .card .cover::after { content: attr(data-mark); position: absolute; inset: 0; display: grid; place-content: center; color: rgba(255,255,255,.92); font: italic 700 50px/1 Georgia, serif; letter-spacing: -0.04em; text-shadow: 0 2px 12px rgba(0,0,0,.3); }
+  </style>
+
+  <!-- ================================================================= -->
+  <!-- S6 — Terminal frame                                                -->
+  <!-- ================================================================= -->
+  <section class="skel" id="s6">
+    <header>
+      <h2>S6 · Terminal frame <span class="tag">skeleton</span></h2>
+      <p class="note">The whole index is a terminal. Tabs up top, status bar on the bottom, listing in the middle. Maximum identity: "Scout runs in a Docker container on an old NAS, so of course its index is a terminal". Niche. Pair with V4 cards or use as an alternative theme toggle.</p>
+    </header>
+    <div class="frame">
+      <div class="frame-bar">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="url"><span class="scheme">https://</span>laoujin.github.io/Atlas/</div>
+      </div>
+      <div class="viewport">
+        <div class="s6">
+          <div class="tabs">
+            <div class="tab">~/atlas</div>
+            <div class="tab bg">~/atlas/research/2026-04-12-research-agents</div>
+            <div class="tab bg">+</div>
+          </div>
+          <div class="body">
+            <p class="prompt"><span class="path">atlas</span> ls research/ --sort=date</p>
+            <div class="listing">
+              <span class="header">date</span>
+              <span class="header">depth</span>
+              <span class="header">title</span>
+              <span class="header">cit / read</span>
+
+              <span class="cell date">2026-04-18</span><span class="cell depth-cell">standard</span><span class="cell title">static-site-generators</span><span class="cell">18 · 4m</span>
+              <span class="cell date">2026-04-15</span><span class="cell depth-cell">standard</span><span class="cell title">romantic-restaurants-ghent</span><span class="cell">23 · 6m</span>
+              <span class="cell date">2026-04-12</span><span class="cell depth-cell">deep</span><span class="cell title">research-agents-2026</span><span class="cell">42 · 12m</span>
+              <span class="cell date">2026-04-08</span><span class="cell depth-cell">deep</span><span class="cell title">replacing-synology</span><span class="cell">35 · 9m</span>
+              <span class="cell date">2026-04-02</span><span class="cell depth-cell">standard</span><span class="cell title">unique-birthday-gifts</span><span class="cell">8 · 2m</span>
+              <span class="cell date">2026-03-28</span><span class="cell depth-cell">standard</span><span class="cell title">self-hosted-mcp-catalogue</span><span class="cell">19 · 5m</span>
+            </div>
+            <p class="prompt"><span class="path">atlas</span> tag ai</p>
+            <div style="color: var(--pal-fg-muted); margin-left: 14px; font-size: 12.5px;">
+              → 2 entries: research-agents-2026, self-hosted-mcp-catalogue
+            </div>
+            <p class="prompt" style="margin-top: 10px;"><span class="path">atlas</span> <span style="color: var(--pal-fg); border-right: 2px solid var(--pal-accent); animation: none;">_</span></p>
+          </div>
+          <div class="statusbar">
+            <span>atlas · 6 entries · last run 2026-04-18 14:32</span>
+            <span>scout/v0.3 · 1.2 MB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="end-notes">
+    <p><strong>Pairing notes.</strong> Skeletons and card variants are orthogonal — any card works inside any skeleton. The combinations I'd actually consider: S1+V1 (Atlas today, polished), S2+V1+V7-toggle (high-throughput), S3+V7 (docs-like, filter-heavy), S5+V3-featured+V1-below (editorial), S6+V4 (full terminal identity).</p>
+    <p><strong>Palette notes.</strong> "Warm rust" stays closest to the current logo's temperature. "Paper &amp; ink" leans archival (good if cover art is mostly muted/desaturated). "Cartography" is the most on-brand for "Atlas" but narrows mood. "Midnight" is the only dark option — commit fully or skip. "Minimal" is the neutral doc-site pick. "Field notes" reads as "scout's lab notebook" — specific but charming.</p>
+    <p><strong>What to do next.</strong> Pick: one skeleton + one palette + (from the <a href="atlas-card-mockups.html">cards file</a>) one card variant. Tell me the triplet and I'll wire it into Atlas's Jekyll layout.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  const buttons = document.querySelectorAll('.picker [data-pal]');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.body.dataset.palette = btn.dataset.pal;
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
