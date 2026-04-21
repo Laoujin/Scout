@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scout — research on demand, cited on every line</title>
+<meta name="description" content="Trigger a GitHub Action, get a cited research artifact published to your personal GitHub Pages site. Runs on your NAS in Docker.">
+<style>
+/* =========================================================================
+   Scout marketing site — mockup
+   One self-contained page. Warm-rust palette.
+   Sections: hero · what · why · examples · how it works · install · picker
+   ========================================================================= */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 16px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  color: var(--fg);
+  background: var(--bg);
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; }
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+:root {
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --surface-tint: #f5f3ee;
+  --fg: #1a1a1a;
+  --fg-muted: #5c5c5c;
+  --fg-faint: #8a8a8a;
+  --border: #e8e6e0;
+  --accent: #c2410c;
+  --accent-soft: #fef3ec;
+  --accent-dark: #9a3309;
+  --ok: #059669;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+/* ---------- Nav ---------- */
+.nav {
+  position: sticky; top: 0; z-index: 30;
+  background: rgba(250,249,246,.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1120px; margin: 0 auto;
+  padding: 10px 24px;
+  display: flex; align-items: center; gap: 20px;
+}
+.nav .brand {
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 700; letter-spacing: -0.01em;
+}
+.nav .brand .mark {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: var(--accent); color: #fff;
+  display: grid; place-content: center;
+  font: italic 700 16px/1 Georgia, serif;
+}
+.nav .links { display: flex; gap: 20px; margin-left: auto; font-size: 14px; }
+.nav .links a { color: var(--fg-muted); }
+.nav .links a:hover { color: var(--fg); }
+.nav .links a.cta {
+  background: var(--fg); color: #fff;
+  padding: 6px 12px; border-radius: 6px;
+}
+.nav .links a.cta:hover { background: var(--accent); color: #fff; }
+
+/* ---------- Layout ---------- */
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+section { padding: 96px 0; }
+section.tight { padding: 64px 0; }
+section .kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 600 11px/1 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+section .kicker::before {
+  content: ""; width: 18px; height: 1px; background: var(--accent);
+}
+section > .container > h2 {
+  font-size: 34px; letter-spacing: -0.02em; margin: 0 0 12px;
+  max-width: 22ch;
+}
+section > .container > p.lede {
+  font-size: 17px; color: var(--fg-muted); margin: 0 0 40px; max-width: 60ch;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative; padding: 80px 0 60px; overflow: hidden;
+}
+.hero::before {
+  content: ""; position: absolute; inset: -20% -20% auto auto;
+  width: 80%; height: 800px;
+  background:
+    radial-gradient(ellipse at 70% 30%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 55%);
+  pointer-events: none;
+}
+.hero-grid {
+  display: grid; grid-template-columns: 1.3fr 1fr;
+  gap: 64px; align-items: center; position: relative;
+}
+.hero h1 {
+  font-size: 56px; line-height: 1.05; letter-spacing: -0.03em;
+  margin: 0 0 20px;
+}
+.hero h1 .accent { color: var(--accent); font-style: italic; font-family: Georgia, serif; font-weight: 500; }
+.hero .tagline {
+  font-size: 20px; color: var(--fg-muted); margin: 0 0 28px; max-width: 48ch;
+}
+.hero .meta-row {
+  display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 32px;
+  font: 500 12px ui-monospace, Menlo, monospace;
+  color: var(--fg-faint);
+}
+.hero .meta-row span::before { content: "· "; color: var(--accent); margin-right: 4px; }
+.hero .ctas { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 20px; border-radius: 8px;
+  font-weight: 500; font-size: 15px;
+  border: 1px solid transparent;
+  transition: transform .12s ease, background .15s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); }
+.btn-ghost { background: transparent; color: var(--fg); border-color: var(--border); }
+.btn-ghost:hover { border-color: var(--fg-muted); }
+.btn .arrow { transition: transform .15s ease; }
+.btn:hover .arrow { transform: translateX(3px); }
+
+/* Hero right — demo artifact preview */
+.hero-demo {
+  position: relative;
+  background: #0f1013;
+  color: #d6d3cc;
+  border-radius: 12px;
+  padding: 14px 18px 18px;
+  font: 13px ui-monospace, Menlo, monospace;
+  box-shadow: 0 20px 60px -20px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.08);
+  overflow: hidden;
+  transform: perspective(1200px) rotateY(-4deg) rotateX(2deg);
+}
+.hero-demo .bar { display: flex; gap: 6px; margin-bottom: 14px; }
+.hero-demo .bar i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+.hero-demo .bar i:nth-child(1) { background: #ec6058; }
+.hero-demo .bar i:nth-child(2) { background: #f4be4f; }
+.hero-demo .bar i:nth-child(3) { background: #61c454; }
+.hero-demo .prompt { color: var(--accent); }
+.hero-demo .prompt::before { content: "▸ "; }
+.hero-demo .log { color: #6e7079; margin: 4px 0 4px 14px; font-size: 12px; }
+.hero-demo .log .ok { color: #61c454; }
+.hero-demo .log .muted { color: #4a4d52; }
+.hero-demo .outcome {
+  margin-top: 10px; padding: 10px 12px;
+  background: #1a1c20; border-radius: 6px; border: 1px solid #26282c;
+  color: #f4efe6;
+}
+.hero-demo .outcome .t { font-weight: 600; color: #f4efe6; margin-bottom: 4px; }
+.hero-demo .outcome .u { color: #7cc4a0; font-size: 12px; }
+.hero-demo .cursor { display: inline-block; width: 8px; height: 14px; background: var(--accent); vertical-align: -2px; animation: blink 1.1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---------- What (two-column) ---------- */
+.what-grid {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 40px; align-items: center;
+}
+.what-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px 28px 24px;
+}
+.what-card .icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--accent-soft); color: var(--accent);
+  display: grid; place-content: center;
+  font: italic 700 22px/1 Georgia, serif;
+  margin-bottom: 14px;
+}
+.what-card h3 { margin: 0 0 6px; font-size: 22px; letter-spacing: -0.01em; }
+.what-card .role { font: 600 11px ui-monospace, Menlo, monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.what-card p { margin: 10px 0 0; color: var(--fg-muted); font-size: 15px; }
+.what-card ul { margin: 14px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--fg-muted); display: flex; flex-direction: column; gap: 5px; }
+.what-card ul li::before { content: "·"; color: var(--accent); margin-right: 6px; font-weight: 700; }
+
+.what-arrow {
+  width: 80px; text-align: center; color: var(--fg-faint);
+}
+.what-arrow svg { display: block; margin: 0 auto; }
+.what-arrow .label {
+  font: 600 10px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--fg-faint);
+  margin-top: 6px;
+}
+
+/* ---------- Why (pillars) ---------- */
+.pillars {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+}
+.pillar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 20px 20px;
+  position: relative;
+}
+.pillar .n {
+  position: absolute; top: 14px; right: 16px;
+  font: 600 11px ui-monospace, Menlo, monospace;
+  color: var(--fg-faint);
+}
+.pillar h4 { margin: 0 0 8px; font-size: 17px; letter-spacing: -0.01em; }
+.pillar p { margin: 0; color: var(--fg-muted); font-size: 14px; }
+.pillar .icon {
+  color: var(--accent); margin-bottom: 12px;
+}
+
+/* ---------- Examples ---------- */
+.examples-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+.example {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  transition: transform .15s ease, border-color .15s ease;
+  cursor: pointer;
+}
+.example:hover { transform: translateY(-2px); border-color: var(--accent); }
+.example .prompt-line {
+  display: flex; gap: 8px; align-items: flex-start;
+  font: 500 14px/1.5 ui-monospace, Menlo, monospace;
+  color: var(--fg);
+  margin-bottom: 12px;
+}
+.example .prompt-line::before { content: "▸"; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+.example .arrow { color: var(--fg-faint); margin: 0 6px; }
+.example .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.example .chip {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: 11px; color: var(--fg-muted);
+  border: 1px solid var(--border);
+}
+.example .chip::before { content: "#"; opacity: 0.5; }
+.example .chip.depth {
+  background: var(--accent-soft); color: var(--accent); border-color: transparent;
+}
+.example .chip.depth::before { content: ""; margin: 0; }
+
+.example-note {
+  margin-top: 24px; text-align: center;
+  font-size: 13px; color: var(--fg-faint);
+}
+.example-note::before { content: "— "; color: var(--accent); }
+
+/* ---------- How it works (diagram) ---------- */
+.how { background: var(--surface-tint); }
+.how-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 40px 24px;
+  overflow-x: auto;
+}
+.how-diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+
+.how-steps {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  margin-top: 30px;
+}
+.how-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+.how-step .n {
+  font: 600 11px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 6px;
+}
+.how-step h4 { margin: 0 0 6px; font-size: 16px; letter-spacing: -0.01em; }
+.how-step p { margin: 0; color: var(--fg-muted); font-size: 13.5px; }
+.how-step code { font-size: 12px; background: var(--surface-tint); padding: 1px 5px; border-radius: 3px; color: var(--accent); }
+
+/* ---------- Install ---------- */
+.install-steps {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  margin-bottom: 28px;
+}
+.install-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 22px 20px;
+  position: relative;
+}
+.install-step .num {
+  position: absolute; top: -14px; left: 22px;
+  width: 28px; height: 28px;
+  background: var(--accent); color: #fff;
+  border-radius: 50%;
+  display: grid; place-content: center;
+  font: 700 13px ui-monospace, Menlo, monospace;
+}
+.install-step h4 { margin: 12px 0 8px; font-size: 17px; letter-spacing: -0.01em; }
+.install-step p { margin: 0 0 12px; color: var(--fg-muted); font-size: 13.5px; }
+.install-step .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.install-step .sm-btn {
+  padding: 6px 10px; border-radius: 5px;
+  font: 500 12px/1 -apple-system, system-ui, sans-serif;
+  background: var(--surface-tint);
+  border: 1px solid var(--border);
+  color: var(--fg);
+}
+.install-step .sm-btn.primary { background: var(--fg); color: #fff; border-color: var(--fg); }
+.install-step .sm-btn:hover { border-color: var(--accent); color: var(--accent); }
+.install-step .sm-btn.primary:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.install-cmd {
+  background: #0f1013;
+  color: #d6d3cc;
+  border-radius: 10px;
+  padding: 18px 20px;
+  font: 13.5px/1.6 ui-monospace, Menlo, monospace;
+  position: relative;
+  overflow-x: auto;
+}
+.install-cmd .line { white-space: nowrap; }
+.install-cmd .comment { color: #6e7079; }
+.install-cmd .prompt { color: var(--accent); }
+.install-cmd .cmd { color: #f4efe6; }
+.install-cmd .flag { color: #7cc4a0; }
+.install-cmd .str { color: #e0c085; }
+.install-cmd .copy-btn {
+  position: absolute; top: 14px; right: 14px;
+  background: #1a1c20; color: #a8a59c;
+  border: 1px solid #2d3036; border-radius: 5px;
+  padding: 4px 10px; font-size: 11px;
+}
+.install-cmd .copy-btn:hover { color: #f4efe6; border-color: #4a4d52; }
+.install-cmd .copy-btn.ok { color: #61c454; border-color: #61c454; }
+
+/* ---------- Picker ---------- */
+.picker { background: var(--surface-tint); }
+.picker-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+  align-items: start;
+}
+.picker-controls h3 {
+  margin: 0 0 12px;
+  font: 600 12px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.picker-controls section { padding: 0; margin-bottom: 28px; }
+
+.swatches { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 11px 6px 7px;
+  font-size: 13px; color: var(--fg);
+  transition: border-color .15s ease, transform .12s ease;
+}
+.swatch-btn:hover { transform: translateY(-1px); border-color: var(--fg-muted); }
+.swatch-btn.active { border-color: var(--fg); box-shadow: 0 0 0 2px var(--fg) inset; }
+.swatch-btn .sw {
+  display: flex; border-radius: 4px; overflow: hidden; flex-shrink: 0;
+}
+.swatch-btn .sw i { display: block; width: 11px; height: 18px; }
+
+.layout-picks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.layout-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 10px 8px;
+  transition: border-color .15s ease, transform .12s ease;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.layout-btn:hover { transform: translateY(-1px); border-color: var(--fg-muted); }
+.layout-btn.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.layout-btn svg { display: block; }
+.layout-btn .n { font: 600 11px/1 ui-monospace, Menlo, monospace; color: var(--fg-muted); }
+
+.card-picks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.card-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 4px 6px;
+  font: 600 11px ui-monospace, Menlo, monospace;
+  color: var(--fg-muted);
+  transition: border-color .15s ease;
+  text-align: center;
+}
+.card-btn:hover { border-color: var(--fg-muted); color: var(--fg); }
+.card-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.card-btn .label { display: block; font-weight: 400; font-size: 10px; opacity: 0.8; margin-top: 2px; }
+
+/* Preview panel */
+.picker-preview {
+  position: sticky; top: 80px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 22px 22px;
+}
+.picker-preview h3 {
+  margin: 0 0 14px;
+  font: 600 12px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--fg-muted);
+}
+.preview-card {
+  background: var(--preview-surface, #fff);
+  color: var(--preview-fg, #1a1a1a);
+  border: 1px solid var(--preview-border, #e8e6e0);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.preview-cover {
+  aspect-ratio: 3/2;
+  background:
+    radial-gradient(circle at 20% 30%, hsla(210, 85%, 70%, .9), transparent 55%),
+    radial-gradient(circle at 85% 70%, hsla(260, 80%, 55%, .85), transparent 60%),
+    linear-gradient(135deg, hsl(210 65% 40%), hsl(240 55% 25%));
+  position: relative;
+}
+.preview-cover::after {
+  content: "SSG"; position: absolute; inset: 0;
+  display: grid; place-content: center;
+  color: rgba(255,255,255,.92);
+  font: italic 700 54px/1 Georgia, serif;
+  letter-spacing: -0.04em;
+  text-shadow: 0 2px 12px rgba(0,0,0,.3);
+}
+.preview-body { padding: 16px 18px 18px; }
+.preview-body .row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.preview-depth {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px; border-radius: 3px;
+  font: 700 10px/1.4 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--preview-accent-soft, #fef3ec);
+  color: var(--preview-accent, #c2410c);
+}
+.preview-depth::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.preview-fmt {
+  font: 600 10px/1 ui-monospace, Menlo, monospace;
+  padding: 2px 6px; border-radius: 3px;
+  background: var(--preview-accent-soft, #fef3ec);
+  color: var(--preview-accent, #c2410c);
+}
+.preview-body h4 { margin: 0 0 6px; font-size: 16px; letter-spacing: -0.01em; }
+.preview-body p { margin: 0 0 10px; color: var(--preview-fg-muted, #5c5c5c); font-size: 13px; }
+.preview-body .tags { display: flex; gap: 6px; margin-bottom: 10px; }
+.preview-body .tags span {
+  display: inline-block; padding: 1px 7px; border-radius: 999px;
+  font-size: 11px; color: var(--preview-fg-muted, #5c5c5c);
+  border: 1px solid var(--preview-border, #e8e6e0);
+}
+.preview-body .tags span::before { content: "#"; opacity: 0.5; }
+.preview-body .meta {
+  font: 500 11px ui-monospace, Menlo, monospace;
+  color: var(--preview-fg-faint, #8a8a8a);
+}
+
+.config-output {
+  margin-top: 18px;
+  background: #0f1013;
+  color: #d6d3cc;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font: 12.5px/1.55 ui-monospace, Menlo, monospace;
+  position: relative;
+}
+.config-output .key { color: #7cc4a0; }
+.config-output .str { color: #e0c085; }
+.config-output .copy {
+  position: absolute; top: 10px; right: 10px;
+  background: #1a1c20; border: 1px solid #2d3036; color: #a8a59c;
+  border-radius: 4px; padding: 3px 8px; font-size: 10.5px;
+}
+.config-output .copy:hover { color: #fff; border-color: #61c454; }
+.config-output .copy.ok { color: #61c454; border-color: #61c454; }
+.config-output + .config-output { margin-top: 10px; }
+.config-output h4 {
+  margin: 0 0 6px; font: 600 10px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #6e7079;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  background: var(--fg); color: #d6d3cc;
+  padding: 48px 0 40px;
+}
+.footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; }
+.footer .brand { font-weight: 700; letter-spacing: -0.01em; color: #fff; font-size: 18px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+.footer .brand .mark {
+  width: 28px; height: 28px; border-radius: 7px;
+  background: var(--accent); color: #fff;
+  display: grid; place-content: center;
+  font: italic 700 16px/1 Georgia, serif;
+}
+.footer p.tag { color: #8a8a80; font-size: 13px; margin: 0; max-width: 32ch; }
+.footer h5 {
+  margin: 0 0 10px; font: 600 11px ui-monospace, Menlo, monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: #6e7079;
+}
+.footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.footer ul a { color: #d6d3cc; font-size: 14px; }
+.footer ul a:hover { color: var(--accent); }
+.footer .btm {
+  margin-top: 40px; padding-top: 20px;
+  border-top: 1px solid #2d3036;
+  color: #6e7079; font-size: 12px;
+  display: flex; justify-content: space-between;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  section { padding: 60px 0; }
+  .hero { padding: 48px 0 32px; }
+  .hero h1 { font-size: 40px; }
+  .hero-grid { grid-template-columns: 1fr; gap: 32px; }
+  .hero-demo { transform: none; }
+  .what-grid { grid-template-columns: 1fr; }
+  .what-arrow { transform: rotate(90deg); }
+  .pillars { grid-template-columns: repeat(2, 1fr); }
+  .examples-grid { grid-template-columns: 1fr; }
+  .how-steps { grid-template-columns: 1fr; }
+  .install-steps { grid-template-columns: 1fr; }
+  .picker-grid { grid-template-columns: 1fr; }
+  .picker-preview { position: static; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .nav .links a:not(.cta) { display: none; }
+}
+@media (max-width: 600px) {
+  .pillars { grid-template-columns: 1fr; }
+  .card-picks { grid-template-columns: repeat(2, 1fr); }
+  .layout-picks { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 32px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="brand"><span class="mark">S</span> Scout</a>
+    <div class="links">
+      <a href="#what">What</a>
+      <a href="#how">How</a>
+      <a href="#install">Install</a>
+      <a href="#picker">Configure</a>
+      <a class="cta" href="https://github.com/Laoujin/Scout" target="_blank">GitHub ↗</a>
+    </div>
+  </div>
+</nav>
+
+<!-- =================================================================== -->
+<!-- HERO                                                                  -->
+<!-- =================================================================== -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <h1>Research on demand,<br><span class="accent">cited on every line.</span></h1>
+      <p class="tagline">Trigger a GitHub Action with a one-line prompt. Scout researches the web and publishes a fully-cited artifact to your own GitHub Pages site — no orphan reference dump, every claim linked inline.</p>
+      <div class="meta-row">
+        <span>Self-hosted</span>
+        <span>Runs on your NAS</span>
+        <span>Free to operate</span>
+        <span>Your data, your repo</span>
+      </div>
+      <div class="ctas">
+        <a href="#install" class="btn btn-primary">Install <span class="arrow">→</span></a>
+        <a href="https://laoujin.github.io/Atlas/" target="_blank" class="btn btn-ghost">See an example Atlas</a>
+      </div>
+    </div>
+    <div class="hero-demo" aria-hidden="true">
+      <div class="bar"><i></i><i></i><i></i></div>
+      <div class="log"><span class="muted">[14:32:00]</span> issue <span class="ok">#47</span> opened by @laoujin · label: standard</div>
+      <div class="log" style="margin-left: 14px;">→ "top 3 static site generators in 2026"</div>
+      <div class="prompt">scout run --topic="top 3 static site generators in 2026" --depth=standard</div>
+      <div class="log"><span class="muted">[14:32:01]</span> cloning atlas … <span class="ok">ok</span></div>
+      <div class="log"><span class="muted">[14:32:04]</span> WebSearch: 6 queries</div>
+      <div class="log"><span class="muted">[14:32:18]</span> WebFetch: 23 urls</div>
+      <div class="log"><span class="muted">[14:36:40]</span> drafting — 18 citations tracked</div>
+      <div class="log"><span class="muted">[14:37:12]</span> writing research/2026-04-18-static-site-generators/index.md</div>
+      <div class="log"><span class="muted">[14:37:14]</span> git push atlas … <span class="ok">ok</span></div>
+      <div class="log"><span class="muted">[14:37:15]</span> Pages rebuild triggered</div>
+      <div class="outcome">
+        <div class="t">Static site generators in 2026</div>
+        <div class="u">→ laoujin.github.io/Atlas/research/2026-04-18-static-site-generators/</div>
+      </div>
+      <div style="margin-top:10px;" class="prompt">_<span class="cursor"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- WHAT                                                                  -->
+<!-- =================================================================== -->
+<section id="what">
+  <div class="container">
+    <span class="kicker">Two repos, one flow</span>
+    <h2>Scout researches. Atlas publishes.</h2>
+    <p class="lede">You own both. One does the work, the other shows the result.</p>
+
+    <div class="what-grid">
+      <div class="what-card">
+        <div class="icon">S</div>
+        <div class="role">The researcher</div>
+        <h3>Scout</h3>
+        <p>A Docker runner on your NAS, a GitHub Action, and a Claude-Code-based skill that knows how to cite. Give it a topic, depth, and format.</p>
+        <ul>
+          <li>3 depths: <code>ceo</code>, <code>standard</code>, <code>deep</code></li>
+          <li>2 formats: <code>.md</code> or <code>.html</code></li>
+          <li>WebSearch + WebFetch + Playwright fallback</li>
+          <li>5–30 min per topic</li>
+        </ul>
+      </div>
+
+      <div class="what-arrow">
+        <svg width="60" height="28" viewBox="0 0 60 28">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <line x1="4" y1="14" x2="52" y2="14" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 4" marker-end="url(#ah)"/>
+        </svg>
+        <div class="label">git push</div>
+      </div>
+
+      <div class="what-card">
+        <div class="icon">A</div>
+        <div class="role">The shelf</div>
+        <h3>Atlas</h3>
+        <p>A Jekyll site, served by GitHub Pages. Every research result lands in <code>research/DATE-SLUG/</code> with frontmatter; the index auto-builds.</p>
+        <ul>
+          <li>Cards with cover art and tag filtering</li>
+          <li>Inline citations on every claim</li>
+          <li>Zero ops — GitHub rebuilds on push</li>
+          <li>Yours to fork and customize</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- WHY                                                                   -->
+<!-- =================================================================== -->
+<section id="why" style="background: var(--surface-tint);">
+  <div class="container">
+    <span class="kicker">Why Scout</span>
+    <h2>A research tool that doesn't lie.</h2>
+    <p class="lede">Four principles that fell out of using LLMs for real research work.</p>
+
+    <div class="pillars">
+      <div class="pillar">
+        <span class="n">01</span>
+        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.71"/></svg>
+        <h4>Cited per-line</h4>
+        <p>Every factual claim carries its source URL inline. No orphan "references" dump at the bottom. If a claim has no URL, it doesn't get written.</p>
+      </div>
+      <div class="pillar">
+        <span class="n">02</span>
+        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <h4>Your hardware</h4>
+        <p>Runs in Docker on any always-on Linux device with AVX2 — an old NAS, a mini-PC, a Raspberry Pi 5. No managed service, no vendor lock-in.</p>
+      </div>
+      <div class="pillar">
+        <span class="n">03</span>
+        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="7" y1="12" x2="21" y2="12"/><line x1="11" y1="18" x2="21" y2="18"/></svg>
+        <h4>Three depths</h4>
+        <p><code>ceo</code> for a one-page decision, <code>standard</code> for 2–4 pages with trade-offs, <code>deep</code> for every angle. You pick per-topic.</p>
+      </div>
+      <div class="pillar">
+        <span class="n">04</span>
+        <svg class="icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="m6 8 6-6 6 6"/><path d="m6 16 6 6 6-6"/></svg>
+        <h4>Yours to fork</h4>
+        <p>Every part of the pipeline is in two repos you own. Change the skill, the layout, the cards, the palette. Nothing phones home.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- EXAMPLES                                                              -->
+<!-- =================================================================== -->
+<section id="examples">
+  <div class="container">
+    <span class="kicker">Example prompts</span>
+    <h2>The kind of thing you throw at it.</h2>
+    <p class="lede">Real prompts from the TODO. A few clicks in GitHub and the artifact lands on your Atlas.</p>
+
+    <div class="examples-grid">
+      <div class="example">
+        <div class="prompt-line">Top 3 static site generators in 2026 <span class="arrow">→</span></div>
+        <div class="tags">
+          <span class="chip depth">Standard</span>
+          <span class="chip">web</span>
+          <span class="chip">tooling</span>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="prompt-line">Listing of romantic restaurants in Ghent <span class="arrow">→</span></div>
+        <div class="tags">
+          <span class="chip depth">Standard</span>
+          <span class="chip">food</span>
+          <span class="chip">ghent</span>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="prompt-line">Survey of research agents / deep-research tools in 2026 <span class="arrow">→</span></div>
+        <div class="tags">
+          <span class="chip depth">Deep</span>
+          <span class="chip">ai</span>
+          <span class="chip">agents</span>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="prompt-line">Always-on replacement for my Synology — AVX2, quiet, under €500 <span class="arrow">→</span></div>
+        <div class="tags">
+          <span class="chip depth">Deep</span>
+          <span class="chip">hardware</span>
+          <span class="chip">homelab</span>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="prompt-line">Unique birthday gift ideas — not flowers, not dinner <span class="arrow">→</span></div>
+        <div class="tags">
+          <span class="chip depth">CEO</span>
+          <span class="chip">personal</span>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="prompt-line">Self-hosted MCP servers worth running in production <span class="arrow">→</span></div>
+        <div class="tags">
+          <span class="chip depth">Standard</span>
+          <span class="chip">mcp</span>
+          <span class="chip">self-hosted</span>
+        </div>
+      </div>
+    </div>
+    <p class="example-note">Steering hints inside the topic are honored ("focus on r/homelab", "prioritise academic sources").</p>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- HOW IT WORKS                                                          -->
+<!-- =================================================================== -->
+<section id="how" class="how">
+  <div class="container">
+    <span class="kicker">How it works</span>
+    <h2>Six boxes, one arrow chain.</h2>
+    <p class="lede">You open a GitHub issue. The Action fires on your NAS. Scout researches. Atlas gets a push. Pages rebuilds. Done.</p>
+
+    <div class="how-diagram">
+      <svg width="1000" height="220" viewBox="0 0 1000 220" xmlns="http://www.w3.org/2000/svg" aria-label="Scout flow diagram">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#c2410c"/>
+          </marker>
+          <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#faf9f6"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Box 1: You -->
+        <g transform="translate(10, 60)">
+          <rect width="130" height="90" rx="10" fill="url(#cardGrad)" stroke="#e8e6e0"/>
+          <text x="65" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">01 · YOU</text>
+          <text x="65" y="52" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">open an</text>
+          <text x="65" y="70" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">issue</text>
+          <text x="65" y="85" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#8a8a8a">from anywhere</text>
+        </g>
+
+        <line x1="145" y1="105" x2="175" y2="105" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
+
+        <!-- Box 2: GH Action -->
+        <g transform="translate(180, 60)">
+          <rect width="140" height="90" rx="10" fill="url(#cardGrad)" stroke="#e8e6e0"/>
+          <text x="70" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">02 · TRIGGER</text>
+          <text x="70" y="52" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">GitHub Action</text>
+          <text x="70" y="70" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">fires on issue</text>
+          <text x="70" y="85" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#8a8a8a">research.yml</text>
+        </g>
+
+        <line x1="325" y1="105" x2="355" y2="105" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
+
+        <!-- Box 3: Scout runner -->
+        <g transform="translate(360, 40)">
+          <rect width="170" height="130" rx="10" fill="url(#cardGrad)" stroke="#c2410c" stroke-width="1.5"/>
+          <text x="85" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">03 · SCOUT</text>
+          <text x="85" y="50" text-anchor="middle" font-family="system-ui" font-size="14" fill="#1a1a1a" font-weight="700">Docker runner</text>
+          <text x="85" y="68" text-anchor="middle" font-family="system-ui" font-size="12" fill="#5c5c5c">on your NAS</text>
+          <line x1="20" y1="82" x2="150" y2="82" stroke="#e8e6e0"/>
+          <text x="85" y="100" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#5c5c5c">Claude Code +</text>
+          <text x="85" y="116" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="11" fill="#5c5c5c">scout SKILL</text>
+        </g>
+
+        <!-- Branch down to web sources -->
+        <path d="M 445 175 L 445 195 Q 445 200 450 200 L 540 200 Q 545 200 545 195 L 545 175" stroke="#c2410c" stroke-width="1.4" fill="none" stroke-dasharray="3 3"/>
+        <g transform="translate(445, 185)">
+          <text font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#8a8a8a" text-anchor="middle" x="50" y="25">WebSearch · WebFetch · Playwright</text>
+        </g>
+
+        <line x1="535" y1="105" x2="565" y2="105" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
+
+        <!-- Box 4: git push -->
+        <g transform="translate(570, 60)">
+          <rect width="140" height="90" rx="10" fill="url(#cardGrad)" stroke="#e8e6e0"/>
+          <text x="70" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">04 · COMMIT</text>
+          <text x="70" y="52" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">git push</text>
+          <text x="70" y="70" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">to Atlas</text>
+          <text x="70" y="85" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#8a8a8a">via deploy key</text>
+        </g>
+
+        <line x1="715" y1="105" x2="745" y2="105" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
+
+        <!-- Box 5: Pages -->
+        <g transform="translate(750, 60)">
+          <rect width="140" height="90" rx="10" fill="url(#cardGrad)" stroke="#e8e6e0"/>
+          <text x="70" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">05 · BUILD</text>
+          <text x="70" y="52" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">GitHub Pages</text>
+          <text x="70" y="70" text-anchor="middle" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">rebuilds Atlas</text>
+          <text x="70" y="85" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#8a8a8a">Jekyll</text>
+        </g>
+
+        <line x1="895" y1="105" x2="925" y2="105" stroke="#c2410c" stroke-width="1.6" marker-end="url(#arr)"/>
+
+        <!-- Box 6: You read -->
+        <g transform="translate(930, 60)">
+          <rect width="64" height="90" rx="10" fill="#c2410c" stroke="#c2410c"/>
+          <text x="32" y="28" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#fef3ec" font-weight="700" letter-spacing="1.2">06</text>
+          <text x="32" y="55" text-anchor="middle" font-family="system-ui" font-size="13" fill="#fff" font-weight="700">Read</text>
+          <text x="32" y="72" text-anchor="middle" font-family="system-ui" font-size="13" fill="#fff" font-weight="700">Atlas</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="n">01 → 02</div>
+        <h4>Open an issue</h4>
+        <p>Title is your topic. Label sets the depth — <code>ceo</code>, <code>standard</code>, or <code>deep</code>. Works from mobile; one-handed research queueing on the train.</p>
+      </div>
+      <div class="how-step">
+        <div class="n">03</div>
+        <h4>Scout does the work</h4>
+        <p>Runs on your hardware. Hits WebSearch, WebFetch, Playwright as needed. Writes the artifact with inline citations — no claim without a URL.</p>
+      </div>
+      <div class="how-step">
+        <div class="n">04 → 06</div>
+        <h4>Atlas publishes</h4>
+        <p>Scout pushes to <code>research/DATE-SLUG/index.{md,html}</code>. GitHub Pages rebuilds. You read it at your own domain.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- INSTALL                                                               -->
+<!-- =================================================================== -->
+<section id="install">
+  <div class="container">
+    <span class="kicker">Install</span>
+    <h2>Three steps. Twenty minutes.</h2>
+    <p class="lede">Assumes you have a Linux device that can run Docker, and a GitHub account.</p>
+
+    <div class="install-steps">
+      <div class="install-step">
+        <span class="num">1</span>
+        <h4>Fork the templates</h4>
+        <p>Scout (the runner) and Atlas (the site) are two repos. Fork both with one click.</p>
+        <div class="actions">
+          <a href="https://github.com/Laoujin/Scout/generate" target="_blank" class="sm-btn primary">Fork Scout ↗</a>
+          <a href="https://github.com/Laoujin/Atlas/generate" target="_blank" class="sm-btn">Fork Atlas ↗</a>
+        </div>
+      </div>
+      <div class="install-step">
+        <span class="num">2</span>
+        <h4>Pick your look</h4>
+        <p>Palette, page layout, card style. The picker below gives you a config string to paste into the install script.</p>
+        <div class="actions">
+          <a href="#picker" class="sm-btn primary">Open the picker ↓</a>
+        </div>
+      </div>
+      <div class="install-step">
+        <span class="num">3</span>
+        <h4>Run install.sh</h4>
+        <p>SSH to your always-on device. Paste the command — walks you through the runner token and deploy key interactively.</p>
+        <div class="actions">
+          <a href="#install-cmd" class="sm-btn primary">See the command ↓</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="install-cmd" class="install-cmd">
+      <button class="copy-btn" data-copy="install-cmd-text">Copy</button>
+      <div class="line" id="install-cmd-text"><span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-fsSL</span> <span class="str">https://raw.githubusercontent.com/Laoujin/Scout/main/install.sh</span> <span class="comment">\</span></div>
+      <div class="line">  | <span class="cmd">bash</span> <span class="flag">-s</span> -- <span class="flag">--config=</span><span class="str" id="cfg-inline">s1.rust.v1</span></div>
+      <div class="line" style="margin-top: 10px;"><span class="comment"># prompts you for the runner token + deploy key interactively.</span></div>
+      <div class="line"><span class="comment"># pick your config above — the flag pre-seeds Atlas with that look.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- PICKER                                                                -->
+<!-- =================================================================== -->
+<section id="picker" class="picker">
+  <div class="container">
+    <span class="kicker">Configure</span>
+    <h2>Pick your palette, layout, and card.</h2>
+    <p class="lede">Preview updates live. Copy the config string, paste it into the install command above.</p>
+
+    <div class="picker-grid">
+      <div class="picker-controls">
+        <section>
+          <h3>Palette <span id="pal-label" style="color: var(--fg); text-transform: none; font-weight: 400; letter-spacing: 0;">· Warm rust</span></h3>
+          <div class="swatches" id="palette-picker">
+            <button class="swatch-btn active" data-key="rust" data-name="Warm rust"><span class="sw"><i style="background:#faf9f6"></i><i style="background:#c2410c"></i><i style="background:#1a1a1a"></i></span>Warm rust</button>
+            <button class="swatch-btn" data-key="paper" data-name="Paper &amp; ink"><span class="sw"><i style="background:#fbf7ea"></i><i style="background:#a84a07"></i><i style="background:#2a1e12"></i></span>Paper &amp; ink</button>
+            <button class="swatch-btn" data-key="cartography" data-name="Cartography"><span class="sw"><i style="background:#f0ebe0"></i><i style="background:#4a6b3a"></i><i style="background:#1a2e1f"></i></span>Cartography</button>
+            <button class="swatch-btn" data-key="midnight" data-name="Midnight"><span class="sw"><i style="background:#0f1013"></i><i style="background:#f59e0b"></i><i style="background:#f0ede6"></i></span>Midnight</button>
+            <button class="swatch-btn" data-key="minimal" data-name="Minimal"><span class="sw"><i style="background:#ffffff"></i><i style="background:#2563eb"></i><i style="background:#0a0a0a"></i></span>Minimal</button>
+            <button class="swatch-btn" data-key="fieldnotes" data-name="Field notes"><span class="sw"><i style="background:#ede6cf"></i><i style="background:#b54708"></i><i style="background:#3d2914"></i></span>Field notes</button>
+          </div>
+        </section>
+
+        <section>
+          <h3>Layout <span id="skel-label" style="color: var(--fg); text-transform: none; font-weight: 400; letter-spacing: 0;">· Hero + footer</span></h3>
+          <div class="layout-picks" id="skeleton-picker">
+            <button class="layout-btn active" data-key="s1" data-name="Hero + footer">
+              <svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><rect x="10" y="6" width="60" height="16" rx="1" fill="currentColor" opacity=".15"/><circle cx="40" cy="14" r="3" fill="currentColor"/><rect x="10" y="26" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="30" y="26" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="50" y="26" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="10" y="42" width="60" height="3" rx="1" fill="currentColor" opacity=".2"/></svg>
+              <span class="n">s1</span>
+            </button>
+            <button class="layout-btn" data-key="s2" data-name="Top bar + footer">
+              <svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2" y="2" width="76" height="7" rx="1" fill="currentColor" opacity=".2"/><rect x="10" y="14" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="30" y="14" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="50" y="14" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="10" y="30" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="30" y="30" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="50" y="30" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="2" y="43" width="76" height="5" fill="currentColor" opacity=".15"/></svg>
+              <span class="n">s2</span>
+            </button>
+            <button class="layout-btn" data-key="s3" data-name="Sidenav">
+              <svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2" y="2" width="76" height="6" rx="1" fill="currentColor" opacity=".2"/><rect x="2" y="10" width="20" height="38" fill="currentColor" opacity=".15"/><rect x="26" y="14" width="22" height="16" rx="1" fill="currentColor" opacity=".4"/><rect x="52" y="14" width="22" height="16" rx="1" fill="currentColor" opacity=".4"/><rect x="26" y="34" width="22" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="52" y="34" width="22" height="12" rx="1" fill="currentColor" opacity=".4"/></svg>
+              <span class="n">s3</span>
+            </button>
+            <button class="layout-btn" data-key="s4" data-name="Split hero">
+              <svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2" y="2" width="30" height="46" fill="currentColor" opacity=".2"/><circle cx="17" cy="14" r="3" fill="currentColor"/><rect x="8" y="22" width="18" height="2" fill="currentColor" opacity=".5"/><rect x="8" y="27" width="14" height="2" fill="currentColor" opacity=".5"/><rect x="36" y="8" width="18" height="14" rx="1" fill="currentColor" opacity=".4"/><rect x="58" y="8" width="18" height="14" rx="1" fill="currentColor" opacity=".4"/><rect x="36" y="26" width="18" height="14" rx="1" fill="currentColor" opacity=".4"/><rect x="58" y="26" width="18" height="14" rx="1" fill="currentColor" opacity=".4"/></svg>
+              <span class="n">s4</span>
+            </button>
+            <button class="layout-btn" data-key="s5" data-name="Magazine">
+              <svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2" y="2" width="76" height="22" fill="currentColor" opacity=".2"/><rect x="8" y="8" width="30" height="3" fill="currentColor" opacity=".6"/><rect x="8" y="14" width="22" height="2" fill="currentColor" opacity=".5"/><rect x="50" y="6" width="24" height="14" rx="1" fill="currentColor" opacity=".55"/><rect x="10" y="28" width="18" height="14" rx="1" fill="currentColor" opacity=".4"/><rect x="32" y="28" width="18" height="14" rx="1" fill="currentColor" opacity=".4"/><rect x="54" y="28" width="18" height="14" rx="1" fill="currentColor" opacity=".4"/></svg>
+              <span class="n">s5</span>
+            </button>
+            <button class="layout-btn" data-key="s6" data-name="Terminal">
+              <svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="currentColor" opacity=".5"/><circle cx="13" cy="8" r="1.5" fill="currentColor" opacity=".5"/><circle cx="18" cy="8" r="1.5" fill="currentColor" opacity=".5"/><rect x="6" y="14" width="30" height="1.5" fill="currentColor" opacity=".6"/><rect x="6" y="19" width="40" height="1.5" fill="currentColor" opacity=".4"/><rect x="6" y="24" width="36" height="1.5" fill="currentColor" opacity=".4"/><rect x="6" y="29" width="44" height="1.5" fill="currentColor" opacity=".4"/><rect x="6" y="34" width="28" height="1.5" fill="currentColor" opacity=".4"/><rect x="2" y="42" width="76" height="6" fill="currentColor" opacity=".2"/></svg>
+              <span class="n">s6</span>
+            </button>
+          </div>
+        </section>
+
+        <section>
+          <h3>Card style <span id="card-label" style="color: var(--fg); text-transform: none; font-weight: 400; letter-spacing: 0;">· Image-top</span></h3>
+          <div class="card-picks" id="card-picker">
+            <button class="card-btn active" data-key="v1" data-name="Image-top">v1<span class="label">image-top</span></button>
+            <button class="card-btn" data-key="v2" data-name="Horizontal">v2<span class="label">horizontal</span></button>
+            <button class="card-btn" data-key="v3" data-name="Hero overlay">v3<span class="label">hero</span></button>
+            <button class="card-btn" data-key="v4" data-name="Terminal">v4<span class="label">terminal</span></button>
+            <button class="card-btn" data-key="v5" data-name="Index card">v5<span class="label">index card</span></button>
+            <button class="card-btn" data-key="v6" data-name="No-image">v6<span class="label">no image</span></button>
+            <button class="card-btn" data-key="v7" data-name="Compact">v7<span class="label">compact</span></button>
+          </div>
+          <p style="margin-top:14px;color:var(--fg-muted);font-size:13px;">See all variants rendered at full size in <a href="atlas-card-mockups.html" style="color:var(--accent);">card mockups →</a> and <a href="atlas-skeleton-mockups.html" style="color:var(--accent);">skeleton mockups →</a>.</p>
+        </section>
+      </div>
+
+      <aside class="picker-preview" id="preview-panel">
+        <h3>Preview</h3>
+        <div class="preview-card">
+          <div class="preview-cover"></div>
+          <div class="preview-body">
+            <div class="row">
+              <span class="preview-depth">Standard</span>
+              <span class="preview-fmt">.md</span>
+            </div>
+            <h4>Static site generators in 2026</h4>
+            <p>Astro dominates, Hugo holds the speed crown, Next.js eats both on brand.</p>
+            <div class="tags"><span>web</span><span>tooling</span></div>
+            <div class="meta">2026-04-18 · 18 citations · 4 min</div>
+          </div>
+        </div>
+
+        <div class="config-output" style="margin-top: 18px;">
+          <h4>Config string</h4>
+          <button class="copy" data-copy="cfg-short">Copy</button>
+          <div id="cfg-short">s1.rust.v1</div>
+        </div>
+
+        <div class="config-output">
+          <h4>JSON</h4>
+          <button class="copy" data-copy="cfg-json">Copy</button>
+<pre id="cfg-json" style="margin:0;white-space:pre-wrap;"><span class="key">{</span>
+  <span class="key">"skeleton"</span>: <span class="str">"s1"</span>,
+  <span class="key">"palette"</span>: <span class="str">"rust"</span>,
+  <span class="key">"card"</span>: <span class="str">"v1"</span>
+<span class="key">}</span></pre>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- FOOTER                                                                -->
+<!-- =================================================================== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="brand"><span class="mark">S</span> Scout</div>
+        <p class="tag">A personal research engine. Trigger from anywhere, publish to your own GitHub Pages site, cite on every line.</p>
+      </div>
+      <div>
+        <h5>Repos</h5>
+        <ul>
+          <li><a href="https://github.com/Laoujin/Scout" target="_blank">Scout</a></li>
+          <li><a href="https://github.com/Laoujin/Atlas" target="_blank">Atlas</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Docs</h5>
+        <ul>
+          <li><a href="https://github.com/Laoujin/Scout/blob/main/README.md" target="_blank">Setup guide</a></li>
+          <li><a href="https://github.com/Laoujin/Scout/blob/main/skills/scout/SKILL.md" target="_blank">Scout skill</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Community</h5>
+        <ul>
+          <li><a href="https://github.com/Laoujin/Scout/issues" target="_blank">Issues</a></li>
+          <li><a href="https://laoujin.github.io/Atlas/" target="_blank">Example Atlas</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="btm">
+      <span>Scout · open source</span>
+      <span>Built on GitHub Actions + Claude Code</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  const state = { palette: 'rust', skeleton: 's1', card: 'v1' };
+  const names = { paletteName: 'Warm rust', skeletonName: 'Hero + footer', cardName: 'Image-top' };
+
+  // Palette theme map (for live preview recoloring)
+  const palettes = {
+    rust:         { bg: '#faf9f6', surf: '#ffffff', fg: '#1a1a1a', fgM: '#5c5c5c', fgF: '#8a8a8a', border: '#e8e6e0', accent: '#c2410c', accentSoft: '#fef3ec' },
+    paper:        { bg: '#fbf7ea', surf: '#fffcf2', fg: '#2a1e12', fgM: '#6b5a3f', fgF: '#9b8766', border: '#dcd2b8', accent: '#a84a07', accentSoft: '#fbeedd' },
+    cartography:  { bg: '#f0ebe0', surf: '#faf6ea', fg: '#1a2e1f', fgM: '#4a5d4e', fgF: '#7a8a7e', border: '#c9bc9d', accent: '#4a6b3a', accentSoft: '#dce5d1' },
+    midnight:     { bg: '#0f1013', surf: '#1a1c20', fg: '#f0ede6', fgM: '#a8a59c', fgF: '#6e7079', border: '#2d3036', accent: '#f59e0b', accentSoft: '#3a2f18' },
+    minimal:      { bg: '#ffffff', surf: '#ffffff', fg: '#0a0a0a', fgM: '#525252', fgF: '#a3a3a3', border: '#e5e5e5', accent: '#2563eb', accentSoft: '#dbeafe' },
+    fieldnotes:   { bg: '#ede6cf', surf: '#f6f0dc', fg: '#3d2914', fgM: '#6b5434', fgF: '#948066', border: '#c4b88f', accent: '#b54708', accentSoft: '#f3e3bf' }
+  };
+
+  function applyPreview() {
+    const p = palettes[state.palette];
+    const card = document.querySelector('.preview-card');
+    card.style.setProperty('--preview-surface', p.surf);
+    card.style.setProperty('--preview-fg', p.fg);
+    card.style.setProperty('--preview-fg-muted', p.fgM);
+    card.style.setProperty('--preview-fg-faint', p.fgF);
+    card.style.setProperty('--preview-border', p.border);
+    card.style.setProperty('--preview-accent', p.accent);
+    card.style.setProperty('--preview-accent-soft', p.accentSoft);
+    // Panel bg shifts slightly to show the palette against "surface"
+    document.getElementById('preview-panel').style.background = p.surf;
+    document.getElementById('preview-panel').style.borderColor = p.border;
+  }
+
+  function updateOutputs() {
+    const short = `${state.skeleton}.${state.palette}.${state.card}`;
+    document.getElementById('cfg-short').textContent = short;
+    document.getElementById('cfg-inline').textContent = short;
+    const json = `<span class="key">{</span>
+  <span class="key">"skeleton"</span>: <span class="str">"${state.skeleton}"</span>,
+  <span class="key">"palette"</span>: <span class="str">"${state.palette}"</span>,
+  <span class="key">"card"</span>: <span class="str">"${state.card}"</span>
+<span class="key">}</span>`;
+    document.getElementById('cfg-json').innerHTML = json;
+    document.getElementById('pal-label').textContent = '· ' + names.paletteName;
+    document.getElementById('skel-label').textContent = '· ' + names.skeletonName;
+    document.getElementById('card-label').textContent = '· ' + names.cardName;
+  }
+
+  function wire(containerId, key, nameKey) {
+    document.querySelectorAll(`#${containerId} [data-key]`).forEach(btn => {
+      btn.addEventListener('click', () => {
+        state[key] = btn.dataset.key;
+        names[nameKey] = btn.dataset.name;
+        document.querySelectorAll(`#${containerId} [data-key]`).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (key === 'palette') applyPreview();
+        updateOutputs();
+      });
+    });
+  }
+
+  wire('palette-picker', 'palette', 'paletteName');
+  wire('skeleton-picker', 'skeleton', 'skeletonName');
+  wire('card-picker', 'card', 'cardName');
+
+  // Copy buttons
+  document.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.copy;
+      const el = document.getElementById(id);
+      const text = el.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        const original = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        btn.classList.add('ok');
+        setTimeout(() => { btn.textContent = original; btn.classList.remove('ok'); }, 1400);
+      } catch (e) {
+        // fallback: select the text
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges(); sel.addRange(range);
+      }
+    });
+  });
+
+  applyPreview();
+  updateOutputs();
+})();
+</script>
+
+</body>
+</html>
