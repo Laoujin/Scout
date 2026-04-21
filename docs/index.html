@@ -315,6 +315,8 @@ section > .container > p.lede {
 .atlas-preview.palette-midnight    { --ap-bg:#0f1013; --ap-surface:#1a1c20; --ap-fg:#f0ede6; --ap-fg-muted:#a8a59c; --ap-fg-faint:#6e7079; --ap-border:#2d3036; --ap-accent:#f59e0b; --ap-accent-soft:#3a2f18; }
 .atlas-preview.palette-minimal     { --ap-bg:#ffffff; --ap-surface:#ffffff; --ap-fg:#0a0a0a; --ap-fg-muted:#525252; --ap-fg-faint:#a3a3a3; --ap-border:#e5e5e5; --ap-accent:#2563eb; --ap-accent-soft:#dbeafe; }
 .atlas-preview.palette-fieldnotes  { --ap-bg:#ede6cf; --ap-surface:#f6f0dc; --ap-fg:#3d2914; --ap-fg-muted:#6b5434; --ap-fg-faint:#948066; --ap-border:#c4b88f; --ap-accent:#b54708; --ap-accent-soft:#f3e3bf; }
+.atlas-preview.palette-solarized   { --ap-bg:#fdf6e3; --ap-surface:#eee8d5; --ap-fg:#586e75; --ap-fg-muted:#657b83; --ap-fg-faint:#93a1a1; --ap-border:#e0dab3; --ap-accent:#b58900; --ap-accent-soft:#f4ecc2; }
+.atlas-preview.palette-nord        { --ap-bg:#2e3440; --ap-surface:#3b4252; --ap-fg:#eceff4; --ap-fg-muted:#d8dee9; --ap-fg-faint:#a4b0c1; --ap-border:#4c566a; --ap-accent:#88c0d0; --ap-accent-soft:#434c5e; }
 
 /* Skeleton chrome */
 .atlas-preview.skeleton-s1 .ap-chrome {
@@ -373,10 +375,9 @@ section > .container > p.lede {
   border-bottom: 1px solid var(--ap-border);
 }
 .atlas-preview.skeleton-s5 .ap-chrome::before {
-  content: "The latest research\Afrom your shelf.";
-  white-space: pre;
+  content: "Your latest research.";
   font-family: "Fraunces", Georgia, serif; font-weight: 600;
-  font-size: 30px; line-height: 1.15; letter-spacing: -0.03em;
+  font-size: 30px; letter-spacing: -0.03em;
   color: var(--ap-fg);
 }
 .atlas-preview.skeleton-s6 {
@@ -436,6 +437,7 @@ section > .container > p.lede {
 .ap-card .ap-meta { font: 500 10px ui-monospace, Menlo, monospace; color: var(--ap-fg-faint); margin-top: auto; }
 
 /* Card v2: horizontal */
+.atlas-preview.card-v2 .ap-cards { grid-template-columns: repeat(2, 1fr); }
 .atlas-preview.card-v2 .ap-card { flex-direction: row; }
 .atlas-preview.card-v2 .ap-card-cover { aspect-ratio: auto; width: 110px; flex-shrink: 0; }
 
@@ -484,6 +486,7 @@ section > .container > p.lede {
 }
 .atlas-preview.card-v7 .ap-card-cover { display: none; }
 .atlas-preview.card-v7 .ap-card-body { padding: 0; flex-direction: row; align-items: center; gap: 10px; }
+.atlas-preview.card-v7 .ap-card-meta-row { gap: 10px; }
 .atlas-preview.card-v7 .ap-card h4 { font-size: 13px; flex: 1; }
 .atlas-preview.card-v7 .ap-card p,
 .atlas-preview.card-v7 .ap-card .ap-meta { display: none; }
@@ -695,6 +698,8 @@ section > .container > p.lede {
           <button class="swatch-btn" data-key="midnight" data-name="Midnight"><span class="sw"><i style="background:#0f1013"></i><i style="background:#f59e0b"></i><i style="background:#f0ede6"></i></span>Midnight</button>
           <button class="swatch-btn" data-key="minimal" data-name="Minimal"><span class="sw"><i style="background:#ffffff"></i><i style="background:#2563eb"></i><i style="background:#0a0a0a"></i></span>Minimal</button>
           <button class="swatch-btn" data-key="fieldnotes" data-name="Field notes"><span class="sw"><i style="background:#ede6cf"></i><i style="background:#b54708"></i><i style="background:#3d2914"></i></span>Field notes</button>
+          <button class="swatch-btn" data-key="solarized" data-name="Solarized"><span class="sw"><i style="background:#fdf6e3"></i><i style="background:#b58900"></i><i style="background:#586e75"></i></span>Solarized</button>
+          <button class="swatch-btn" data-key="nord" data-name="Nord"><span class="sw"><i style="background:#2e3440"></i><i style="background:#88c0d0"></i><i style="background:#eceff4"></i></span>Nord</button>
         </div>
       </section>
 
