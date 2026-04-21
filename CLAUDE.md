@@ -6,7 +6,6 @@ These rules apply to every research run inside this repo.
 
 - Terse. No filler, no "in conclusion" paragraphs, no prose bloat.
 - When comparing options, use a table. Always. Never prose.
-- No emojis.
 
 ## Citations (hard rule)
 
@@ -19,4 +18,4 @@ Every factual claim, quote, number, or summary line MUST carry its source URL in
 ## Tools
 
 - Prefer `WebFetch` and `WebSearch` first. Fall back to `npx playwright chromium` only for pages that return empty/JS-walled content.
-- Do NOT install packages. Runs are headless — there is no one to ask for permission. If a task truly needs a dependency that isn't in the container, abort the run and print a single clear line naming the missing dependency (`scout: missing dependency: <name>`) so it can be baked into the Docker image later.
+- Install what you need — runs are headless and `--dangerously-skip-permissions` is set. User-level installs work as the `runner` user: `npm install -g`, `pip install --user`, `npx …`. System packages (`apt-get`) need root which you don't have; if one is genuinely required, note it in a single footer line of your output (e.g. `scout: wants apt pkg: pandoc`) and carry on with the best workaround you can find — a later rebuild can bake it into the Dockerfile.
