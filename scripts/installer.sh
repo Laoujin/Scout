@@ -95,7 +95,7 @@ prompt_repo() {
   done
 }
 
-prompt_repo "Fork Scout as"        "$DEFAULT_OWNER" "Scout" SCOUT
+prompt_repo "Fork Scout as"        "$DEFAULT_OWNER" "${SCOUT_NAME_DEFAULT:-Scout}" SCOUT
 prompt_repo "Create Atlas repo as" "$DEFAULT_OWNER" "Atlas" ATLAS
 
 # ---------- Step 6: Fork Scout, enable Actions, clone into /work ----------

@@ -11,7 +11,9 @@
 #   --config=<skeleton>.<palette>.<card>   Required. e.g. s1.rust.v1
 #   --ref=<branch|tag>                      Default: main
 #   --upstream=<owner>/<repo>               Default: Laoujin/Scout
-#   --dir=<path>                            Default: $PWD/scout-install
+#   --dir=<path>                            Full path to clone Scout into.
+#                                           Default: $PWD/Scout (prompted when
+#                                           not passed).
 #   --org=<org>                             Fork + create Atlas under this org
 #                                           instead of the authenticated user
 #                                           (required when the user already owns
@@ -45,7 +47,7 @@ fi
 CONFIG=""
 REF="main"
 UPSTREAM="Laoujin/Scout"
-INSTALL_DIR="$PWD/scout-install"
+CLONE_PATH=""
 LOCAL_SCOUT=""
 ORG=""
 
@@ -54,13 +56,24 @@ for arg in "$@"; do
     --config=*)   CONFIG="${arg#*=}" ;;
     --ref=*)      REF="${arg#*=}" ;;
     --upstream=*) UPSTREAM="${arg#*=}" ;;
-    --dir=*)      INSTALL_DIR="${arg#*=}" ;;
+    --dir=*)      CLONE_PATH="${arg#*=}" ;;
     --local=*)    LOCAL_SCOUT="${arg#*=}" ;;   # use local checkout instead of fetching from GitHub
     --org=*)      ORG="${arg#*=}" ;;           # fork + create Atlas under this org instead of authed user
-    -h|--help)    sed -n '3,16p' "$0" 2>/dev/null || grep '^#' "$0" | head -16; exit 0 ;;
+    -h|--help)    sed -n '3,20p' "$0" 2>/dev/null || grep '^#' "$0" | head -20; exit 0 ;;
     *) echo "Unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
+
+# Ask where Scout should land when not passed via --dir. Default puts it at
+# $PWD/Scout directly — no extra scout-install/ wrapper.
+if [[ -z "$CLONE_PATH" ]]; then
+  default_clone="$PWD/Scout"
+  read -rp "Install Scout to [$default_clone]: " CLONE_PATH
+  CLONE_PATH="${CLONE_PATH:-$default_clone}"
+fi
+
+INSTALL_DIR="$(dirname "$CLONE_PATH")"
+SCOUT_NAME_DEFAULT="$(basename "$CLONE_PATH")"
 
 [[ -n "$CONFIG" ]] || { echo "Error: --config=<skeleton>.<palette>.<card> is required" >&2; exit 2; }
 
@@ -123,6 +136,7 @@ docker run --rm -it \
   -e SCOUT_REF="$REF" \
   -e SCOUT_ORG="$ORG" \
   -e SCOUT_HOST_WORK="$INSTALL_DIR" \
+  -e SCOUT_NAME_DEFAULT="$SCOUT_NAME_DEFAULT" \
   -e GH_TOKEN \
   -e GITHUB_TOKEN \
   scout-installer
