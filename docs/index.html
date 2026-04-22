@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="./scout-atlas-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=DM+Serif+Display:ital@0;1&family=Fraunces:opsz,wght@9..144,600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,700;1,700&family=Cormorant+Garamond:ital,wght@0,600;1,600&family=DM+Serif+Display:ital@0;1&family=Fraunces:opsz,wght@9..144,600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 <style>
 /* =========================================================================
    Scout marketing site
@@ -460,7 +460,9 @@ section.ya-group { padding: 15px 0; }
 .ap.skel-s5 .s5 { display: flex; flex-direction: column; min-height: 620px; }
 .ap.skel-s5 .s5-fold {
   position: relative; padding: 40px 36px 48px;
-  background: radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--pal-accent) 30%, transparent), transparent 55%), linear-gradient(135deg, var(--pal-surface-tint), var(--pal-bg));
+  background:
+    linear-gradient(to right, var(--pal-bg) 0%, color-mix(in srgb, var(--pal-bg) 55%, transparent) 45%, color-mix(in srgb, var(--pal-bg) 30%, transparent) 100%),
+    url('./hero-banner.png') center / cover no-repeat;
   border-bottom: 1px solid var(--pal-border);
   overflow: hidden; min-height: 320px;
   display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: center;
@@ -471,14 +473,12 @@ section.ya-group { padding: 15px 0; }
   color: color-mix(in srgb, var(--pal-accent) 10%, transparent);
   letter-spacing: -0.06em; pointer-events: none; user-select: none;
 }
-.ap.skel-s5 .s5-brand { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; font: 600 10.5px ui-monospace, Menlo, monospace; letter-spacing: 0.16em; text-transform: uppercase; color: var(--pal-fg-muted); }
-.ap.skel-s5 .s5-mark { width: 22px; height: 22px; border-radius: 5px; background: var(--pal-accent); color: var(--pal-accent-fg); display: grid; place-content: center; font: italic 700 12px/1 Georgia, serif; }
+.ap.skel-s5 .s5-brand { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; font-family: 'Bodoni Moda', 'Fraunces', Georgia, serif; font-style: italic; font-weight: 700; font-size: 18px; color: var(--pal-fg); }
+.ap.skel-s5 .s5-mark { width: 22px; height: 22px; border-radius: 5px; display: block; }
 .ap.skel-s5 .s5-fold h1 { margin: 0 0 8px; font-family: 'Fraunces', Georgia, serif; font-size: 38px; line-height: 1.05; letter-spacing: -0.03em; color: var(--pal-fg); }
 .ap.skel-s5 .s5-tag { color: var(--pal-fg-muted); font-size: 13.5px; max-width: 40ch; margin: 0; }
-.ap.skel-s5 .s5-cta { margin-top: 18px; display: flex; gap: 10px; }
-.ap.skel-s5 .s5-cta a { padding: 7px 13px; border-radius: 6px; font-size: 12px; font-weight: 500; }
-.ap.skel-s5 .s5-primary { background: var(--pal-accent); color: var(--pal-accent-fg); }
-.ap.skel-s5 .s5-ghost { border: 1px solid var(--pal-border); color: var(--pal-fg-muted); }
+.ap.skel-s5 .s5-cta { position: absolute; top: 18px; right: 22px; padding: 6px 11px; border-radius: 5px; background: var(--pal-accent); color: var(--pal-accent-fg); font: 600 11.5px/1 ui-monospace, Menlo, monospace; text-decoration: none; z-index: 2; transition: transform .12s ease, filter .12s ease; }
+.ap.skel-s5 .s5-cta:hover { transform: translateY(-1px); filter: brightness(1.05); }
 .ap.skel-s5 .s5-featured { position: relative; z-index: 1; }
 .ap.skel-s5 .s5-tag-above { font: 600 10px ui-monospace, Menlo, monospace; letter-spacing: 0.14em; text-transform: uppercase; color: var(--pal-accent); margin-bottom: 8px; display: inline-block; }
 .ap.skel-s5 .s5-featured-card { display: block; background: var(--pal-surface); border-radius: 10px; overflow: hidden; box-shadow: 0 8px 24px -8px rgba(0,0,0,.2), 0 0 0 1px var(--pal-border); }
@@ -487,8 +487,7 @@ section.ya-group { padding: 15px 0; }
 .ap.skel-s5 .s5-featured-body h3 { margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-size: 15px; color: var(--pal-fg); }
 .ap.skel-s5 .s5-featured-body p { margin: 0; font-size: 12px; color: var(--pal-fg-muted); }
 .ap.skel-s5 .s5-content { padding: 30px 36px 24px; }
-.ap.skel-s5 .s5-content h2 { margin: 0 0 14px; font-size: 14px; color: var(--pal-fg-muted); font-weight: 600; display: flex; align-items: center; gap: 10px; }
-.ap.skel-s5 .s5-content h2::after { content: ""; flex: 1; height: 1px; background: var(--pal-border); }
+.ap.skel-s5 .s5-footer { margin-top: auto; padding: 14px 36px; border-top: 1px solid var(--pal-border); font-size: 11px; color: var(--pal-fg-faint); display: flex; gap: 20px; justify-content: space-between; }
 
 /* S6 — Terminal frame */
 .ap.skel-s6 .ap-viewport { background: var(--pal-surface); }
@@ -511,7 +510,7 @@ section.ya-group { padding: 15px 0; }
 .ap.skel-s6 .s6-statusbar { padding: 6px 16px; background: var(--pal-accent); color: var(--pal-accent-fg); font-size: 10.5px; font-weight: 600; display: flex; justify-content: space-between; letter-spacing: 0.04em; }
 
 /* ---------- Card variants (scoped) — only used by s1/s2/s3/s4/s5 ----- */
-.ap .card { background: var(--pal-surface); border: 1px solid var(--pal-border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; transition: transform .15s ease, border-color .15s ease; }
+.ap .card { background: var(--pal-surface); border: 1px solid var(--pal-border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; transition: transform .15s ease, border-color .15s ease; position: relative; }
 .ap .card:hover { transform: translateY(-2px); border-color: var(--pal-accent); }
 .ap .card-cover { width: 100%; aspect-ratio: 3/2; background-color: color-mix(in srgb, var(--pal-accent) 18%, var(--pal-surface)); background-size: cover; background-position: center; position: relative; }
 .ap .card-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
@@ -519,23 +518,34 @@ section.ya-group { padding: 15px 0; }
 .ap .card-title { margin: 0; font-size: 13.5px; line-height: 1.3; letter-spacing: -0.01em; color: var(--pal-fg); font-weight: 600; }
 .ap .card-summary { margin: 0; color: var(--pal-fg-muted); font-size: 12px; line-height: 1.4; }
 .ap .card-tags { display: flex; gap: 4px; flex-wrap: wrap; }
-.ap .card-foot { font: 500 10px ui-monospace, Menlo, monospace; color: var(--pal-fg-faint); margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 2px; }
+.ap .card-foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; padding-top: 4px; }
+.ap-viewport .meta-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font: 500 10.5px/1.4 ui-monospace, Menlo, monospace; color: var(--pal-fg-muted); background: var(--pal-surface-tint); border: 1px solid var(--pal-border); }
+
+/* V1 — badges floated over cover top-right */
+.ap.card-v1 .card-top { position: absolute; top: 10px; right: 10px; left: auto; z-index: 3; margin: 0; }
 
 /* V2 horizontal */
 .ap.card-v2 .entry-grid { grid-template-columns: repeat(2, 1fr); }
 .ap.card-v2 .card { flex-direction: row; }
 .ap.card-v2 .card-cover { width: 110px; aspect-ratio: auto; flex-shrink: 0; }
 .ap.card-v2 .card-body { padding: 10px 12px 10px 12px; }
+.ap.card-v2 .card-top { position: absolute; top: 8px; right: 10px; z-index: 3; margin: 0; }
 
 /* V3 hero overlay */
 .ap.card-v3 .entry-grid { grid-template-columns: repeat(2, 1fr); }
-.ap.card-v3 .card { position: relative; min-height: 150px; border: none; }
+.ap.card-v3 .card { position: relative; aspect-ratio: 3/2; border: none; overflow: hidden; isolation: isolate; }
 .ap.card-v3 .card-cover { position: absolute; inset: 0; aspect-ratio: auto; width: 100%; height: 100%; }
-.ap.card-v3 .card-cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.35) 60%, transparent 100%); }
-.ap.card-v3 .card-body { position: relative; z-index: 2; background: transparent; margin-top: auto; padding: 14px 16px; color: #fff; }
+.ap.card-v3 .card-cover::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,.55) 0%, rgba(0,0,0,.15) 18%, transparent 38%),
+    linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.75) 22%, rgba(0,0,0,.35) 48%, transparent 72%);
+}
+.ap.card-v3 .card-top { position: absolute; top: 12px; left: 12px; right: 12px; z-index: 3; margin: 0; }
+.ap.card-v3 .card-body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; background: transparent; padding: 14px 16px 16px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
 .ap.card-v3 .card-title, .ap.card-v3 .card-summary { color: #fff; }
-.ap.card-v3 .card-foot { color: rgba(255,255,255,.7); }
-.ap.card-v3 .card .chip { background: rgba(255,255,255,.14); color: #fff; border-color: rgba(255,255,255,.2); }
+.ap.card-v3 .card .chip { background: rgba(0,0,0,.35); color: #fff; border-color: rgba(255,255,255,.25); backdrop-filter: blur(4px); }
+.ap.card-v3 .meta-chip { background: rgba(0,0,0,.45); color: #fff; border-color: rgba(255,255,255,.22); backdrop-filter: blur(4px); text-shadow: none; }
 
 /* V4 terminal */
 .ap.card-v4 .entry-grid { grid-template-columns: repeat(2, 1fr); }
@@ -850,17 +860,18 @@ section.ya-group { padding: 15px 0; }
   function renderCard(e) {
     return `<article class="card" style="--h:${e.hue};">
       <div class="card-cover cover ratio"><img class="cover-img" src="./cover-svg-prototype/${e.slug}.svg" alt="" loading="lazy"></div>
+      <div class="card-top">
+        <span class="depth-badge depth-${e.depth}">${e.depth}</span>
+        <span class="fmt-pill fmt-${e.fmt}">.${e.fmt}</span>
+      </div>
       <div class="card-body">
-        <div class="card-top">
-          <span class="depth-badge depth-${e.depth}">${e.depth}</span>
-          <span class="fmt-pill fmt-${e.fmt}">.${e.fmt}</span>
-        </div>
         <h4 class="card-title">${e.title}</h4>
         <p class="card-summary">${e.summary}</p>
         <div class="card-tags">${e.tags.map(t => `<span class="chip">${t}</span>`).join('')}</div>
         <div class="card-foot">
-          <span class="mono">${e.date}</span>
-          <span>${e.citations}c · ${e.read}m</span>
+          <span class="meta-chip">${e.date}</span>
+          <span class="meta-chip">${e.citations} sources</span>
+          <span class="meta-chip">${e.read} min</span>
         </div>
       </div>
     </article>`;
@@ -980,14 +991,11 @@ section.ya-group { padding: 15px 0; }
     const rest = entries.slice(1);
     return `<div class="s5">
       <header class="s5-fold">
+        <a class="s5-cta" href="https://github.com/Laoujin/Scout/issues/new?template=research.yml" target="_blank" rel="noopener">+ New research</a>
         <div>
-          <div class="s5-brand"><span class="s5-mark">A</span> Atlas · Issue ${entries.length}</div>
+          <div class="s5-brand"><img class="s5-mark" src="./scout-atlas-icon.png" alt=""> Atlas · Issue ${entries.length}</div>
           <h1>Cited research, automated.</h1>
           <p class="s5-tag">Every claim carries its URL. Every entry is generated by Scout from a one-line prompt.</p>
-          <div class="s5-cta">
-            <a class="s5-primary">Browse all</a>
-            <a class="s5-ghost">About Scout ↗</a>
-          </div>
         </div>
         <div class="s5-featured">
           <span class="s5-tag-above">Latest · ${new Date(featured.date).toLocaleString('en-US', {month:'short', day:'2-digit'})}</span>
@@ -1002,9 +1010,12 @@ section.ya-group { padding: 15px 0; }
         <span class="s5-watermark" aria-hidden="true">ATLAS</span>
       </header>
       <section class="s5-content">
-        <h2>More research</h2>
         <div class="entry-grid">${rest.map(renderCard).join('')}</div>
       </section>
+      <footer class="s5-footer">
+        <span>Atlas · <a href="#">yourname/atlas ↗</a></span>
+        <span>Built with <a href="#">Scout ↗</a></span>
+      </footer>
     </div>`;
   }
 
