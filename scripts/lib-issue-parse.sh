@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Parse the body of a Scout research-request Issue (rendered from the Issue Form
 # at .github/ISSUE_TEMPLATE/research.yml) and export RAW_TOPIC, DEPTH, FORMAT,
-# SKIP_TIGHTEN.
+# SKIP_SHARPEN.
 #
 # Usage (source this file, then call parse_issue_body):
 #   source scripts/lib-issue-parse.sh
@@ -22,7 +22,7 @@
 #
 #   ### Options
 #
-#   - [X] Skip tightening (use my topic verbatim)
+#   - [X] Skip sharpening (use my topic verbatim)
 
 # Extract the lines between `### <label>` and the next `### ` header.
 _extract_section() {
@@ -44,7 +44,7 @@ _trim_blanks() {
 }
 
 # Map display-name aliases from the Issue Form back to internal codes used by
-# downstream scripts (run.sh, tighten.sh, skills, agents).
+# downstream scripts (run.sh, sharpen.sh, skills, agents).
 _normalize_depth() {
   case "$1" in
     recon)      echo ceo ;;
@@ -61,14 +61,14 @@ parse_issue_body() {
   FORMAT="$(_extract_section "$body" Format | _trim_blanks | head -n 1)"
   local options_block
   options_block="$(_extract_section "$body" Options)"
-  if printf '%s' "$options_block" | grep -qiE '^\- \[[xX]\] Skip tightening'; then
-    SKIP_TIGHTEN=true
+  if printf '%s' "$options_block" | grep -qiE '^\- \[[xX]\] Skip sharpening'; then
+    SKIP_SHARPEN=true
   else
-    SKIP_TIGHTEN=false
+    SKIP_SHARPEN=false
   fi
   [ -n "$DEPTH" ]  || DEPTH=survey
   [ -n "$FORMAT" ] || FORMAT=auto
   DEPTH_LABEL="$DEPTH"
   DEPTH="$(_normalize_depth "$DEPTH")"
-  export RAW_TOPIC DEPTH DEPTH_LABEL FORMAT SKIP_TIGHTEN
+  export RAW_TOPIC DEPTH DEPTH_LABEL FORMAT SKIP_SHARPEN
 }

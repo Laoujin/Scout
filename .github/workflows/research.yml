@@ -33,7 +33,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  tighten-on-open:
+  sharpen-on-open:
     if: >
       github.event_name == 'issues' &&
       github.event.action == 'opened' &&
@@ -55,24 +55,24 @@ jobs:
             --color c2410c \
             --description "Scout research request" \
             --repo "$GH_REPO" 2>/dev/null || true
-      - name: Tighten and post proposal
+      - name: Sharpen and post proposal
         run: |
           set -euo pipefail
           source scripts/lib-issue-parse.sh
           parse_issue_body "$ISSUE_BODY"
-          if [ "$SKIP_TIGHTEN" = "true" ]; then
+          if [ "$SKIP_SHARPEN" = "true" ]; then
             SHARPENED_TOPIC="$RAW_TOPIC"
             COMMENT_HEADER="Confirm research"
           else
             SHARPENED_TOPIC="$(RAW_TOPIC="$RAW_TOPIC" DEPTH="$DEPTH" FORMAT="$FORMAT" \
-                                 bash scripts/tighten.sh)"
+                                 bash scripts/sharpen.sh)"
             COMMENT_HEADER="Sharpened proposal"
           fi
           ISSUE_NUMBER="$ISSUE_NUMBER" SHARPENED_TOPIC="$SHARPENED_TOPIC" \
             DEPTH="$DEPTH" FORMAT="$FORMAT" COMMENT_HEADER="$COMMENT_HEADER" \
             bash scripts/issue-comment.sh
 
-  retighten-on-comment:
+  resharpen-on-comment:
     if: >
       github.event_name == 'issue_comment' &&
       github.event.action == 'created' &&
@@ -92,7 +92,7 @@ jobs:
       USER_FEEDBACK: ${{ github.event.comment.body }}
     steps:
       - uses: actions/checkout@v5
-      - name: Re-tighten with user feedback
+      - name: Re-sharpen with user feedback
         run: |
           set -euo pipefail
           source scripts/lib-issue-parse.sh
@@ -110,7 +110,7 @@ jobs:
           SHARPENED_TOPIC="$(RAW_TOPIC="$RAW_TOPIC" DEPTH="$DEPTH" FORMAT="$FORMAT" \
                              PREVIOUS_SHARPENED="$PREVIOUS_SHARPENED" \
                              USER_FEEDBACK="$USER_FEEDBACK" \
-                             bash scripts/tighten.sh)"
+                             bash scripts/sharpen.sh)"
           ISSUE_NUMBER="$ISSUE_NUMBER" SHARPENED_TOPIC="$SHARPENED_TOPIC" \
             DEPTH="$DEPTH" FORMAT="$FORMAT" \
             COMMENT_HEADER="Sharpened proposal (revised)" \

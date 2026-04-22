@@ -26,7 +26,7 @@
 
 CLI flag and workflow input values remain the original internal codes: `ceo` (recon), `standard` (survey), `deep` (expedition).
 
-See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour, [`skills/scout/deep.md`](skills/scout/deep.md) for the parallel-sub-agent flow that `depth=deep` triggers, and [`skills/scout/tighten.md`](skills/scout/tighten.md) for how raw topics get sharpened into research briefs before a run.
+See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour, [`skills/scout/deep.md`](skills/scout/deep.md) for the parallel-sub-agent flow that `depth=deep` triggers, and [`skills/scout/sharpen.md`](skills/scout/sharpen.md) for how raw topics get sharpened into research briefs before a run.
 
 ### Depth tiers
 
@@ -86,7 +86,7 @@ docker exec -it scout-runner runuser -u runner -- claude
 
 ### Default: open a research Issue
 
-[Open a new Issue](https://github.com/Laoujin/Scout/issues/new?template=research.yml) using the **Research request** template. Fill in `Topic`, `Depth`, `Format`. Optional: tick **Skip tightening** if your topic is already exactly what you want researched.
+[Open a new Issue](https://github.com/Laoujin/Scout/issues/new?template=research.yml) using the **Research request** template. Fill in `Topic`, `Depth`, `Format`. Optional: tick **Skip sharpening** if your topic is already exactly what you want researched.
 
 Within ~30s Scout replies with a sharpened proposal (or your raw topic when skip is ticked) plus a `- [ ] Start research` checkbox.
 
@@ -97,7 +97,7 @@ Mobile UX: GitHub mobile app → Scout → New issue → pick the template → c
 
 ### Power-user: dispatch the workflow directly
 
-Skips the Issue dance — fires research with your raw topic, no tightening, no Issue created.
+Skips the Issue dance — fires research with your raw topic, no sharpening, no Issue created.
 
 ```bash
 gh workflow run research.yml --repo Laoujin/Scout -f topic="top 3 static site generators in 2026" -f depth=ceo -f format=md

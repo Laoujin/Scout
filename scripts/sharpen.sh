@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Sharpen a raw research topic. Prints the sharpened topic to stdout.
 # Required env: RAW_TOPIC, DEPTH, FORMAT.
-# Optional env: PREVIOUS_SHARPENED, USER_FEEDBACK (for re-tighten on user feedback).
+# Optional env: PREVIOUS_SHARPENED, USER_FEEDBACK (for re-sharpen on user feedback).
 
 set -euo pipefail
 
@@ -10,7 +10,7 @@ set -euo pipefail
 : "${FORMAT:=auto}"
 
 SCOUT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-TIGHTEN_PROMPT="$(cat "$SCOUT_DIR/skills/scout/tighten.md")"
+SHARPEN_PROMPT="$(cat "$SCOUT_DIR/skills/scout/sharpen.md")"
 
 input="Raw topic: ${RAW_TOPIC}
 Depth: ${DEPTH}
@@ -27,5 +27,5 @@ fi
 
 claude --dangerously-skip-permissions \
        --print \
-       --append-system-prompt "$TIGHTEN_PROMPT" \
+       --append-system-prompt "$SHARPEN_PROMPT" \
        "$input"

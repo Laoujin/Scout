@@ -1,40 +1,40 @@
 ---
-description: Open a Scout research Issue (default) or directly dispatch the workflow.
-argument-hint: "[topic] [depth=standard] [format=auto] [--dispatch]"
-allowed-tools: Bash(gh issue create:*), Bash(gh workflow run:*), Bash(gh run list:*), Bash(gh issue view:*)
+description: Open a Scout research Issue.
+argument-hint: "[topic]"
+allowed-tools: AskUserQuestion, Bash(gh issue create:*)
 ---
 
-Parse $ARGUMENTS as:
+`$ARGUMENTS` is the research topic (free text, may be empty).
 
-- `topic` = everything up to any `depth=`, `format=`, or `--dispatch` token (required)
-- `depth` = value after `depth=` if present, else `standard`
-- `format` = value after `format=` if present, else `auto`
-- `dispatch` = `true` if `--dispatch` appears anywhere, else `false`
+## Step 1 — Topic
 
-## Default path: open an Issue
+If `$ARGUMENTS` is non-empty, use it verbatim as the topic. Otherwise ask the user for one in chat (plain message, not `AskUserQuestion` — topic is free text).
 
-Build a body matching the research Issue Form structure so the workflow's parser sees the same shape it gets from a manually-opened Issue:
+## Step 2 — Options
+
+Call `AskUserQuestion` once with these three questions:
+
+1. **Depth** (header `Depth`, single-select):
+   - `survey` — 2-4 pages, balanced overview (Recommended)
+   - `recon` — one-page decision brief
+   - `expedition` — all angles, long-form
+2. **Format** (header `Format`, single-select):
+   - `auto` — Scout picks md or html (Recommended)
+   - `md` — markdown body
+   - `html` — bespoke HTML body
+3. **Skip sharpening** (header `Sharpen`, single-select):
+   - `No` — let Scout sharpen the topic and propose (Recommended)
+   - `Yes` — use my topic verbatim, no proposal round-trip
+
+## Step 3 — Create the Issue
 
 ```
 gh issue create --repo Laoujin/Scout \
   --title "[research] <truncate topic to ~60 chars>" \
   --label scout-research \
-  --body "$(printf '### Topic\n\n%s\n\n### Depth\n\n%s\n\n### Format\n\n%s\n\n### Options\n\n- [ ] Skip tightening (use my topic verbatim)\n' "<topic>" "<depth>" "<format>")"
+  --body "$(printf '### Topic\n\n%s\n\n### Depth\n\n%s\n\n### Format\n\n%s\n\n### Options\n\n- [%s] Skip sharpening (use my topic verbatim)\n' "<topic>" "<depth>" "<format>" "<x if skip else space>")"
 ```
 
-After creation, print the Issue URL and tell the user: "Scout will reply with a sharpened proposal in ~30s. Tick the **Start research** checkbox to publish, or reply with feedback for another proposal."
+Print the Issue URL. If skip-sharpening is No, tell the user: "Scout will reply with a sharpened proposal in ~30s. Tick the **Start research** checkbox to publish, or reply with feedback for another proposal." If skip-sharpening is Yes, tell the user the research job will kick off directly (5-30 min).
 
-Do not poll — the tighten step takes 10-30 seconds; the research step takes 5-30 minutes.
-
-## --dispatch path: skip the Issue, run research immediately
-
-When `--dispatch` is set, fire the workflow directly with the raw topic:
-
-```
-gh workflow run research.yml --repo Laoujin/Scout \
-  -f topic="<topic>" -f depth="<depth>" -f format="<format>"
-```
-
-Then `gh run list --repo Laoujin/Scout --workflow research.yml --limit 1` and report the run URL.
-
-In both cases, remind the user that the published artifact will appear at https://laoujin.github.io/atlas/.
+Do not poll. The sharpen step takes 10-30 seconds; the research step takes 5-30 minutes. The published artifact will appear at https://laoujin.github.io/atlas/.

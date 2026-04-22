@@ -45,5 +45,5 @@ body:
     attributes:
       label: Options
       options:
-        - label: Skip tightening (use my topic verbatim)
+        - label: Skip sharpening (use my topic verbatim)
           required: false

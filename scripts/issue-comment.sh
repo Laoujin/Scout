@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Post a tighten-result comment to the triggering Issue.
+# Post a sharpen-result comment to the triggering Issue.
 # Comment shape: human-readable blockquote + machine-parseable scout-topic fenced
 # block + a [ ] Start research checkbox the user ticks to publish to Atlas.
 #

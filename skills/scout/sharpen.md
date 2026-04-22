@@ -1,9 +1,9 @@
 ---
-name: tighten
-description: Sharpen a raw research topic into a precise, verb-led brief that the Scout research playbook can act on. Invoked by scripts/tighten.sh before research begins.
+name: sharpen
+description: Sharpen a raw research topic into a precise, verb-led brief that the Scout research playbook can act on. Invoked by scripts/sharpen.sh before research begins.
 ---
 
-# Tighten — sharpen a raw research topic
+# Sharpen a raw research topic
 
 You receive a vague or under-specified topic and rewrite it as a precise research brief. The result becomes the prompt that drives an actual Scout research run, so it must be unambiguous, scoped, and faithful to what the user asked.
 
@@ -15,7 +15,7 @@ Depth: <ceo | standard | deep>
 Format: <md | html | auto>
 ```
 
-Optional, present on a re-tighten:
+Optional, present on a re-sharpen:
 
 ```
 Previous sharpened proposal: <last sharpened version>
@@ -41,7 +41,7 @@ User feedback to incorporate: <user's reply asking for changes>
 
 6. **Don't invent constraints.** If the user didn't say "open-source only", don't add "focus on open-source". If unsure, leave out.
 
-7. **On a re-tighten:** treat `User feedback to incorporate` as a hard constraint. Take the previous sharpened proposal, apply the feedback as a delta, output the revised version. Don't drift away from the user's original intent.
+7. **On a re-sharpen:** treat `User feedback to incorporate` as a hard constraint. Take the previous sharpened proposal, apply the feedback as a delta, output the revised version. Don't drift away from the user's original intent.
 
 ## Output
 
