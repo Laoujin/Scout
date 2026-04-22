@@ -1,0 +1,49 @@
+---
+# Atlas site · S4 · Split hero
+# Sticky 38% hero-left (identity + latest-5). Right column scrolls with full grid.
+---
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: 'en' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title | default: site.title | default: 'Atlas' }}</title>
+  {%- if site.description -%}<meta name="description" content="{{ site.description }}">{%- endif -%}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/assets/css/palette.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/base.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/site.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/card.css' | relative_url }}">
+</head>
+<body>
+  {%- assign entries = site.research | sort: 'date' | reverse -%}
+  {%- assign latest = entries | slice: 0, 5 -%}
+
+  <main class="s4">
+    <aside class="s4-hero">
+      <div class="s4-logo">{{ site.title | default: 'Atlas' | slice: 0,1 | upcase }}</div>
+      <h1>{{ site.title | default: 'Atlas' }}</h1>
+      <p>{{ site.description | default: 'Personal research notes. Cited on every line. Published automatically by Scout.' }}</p>
+      {%- if latest.size > 0 -%}
+      <div class="s4-latest">
+        <h4>Latest</h4>
+        <ul>
+          {%- for e in latest -%}
+            <li><a href="{{ e.url | relative_url }}"><span class="d">{{ e.date | date: "%b %d" }}</span> {{ e.title }}</a></li>
+          {%- endfor -%}
+        </ul>
+      </div>
+      {%- endif -%}
+    </aside>
+
+    <section class="s4-content">
+      <h2>All research</h2>
+      <div class="entry-grid" style="grid-template-columns: repeat(2, 1fr);">
+        {%- for e in entries -%}{%- include card.html entry=e -%}{%- endfor -%}
+      </div>
+    </section>
+  </main>
+</body>
+</html>

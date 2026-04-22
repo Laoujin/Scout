@@ -1,0 +1,37 @@
+/* Card V4 — terminal */
+.entry-grid { grid-template-columns: repeat(2, 1fr); }
+.card {
+  background: #0f1013;
+  color: #d6d3cc;
+  border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  overflow: hidden;
+  border: 1px solid #26282c;
+  display: grid; grid-template-rows: auto 1fr;
+}
+.card-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: #1a1c20;
+  border-bottom: 1px solid #26282c;
+  font-size: 11px; color: #8a8a80;
+}
+.card-bar .dots { display: flex; gap: 5px; }
+.card-bar .dots i { width: 10px; height: 10px; border-radius: 50%; background: #3a3d42; display: block; }
+.card-bar .dots i:nth-child(1) { background: #e25; }
+.card-bar .dots i:nth-child(2) { background: #ea0; }
+.card-bar .dots i:nth-child(3) { background: #4a5; }
+.card-link { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 10px; color: inherit; }
+.card .prompt { margin: 0; color: #7cc4a0; }
+.card .prompt::before { content: "▸ "; color: #c2410c; }
+.card-title { margin: 0; font-size: 16px; font-weight: 600; color: #f4efe6; font-family: inherit; }
+.card-summary { margin: 0; color: #a8a59c; }
+.card .kv { display: grid; grid-template-columns: 110px 1fr; row-gap: 3px; font-size: 12px; }
+.card .kv .k { color: #6e7079; }
+.card .kv .v { color: #d6d3cc; }
+.card .kv .v.accent { color: #c2410c; }
+.card .kv .v .chip { background: transparent; border-color: #3a3d42; color: #a8a59c; }
+.card .cursor::after { content: "█"; color: #c2410c; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (max-width: 700px) { .entry-grid { grid-template-columns: 1fr; } }

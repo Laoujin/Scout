@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "default": "s1.rust.v1",
+  "sites": {
+    "s1": { "name": "Hero + footer",          "file": "sites/s1.html" },
+    "s2": { "name": "Top bar + footer",       "file": "sites/s2.html" },
+    "s3": { "name": "Top bar + sidenav",      "file": "sites/s3.html" },
+    "s4": { "name": "Split hero",             "file": "sites/s4.html" },
+    "s5": { "name": "Magazine cover",         "file": "sites/s5.html" },
+    "s6": { "name": "Terminal frame",         "file": "sites/s6.html", "ignores_card": true }
+  },
+  "palettes": {
+    "rust":        { "name": "Warm rust",    "swatch": ["#faf9f6", "#c2410c", "#1a1a1a"] },
+    "paper":       { "name": "Paper & ink",  "swatch": ["#fbf7ea", "#a84a07", "#2a1e12"] },
+    "cartography": { "name": "Cartography",  "swatch": ["#f0ebe0", "#4a6b3a", "#1a2e1f"] },
+    "midnight":    { "name": "Midnight",     "swatch": ["#0f1013", "#f59e0b", "#f0ede6"] },
+    "minimal":     { "name": "Minimal",      "swatch": ["#ffffff", "#2563eb", "#0a0a0a"] },
+    "fieldnotes":  { "name": "Field notes",  "swatch": ["#ede6cf", "#b54708", "#3d2914"] },
+    "solarized":   { "name": "Solarized",    "swatch": ["#fdf6e3", "#b58900", "#586e75"] },
+    "nord":        { "name": "Nord",         "swatch": ["#2e3440", "#88c0d0", "#eceff4"] }
+  },
+  "cards": {
+    "v1": { "name": "Image-top",     "file": "cards/v1.html" },
+    "v2": { "name": "Horizontal",    "file": "cards/v2.html" },
+    "v3": { "name": "Hero overlay",  "file": "cards/v3.html" },
+    "v4": { "name": "Terminal",      "file": "cards/v4.html" },
+    "v5": { "name": "Index card",    "file": "cards/v5.html" },
+    "v6": { "name": "No-image",      "file": "cards/v6.html" },
+    "v7": { "name": "Compact row",   "file": "cards/v7.html" }
+  }
+}
