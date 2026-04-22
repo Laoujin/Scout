@@ -59,8 +59,16 @@ fi
 gh auth setup-git >/dev/null
 
 # ---------- Step 3: Resolve owner ----------
-OWNER=$(gh api user --jq .login)
-echo "→ Authenticated as: $OWNER"
+AUTHED_USER=$(gh api user --jq .login)
+echo "→ Authenticated as: $AUTHED_USER"
+
+# Both repos land under SCOUT_ORG when set (required if AUTHED_USER already owns
+# the upstream — e.g. Laoujin forking Laoujin/Scout into a personal account
+# fails with "single user cannot own both parent and fork").
+OWNER="${SCOUT_ORG:-$AUTHED_USER}"
+if [[ -n "${SCOUT_ORG:-}" ]]; then
+  echo "→ Target owner (--org): $SCOUT_ORG"
+fi
 
 # ---------- Steps 4 + 5: Repo-name prompts ----------
 prompt_repo() {
@@ -82,10 +90,9 @@ prompt_repo "Create Atlas repo" "Atlas" ATLAS_NAME
 
 # ---------- Step 6: Fork Scout, enable Actions, clone into /work ----------
 echo "→ Forking $SCOUT_UPSTREAM as $OWNER/$SCOUT_NAME..."
-gh repo fork "$SCOUT_UPSTREAM" \
-  --fork-name "$SCOUT_NAME" \
-  --clone=false \
-  --default-branch-only >/dev/null
+fork_args=(--fork-name "$SCOUT_NAME" --clone=false --default-branch-only)
+[[ -n "${SCOUT_ORG:-}" ]] && fork_args+=(--org "$SCOUT_ORG")
+gh repo fork "$SCOUT_UPSTREAM" "${fork_args[@]}" >/dev/null
 
 # Forks have Actions disabled by default ("I understand my workflows" button).
 # Flip the switch via API so scout-runner actually fires.

@@ -12,6 +12,11 @@
 #   --ref=<branch|tag>                      Default: main
 #   --upstream=<owner>/<repo>               Default: Laoujin/Scout
 #   --dir=<path>                            Default: $PWD/scout-install
+#   --org=<org>                             Fork + create Atlas under this org
+#                                           instead of the authenticated user
+#                                           (required when the user already owns
+#                                           the upstream, e.g. Laoujin forking
+#                                           Laoujin/Scout).
 set -euo pipefail
 
 # When invoked via `curl … | bash`, bash reads *this script* from stdin line by
@@ -42,6 +47,7 @@ REF="main"
 UPSTREAM="Laoujin/Scout"
 INSTALL_DIR="$PWD/scout-install"
 LOCAL_SCOUT=""
+ORG=""
 
 for arg in "$@"; do
   case "$arg" in
@@ -50,6 +56,7 @@ for arg in "$@"; do
     --upstream=*) UPSTREAM="${arg#*=}" ;;
     --dir=*)      INSTALL_DIR="${arg#*=}" ;;
     --local=*)    LOCAL_SCOUT="${arg#*=}" ;;   # use local checkout instead of fetching from GitHub
+    --org=*)      ORG="${arg#*=}" ;;           # fork + create Atlas under this org instead of authed user
     -h|--help)    sed -n '3,16p' "$0" 2>/dev/null || grep '^#' "$0" | head -16; exit 0 ;;
     *) echo "Unknown argument: $arg" >&2; exit 2 ;;
   esac
@@ -112,6 +119,7 @@ docker run --rm -it \
   -e SCOUT_CONFIG="$CONFIG" \
   -e SCOUT_UPSTREAM="$UPSTREAM" \
   -e SCOUT_REF="$REF" \
+  -e SCOUT_ORG="$ORG" \
   -e GH_TOKEN \
   -e GITHUB_TOKEN \
   scout-installer
