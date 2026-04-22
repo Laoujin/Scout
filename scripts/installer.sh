@@ -140,7 +140,7 @@ step "Creating scout-research label..."
 gh label create scout-research \
   --color c2410c \
   --description "Scout research request" \
-  --repo "$SCOUT_OWNER/$SCOUT_NAME" 2>/dev/null || true
+  --repo "$SCOUT_OWNER/$SCOUT_NAME" >/dev/null 2>&1 || true
 ok
 
 SCOUT_DIR="/work/$SCOUT_NAME"
