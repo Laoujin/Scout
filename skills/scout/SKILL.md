@@ -60,6 +60,21 @@ Pick sources based on the topic. This is not a checklist — consult the categor
 | Talks / SOTA / research | Recent blogs, Twitter/X threads, arXiv, Google Scholar, conference talks (YouTube) |
 | Current events / time-sensitive | Major news outlets, publication dates matter |
 
+## Source type taxonomy
+
+Every ledger entry carries a `source_type` tag. Use the smallest set that covers the topic; don't invent new types without reason.
+
+| Tag | Use for |
+|---|---|
+| `official` | Vendor docs, project README, official specification, primary-source datasheet |
+| `peer-reviewed` | arXiv, conference paper, journal article, Google Scholar with citations |
+| `vendor-blog` | Company engineering blog, product launch post, marketing whitepaper |
+| `forum` | Reddit, HN, Stack Overflow, Discord/GitHub issue thread |
+| `news` | Major outlet (NYT/WSJ/etc.), tech press (TechCrunch/Verge/etc.), publication dates matter |
+| `wiki` | Wikipedia, fandom wikis, project wikis |
+
+Use the tag in the ledger. Optionally surface it as a small label next to a citation in a comparison table when source-credibility is part of what the reader is weighing (e.g., `[[4]]` `(vendor-blog)`).
+
 ## Depth behaviour
 
 | Depth | Target length | Content |
@@ -84,7 +99,7 @@ Pick sources based on the topic. This is not a checklist — consult the categor
 3. **Comparisons → tables** when the axes are measurable (specs, numbers, features). When the comparison is philosophy or fit-for-context, use short labeled sections per option instead — but keep it scannable, not prose blobs.
 4. **Terse.** No "in conclusion", no filler, no "it is worth noting that".
 5. **No emojis.**
-6. **Label opinions by source.** "r/homelab consensus:", "Wirecutter top pick:", "arXiv 2025 paper claims:".
+6. **Label opinions by source, using the source_type taxonomy for credibility signals.** Prose form: "r/homelab consensus:", "Wirecutter top pick:", "arXiv 2025 paper claims:". Tabular form: `source_type` tag in the ledger entry; optionally inline next to the citation when relevant.
 7. **GitHub repos → link + star count.** When the research mentions a tool, library, framework, or project that has a public GitHub repo, the first mention hyperlinks the name to the repo and includes the current star count with the month you looked. Example: `[Astro](https://github.com/withastro/astro) (52 k stars, Apr 2026)`. Stars decay fast; the month keeps it honest.
 8. **If a claim has no URL, do not make the claim.**
 9. **Citation ledger on disk (depth=standard and depth=deep).** Write a JSON Lines file at `RESEARCH_DIR/citations.jsonl`. One line per distinct source URL cited, in order of first citation. Schema:
@@ -138,7 +153,7 @@ Example body structures (not prescriptive):
 
 1. Parse inputs. Pick the file extension based on format; final path is `ATLAS_DIR/research/DATE-SLUG/index.{md,html}`.
 2. Pick source rubric based on topic shape.
-3. Research loop: WebSearch to discover URLs, WebFetch to read. When WebFetch returns empty/JS-walled content, fall back to `npx playwright chromium -o rendered.html <url>` and read the rendered HTML.
+3. Research loop: WebSearch to discover URLs, WebFetch to read. Every WebSearch query includes the literal year from DATE (e.g., `"static site generator 2026"`, not `"static site generator"`) — the model's training cutoff predates runtime and defaults to stale years otherwise. When WebFetch returns empty or JS-walled content, fall back to `npx playwright chromium -o rendered.html <url>` and read the rendered HTML.
 4. For `depth=standard` and `depth=deep`, append to `RESEARCH_DIR/citations.jsonl` as each usable claim is extracted from a source. For `depth=ceo`, track `{claim, url}` pairs in memory (single pass is short enough). No claim without URL.
 5. Draft the body with inline citations. Use tables for comparisons.
 5.5. **Reflect and requery (standard and deep).** Before the self-check, read the draft alongside the ledger. List 1–3 explicit knowledge gaps: claims that feel thin, perspectives missing, numbers or dates that need corroboration. For each gap, fire one targeted search (WebSearch/WebFetch), append new ledger entries, and revise the draft to incorporate the findings. Hard cap: one reflect round for standard; deep handles its own reflection inside each researcher sub-agent (see `skills/scout/deep.md`). If no gaps are found, state that in a single line at the top of the self-check output.
