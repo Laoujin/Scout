@@ -176,7 +176,11 @@ gh api -X PATCH "repos/$ATLAS_OWNER/$ATLAS_NAME" \
 
 # ---------- Step 9: Atlas deploy key ----------
 echo "→ Generating + uploading Atlas deploy key..."
-KEYDIR=$(mktemp -d)
+# Put the keys under /work (= $SCOUT_HOST_WORK on host) so the side-car
+# docker run — which talks to the HOST daemon via the socket — can mount
+# them by their host path. Container-local /tmp is invisible to the host.
+KEYDIR=/work/.scout-keys
+rm -rf "$KEYDIR" && mkdir -p "$KEYDIR"
 ssh-keygen -t ed25519 -f "$KEYDIR/atlas_deploy" -C "scout-nas" -N "" -q
 
 # Remove any prior scout-nas key so re-runs don't duplicate
@@ -198,12 +202,16 @@ Host github.com-atlas
   StrictHostKeyChecking accept-new
 CFG
 
-# Seed the runtime container's named volume via a throwaway side-car
+# Seed the runtime container's named volume via a throwaway side-car.
+# Translate /work/... to its real host path so the daemon can find it.
+: "${SCOUT_HOST_WORK:?SCOUT_HOST_WORK is required (bug in host install.sh)}"
+HOST_KEYDIR="${KEYDIR/#\/work/$SCOUT_HOST_WORK}"
+
 echo "→ Seeding scout_atlas-ssh volume..."
 docker volume create scout_atlas-ssh >/dev/null
 docker run --rm \
   -v scout_atlas-ssh:/dest \
-  -v "$KEYDIR:/src:ro" \
+  -v "$HOST_KEYDIR:/src:ro" \
   alpine:3.20 sh -c '
     cp /src/atlas_deploy /src/atlas_deploy.pub /src/config /dest/
     chown -R 1000:1000 /dest

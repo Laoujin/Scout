@@ -122,6 +122,7 @@ docker run --rm -it \
   -e SCOUT_UPSTREAM="$UPSTREAM" \
   -e SCOUT_REF="$REF" \
   -e SCOUT_ORG="$ORG" \
+  -e SCOUT_HOST_WORK="$INSTALL_DIR" \
   -e GH_TOKEN \
   -e GITHUB_TOKEN \
   scout-installer
