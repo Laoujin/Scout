@@ -16,7 +16,7 @@ Scout TODO List
     - [ ] The options should be the Claude menu, the user picks, then it creates the github issue
     - [ ] Or we could just remove it
 - [ ] Generating an image for the research would be very cool (ie give a Nano Banana API key?)
-- [ ] We prefer tables... but on mobile tables are not really handy... how do we handle that?
+- [x] We prefer tables... but on mobile tables are not really handy... how do we handle that?
 - [ ] A log of what the LLM did? Useful?
 - [ ] Security: what can be stolen from me?
 - [x] Add Claude cost to frontmatter
