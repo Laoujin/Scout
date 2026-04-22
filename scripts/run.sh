@@ -7,6 +7,13 @@ set -euo pipefail
 : "${TOPIC:?TOPIC is required}"
 : "${DEPTH:=standard}"
 : "${FORMAT:=auto}"
+
+# Normalize display aliases (from workflow_dispatch or direct calls) to internal codes.
+case "$DEPTH" in
+  recon)      DEPTH=ceo ;;
+  survey)     DEPTH=standard ;;
+  expedition) DEPTH=deep ;;
+esac
 RAW_TOPIC="${RAW_TOPIC:-$TOPIC}"
 ATLAS_REPO="${ATLAS_REPO:-git@github.com:Laoujin/atlas.git}"
 

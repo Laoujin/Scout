@@ -20,11 +20,11 @@ body:
     id: depth
     attributes:
       label: Depth
-      description: "ceo = one-page decision · standard = 2-4 pages · deep = all angles"
+      description: "recon = one-page decision · survey = 2-4 pages · expedition = all angles"
       options:
-        - ceo
-        - standard
-        - deep
+        - recon
+        - survey
+        - expedition
       default: 1
     validations:
       required: true

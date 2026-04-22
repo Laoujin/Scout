@@ -12,11 +12,11 @@ on:
         required: true
         type: string
       depth:
-        description: "Depth of research"
+        description: "recon = one-page decision · survey = 2-4 pages · expedition = all angles"
         required: true
-        default: standard
+        default: survey
         type: choice
-        options: [ceo, standard, deep]
+        options: [recon, survey, expedition]
       format:
         description: "Output format"
         required: true

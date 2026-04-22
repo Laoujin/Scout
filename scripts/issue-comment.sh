@@ -12,6 +12,7 @@ set -euo pipefail
 : "${SHARPENED_TOPIC:?SHARPENED_TOPIC is required}"
 : "${DEPTH:=standard}"
 : "${FORMAT:=auto}"
+: "${DEPTH_LABEL:=$DEPTH}"
 : "${GH_TOKEN:?GH_TOKEN is required}"
 : "${GH_REPO:?GH_REPO is required (e.g. owner/repo)}"
 : "${COMMENT_HEADER:=Sharpened proposal}"
@@ -30,7 +31,7 @@ ${SHARPENED_TOPIC}
 \`\`\`
 <!-- scout-topic-end -->
 
-- [ ] **Start research** — tick this to publish to Atlas (depth: \`${DEPTH}\`, format: \`${FORMAT}\`).
+- [ ] **Start research** — tick this to publish to Atlas (depth: \`${DEPTH_LABEL}\`, format: \`${FORMAT}\`).
 
 Not what you wanted? Reply with feedback (e.g. "focus on open-source", "shorter, decision-only") and I'll propose a new sharpened version.
 EOF

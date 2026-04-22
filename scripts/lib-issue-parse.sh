@@ -43,6 +43,17 @@ _trim_blanks() {
   '
 }
 
+# Map display-name aliases from the Issue Form back to internal codes used by
+# downstream scripts (run.sh, tighten.sh, skills, agents).
+_normalize_depth() {
+  case "$1" in
+    recon)      echo ceo ;;
+    survey)     echo standard ;;
+    expedition) echo deep ;;
+    *)          echo "$1" ;;
+  esac
+}
+
 parse_issue_body() {
   local body="$1"
   RAW_TOPIC="$(_extract_section "$body" Topic | _trim_blanks)"
@@ -55,7 +66,9 @@ parse_issue_body() {
   else
     SKIP_TIGHTEN=false
   fi
-  [ -n "$DEPTH" ]  || DEPTH=standard
+  [ -n "$DEPTH" ]  || DEPTH=survey
   [ -n "$FORMAT" ] || FORMAT=auto
-  export RAW_TOPIC DEPTH FORMAT SKIP_TIGHTEN
+  DEPTH_LABEL="$DEPTH"
+  DEPTH="$(_normalize_depth "$DEPTH")"
+  export RAW_TOPIC DEPTH DEPTH_LABEL FORMAT SKIP_TIGHTEN
 }

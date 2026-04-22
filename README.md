@@ -18,11 +18,13 @@
 
 ### Inputs
 
-| Field    | Values                      | Default    |
-|----------|-----------------------------|------------|
-| `topic`  | Free text                   | —          |
-| `depth`  | `ceo` / `standard` / `deep` | `standard` |
-| `format` | `md` / `html` / `auto`      | `auto`     |
+| Field    | Values                                  | Default  |
+|----------|-----------------------------------------|----------|
+| `topic`  | Free text                               | —        |
+| `depth`  | `recon` / `survey` / `expedition`       | `survey` |
+| `format` | `md` / `html` / `auto`                  | `auto`   |
+
+CLI flag and workflow input values remain the original internal codes: `ceo` (recon), `standard` (survey), `deep` (expedition).
 
 See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour, [`skills/scout/deep.md`](skills/scout/deep.md) for the parallel-sub-agent flow that `depth=deep` triggers, and [`skills/scout/tighten.md`](skills/scout/tighten.md) for how raw topics get sharpened into research briefs before a run.
 
@@ -30,9 +32,9 @@ See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behavio
 
 | Tier | Shape | Artifacts | Wall-clock |
 |------|-------|-----------|------------|
-| `ceo` | Single pass, inline cites | `index.{md,html}` | ~2–5 min |
-| `standard` | Single pass + on-disk `citations.jsonl` + reflect-and-requery | `index.*`, `citations.jsonl` | ~5–10 min |
-| `deep` | Parent dispatches researcher sub-agents per sub-question (≤6 parallel), merges ledgers, runs post-write reviewer, applies one fix pass | `index.*`, `citations.jsonl`, `citations.a*.jsonl`, `outline.md` | ~15–30 min |
+| `recon` (CLI: `ceo`) | Single pass, inline cites | `index.{md,html}` | ~2–5 min |
+| `survey` (CLI: `standard`) | Single pass + on-disk `citations.jsonl` + reflect-and-requery | `index.*`, `citations.jsonl` | ~5–10 min |
+| `expedition` (CLI: `deep`) | Parent dispatches researcher sub-agents per sub-question (≤6 parallel), merges ledgers, runs post-write reviewer, applies one fix pass | `index.*`, `citations.jsonl`, `citations.a*.jsonl`, `outline.md` | ~15–30 min |
 
 Only the repo OWNER's Issues / dispatches trigger the workflow (author-association gate). Forks are safe out of the box — nobody but you can spend your runner.
 
@@ -123,3 +125,8 @@ In Claude Code:
 - **Claude auth expired** → `docker exec -it scout-runner runuser -u runner -- claude`.
 - **Update Claude CLI** → `docker-compose build --pull && docker-compose up -d`.
 - **Update Scout** → `git pull` in the Scout repo, then `cd docker && docker-compose build --pull && docker-compose up -d`. Claude auth, runner registration, and the Atlas SSH key survive the rebuild (they're on named volumes).
+
+
+## Alternatives
+
+- ⭐ 515 [199-biotechnologies/claude-deep-research-skill](https://github.com/199-biotechnologies/claude-deep-research-skill)
