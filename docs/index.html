@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="./scout-atlas-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
 <style>
 /* =========================================================================
    Scout marketing site
@@ -191,7 +191,8 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
    rendering of the mockups in docs/superpowers/atlas-skeleton-mockups.html.
    ========================================================================= */
 #install { background: var(--surface-tint); }
-.ya-controls { display: grid; gap: 28px; margin-bottom: 36px; }
+.ya-controls { display: grid; gap: 0; margin-bottom: 18px; }
+section.ya-group { padding: 15px 0; }
 .ya-split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
 .ya-group h3 {
   margin: 0 0 12px;
@@ -328,6 +329,8 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
 .ap-viewport .cover .mark.large { font-size: 52px; }
 .ap-viewport .cover .mark.tiny  { font-size: 18px; }
 .ap-viewport .cover.ratio { aspect-ratio: 3/2; }
+.ap-viewport .cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; z-index: 1; }
+.ap-viewport .cover:has(.cover-img)::before { display: none; }
 .ap-viewport .chip {
   display: inline-block; padding: 1px 7px; border-radius: 999px;
   font-size: 11px; color: var(--pal-fg-muted);
@@ -361,17 +364,26 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
 /* S1 — Hero + footer */
 .ap.skel-s1 .s1 { display: flex; flex-direction: column; min-height: 620px; }
 .ap.skel-s1 .s1-hero {
-  padding: 40px 32px 28px; text-align: center;
-  background: radial-gradient(ellipse at top, color-mix(in srgb, var(--pal-accent) 16%, transparent), transparent 60%), var(--pal-bg);
+  padding: 56px 40px; text-align: left;
+  display: flex; align-items: center; gap: 24px;
+  background:
+    linear-gradient(to bottom, color-mix(in srgb, var(--pal-bg) 25%, transparent), var(--pal-bg) 100%),
+    url('./hero-banner.png') center / cover no-repeat;
   border-bottom: 1px solid var(--pal-border);
+  position: relative;
 }
 .ap.skel-s1 .s1-logo {
-  width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 12px;
-  background: var(--pal-accent); color: var(--pal-accent-fg);
-  display: grid; place-content: center;
-  font: italic 700 30px/1 Georgia, serif;
+  width: 72px; height: 72px; margin: 0; border-radius: 14px;
+  display: block; position: relative; flex-shrink: 0;
 }
-.ap.skel-s1 .s1-hero h1 { margin: 0 0 4px; font-family: 'Fraunces', Georgia, serif; font-size: 30px; letter-spacing: -0.02em; color: var(--pal-fg); }
+.ap.skel-s1 .s1-hero-text { position: relative; }
+.ap.skel-s1 .s1-hero h1 {
+  margin: 0 0 6px;
+  font-family: 'Playfair Display', 'Fraunces', Georgia, serif;
+  font-style: italic; font-weight: 700;
+  font-size: 46px; line-height: 1; letter-spacing: -0.01em;
+  color: var(--pal-fg);
+}
 .ap.skel-s1 .s1-hero p { margin: 0; color: var(--pal-fg-muted); font-size: 13px; }
 .ap.skel-s1 .s1-filter { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; padding: 12px 32px; border-bottom: 1px solid var(--pal-border); }
 .ap.skel-s1 .s1-content { padding: 20px 28px 24px; flex: 1; }
@@ -815,12 +827,12 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
 
   // Sample entries — mirror what Scout would publish to Atlas
   const entries = [
-    { title: 'Static site generators in 2026',  mark: 'SSG', hue: 210, depth: 'standard', fmt: 'md',   summary: 'Astro dominates, Hugo holds the speed crown.', date: '2026-04-20', citations: 18, read: 4,  tags: ['web','tooling'] },
-    { title: 'Romantic restaurants in Ghent',   mark: 'GHT', hue: 350, depth: 'standard', fmt: 'html', summary: 'Ten candlelit rooms near the belfry.',         date: '2026-04-15', citations: 23, read: 6,  tags: ['food','ghent'] },
-    { title: 'Research agents in 2026',         mark: 'RA',  hue: 270, depth: 'deep',     fmt: 'md',   summary: 'Perplexity and GPT Researcher lead.',          date: '2026-04-12', citations: 42, read: 12, tags: ['ai','agents'] },
-    { title: 'Replacing Synology',              mark: 'NAS', hue: 150, depth: 'deep',     fmt: 'html', summary: 'AVX2 mini-PCs under €500.',                    date: '2026-04-08', citations: 35, read: 9,  tags: ['hardware','homelab'] },
-    { title: 'Unique birthday gift ideas',      mark: 'GFT', hue: 30,  depth: 'ceo',      fmt: 'md',   summary: 'Decision-oriented shortlist for time-pressed gift-givers.', date: '2026-04-02', citations: 9,  read: 2,  tags: ['personal','ideas'] },
-    { title: 'Self-hosted MCP servers',         mark: 'MCP', hue: 190, depth: 'standard', fmt: 'md',   summary: 'Six MCP servers that earn their keep.',        date: '2026-03-28', citations: 19, read: 5,  tags: ['mcp','ai'] }
+    { title: 'Static site generators in 2026',  slug: 'static-site-generators',  mark: 'SSG', hue: 210, depth: 'standard', fmt: 'md',   summary: 'Astro dominates, Hugo holds the speed crown.', date: '2026-04-20', citations: 18, read: 4,  tags: ['web','tooling'] },
+    { title: 'Romantic restaurants in Ghent',   slug: 'romantic-restaurants-ghent', mark: 'GHT', hue: 350, depth: 'standard', fmt: 'html', summary: 'Ten candlelit rooms near the belfry.',         date: '2026-04-15', citations: 23, read: 6,  tags: ['food','ghent'] },
+    { title: 'Research agents in 2026',         slug: 'research-agents-2026',    mark: 'RA',  hue: 270, depth: 'deep',     fmt: 'md',   summary: 'Perplexity and GPT Researcher lead.',          date: '2026-04-12', citations: 42, read: 12, tags: ['ai','agents'] },
+    { title: 'Replacing Synology',              slug: 'replacing-synology',      mark: 'NAS', hue: 150, depth: 'deep',     fmt: 'html', summary: 'AVX2 mini-PCs under €500.',                    date: '2026-04-08', citations: 35, read: 9,  tags: ['hardware','homelab'] },
+    { title: 'Unique birthday gift ideas',      slug: 'unique-birthday-gifts',   mark: 'GFT', hue: 30,  depth: 'ceo',      fmt: 'md',   summary: 'Decision-oriented shortlist for time-pressed gift-givers.', date: '2026-04-02', citations: 9,  read: 2,  tags: ['personal','ideas'] },
+    { title: 'Self-hosted MCP servers',         slug: 'self-hosted-mcp',         mark: 'MCP', hue: 190, depth: 'standard', fmt: 'md',   summary: 'Six MCP servers that earn their keep.',        date: '2026-03-28', citations: 19, read: 5,  tags: ['mcp','ai'] }
   ];
 
   const preview = document.getElementById('atlas-preview');
@@ -829,7 +841,7 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
   // ---------- Card renderers (scoped; only used by s1-s5) ----------
   function renderCard(e) {
     return `<article class="card" style="--h:${e.hue};">
-      <div class="card-cover cover ratio"><span class="mark">${e.mark}</span></div>
+      <div class="card-cover cover ratio"><img class="cover-img" src="./cover-svg-prototype/${e.slug}.svg" alt="" loading="lazy"></div>
       <div class="card-body">
         <div class="card-top">
           <span class="depth-badge depth-${e.depth}">${e.depth}</span>
@@ -853,16 +865,20 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
   function renderS1() {
     return `<div class="s1">
       <header class="s1-hero">
-        <div class="s1-logo">A</div>
-        <h1>Atlas</h1>
-        <p>Research notes published by Scout.</p>
+        <img class="s1-logo" src="./scout-atlas-icon.png" alt="Atlas">
+        <div class="s1-hero-text">
+          <h1>Atlas</h1>
+          <p>Research notes published by Scout.</p>
+        </div>
       </header>
       <nav class="s1-filter">
         <span class="chip solid">All · ${entries.length}</span>
-        ${[...new Set(entries.flatMap(e => e.tags))].slice(0, 6).map(t => {
-          const c = entries.filter(e => e.tags.includes(t)).length;
-          return `<span class="chip">${t} · ${c}</span>`;
-        }).join('')}
+        ${(() => {
+          const counts = {};
+          entries.flatMap(e => e.tags).forEach(t => counts[t] = (counts[t] || 0) + 1);
+          return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4)
+            .map(([t, c]) => `<span class="chip">${t} · ${c}</span>`).join('');
+        })()}
       </nav>
       <section class="s1-content">${renderGrid()}</section>
       <footer class="s1-footer">
@@ -967,7 +983,7 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
         <div class="s5-featured">
           <span class="s5-tag-above">Latest · ${new Date(featured.date).toLocaleString('en-US', {month:'short', day:'2-digit'})}</span>
           <article class="s5-featured-card">
-            <div class="cover ratio" style="--h:${featured.hue};"><span class="mark large">${featured.mark}</span></div>
+            <div class="cover ratio" style="--h:${featured.hue};"><img class="cover-img" src="./cover-svg-prototype/${featured.slug}.svg" alt="" loading="lazy"></div>
             <div class="s5-featured-body">
               <h3>${featured.title}</h3>
               <p>${featured.summary}</p>
