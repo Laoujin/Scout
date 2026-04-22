@@ -87,6 +87,11 @@ Pick sources based on the topic. This is not a checklist — consult the categor
 6. **Label opinions by source.** "r/homelab consensus:", "Wirecutter top pick:", "arXiv 2025 paper claims:".
 7. **GitHub repos → link + star count.** When the research mentions a tool, library, framework, or project that has a public GitHub repo, the first mention hyperlinks the name to the repo and includes the current star count with the month you looked. Example: `[Astro](https://github.com/withastro/astro) (52 k stars, Apr 2026)`. Stars decay fast; the month keeps it honest.
 8. **If a claim has no URL, do not make the claim.**
+9. **Citation ledger on disk (depth=standard and depth=deep).** Write a JSON Lines file at `RESEARCH_DIR/citations.jsonl`. One line per distinct source URL cited, in order of first citation. Schema:
+   ```json
+   {"n": 1, "url": "https://example.com", "claim": "what this source supports, one sentence", "source_type": "official|peer-reviewed|vendor-blog|forum|news|wiki", "quote": "verbatim snippet from the source, ≤300 chars"}
+   ```
+   The `n` field matches the `[[n]]` marker in the body exactly. Every `[[n]]` in the artifact has a corresponding ledger entry. Every ledger entry has a non-empty `url`. The ledger ships with the published folder — it is an evidence audit trail and the input to future "extend this research" runs. For `depth=ceo`, the ledger is optional and a single-pass with inline cites is sufficient.
 
 ## Frontmatter (required; identical for .md and .html)
 
@@ -134,7 +139,7 @@ Example body structures (not prescriptive):
 1. Parse inputs. Pick the file extension based on format; final path is `ATLAS_DIR/research/DATE-SLUG/index.{md,html}`.
 2. Pick source rubric based on topic shape.
 3. Research loop: WebSearch to discover URLs, WebFetch to read. When WebFetch returns empty/JS-walled content, fall back to `npx playwright chromium -o rendered.html <url>` and read the rendered HTML.
-4. Track `{claim, url}` pairs. No claim without URL.
+4. For `depth=standard` and `depth=deep`, append to `RESEARCH_DIR/citations.jsonl` as each usable claim is extracted from a source. For `depth=ceo`, track `{claim, url}` pairs in memory (single pass is short enough). No claim without URL.
 5. Draft the body with inline citations. Use tables for comparisons.
 6. **Self-check before writing:**
    - Artifact opens with a TL;DR / Decision block (1-3 sentences, cited)?
@@ -145,6 +150,8 @@ Example body structures (not prescriptive):
    - No trailing "References" dump?
    - Frontmatter present with all required fields? `format` matches the extension; `citations` equals number of distinct URLs cited; `reading_time_min` reflects length.
    - For HTML: no `<!doctype>`, `<head>`, `<body>`, `<link>`, or "← Atlas" back-link (layout provides them).
+   - For standard/deep: `citations.jsonl` exists; line count equals the `citations` frontmatter field; every `[[n]]` in the body matches a ledger entry's `n`; no ledger entry has empty `url`.
+   - For standard/deep: no duplicate URLs in the ledger (the same source is one entry, cited multiple times via the same `n`).
 7. Write the file with the `Write` tool.
 8. Report: one line with the final path. `run.sh` handles commit and push.
 
