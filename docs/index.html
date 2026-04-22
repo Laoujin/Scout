@@ -253,6 +253,14 @@ section.ya-group { padding: 15px 0; }
 .card-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .card-btn .label { display: block; font-weight: 400; font-size: 10px; opacity: 0.8; margin-top: 2px; }
 
+/* Collapsible wrapper around each picker — open on desktop, dropdown-style trigger on mobile */
+.ya-dd { margin: 0; }
+.ya-dd-summary { list-style: none; cursor: default; display: block; }
+.ya-dd-summary::-webkit-details-marker { display: none; }
+.ya-dd-summary::marker { content: ""; }
+.ya-dd-caret { display: none; }
+.ya-dd-summary h3 { margin: 0 0 12px; }
+
 /* =========================================================================
    Atlas preview — browser frame + viewport
    ========================================================================= */
@@ -657,6 +665,21 @@ section.ya-group { padding: 15px 0; }
   .ap-url { font-size: 10.5px; padding: 3px 8px; }
   .ap-viewport { min-height: 480px; }
 
+  /* Collapse each picker into a dropdown-style disclosure on mobile */
+  .ya-dd { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); overflow: hidden; }
+  .ya-dd + .ya-dd, .ya-split > .ya-group + .ya-group { margin-top: 10px; }
+  section.ya-group { padding: 0; }
+  .ya-controls { gap: 10px; margin-bottom: 14px; }
+  .ya-split { gap: 10px; }
+  .ya-dd-summary { cursor: pointer; padding: 11px 14px; display: flex; align-items: center; gap: 8px; }
+  .ya-dd-summary h3 { margin: 0; font: 500 14px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; letter-spacing: 0; text-transform: none; color: var(--fg); display: flex; align-items: baseline; gap: 6px; flex: 1; min-width: 0; }
+  .ya-dd-summary h3 .ya-sub { color: var(--fg-muted); font-weight: 400; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ya-dd-caret { display: inline-block; color: var(--fg-muted); font-size: 11px; line-height: 1; transition: transform .2s ease; flex-shrink: 0; }
+  .ya-dd[open] .ya-dd-caret { transform: rotate(180deg); }
+  .ya-dd > .swatches,
+  .ya-dd > .layout-picks,
+  .ya-dd > .card-picks { padding: 2px 12px 12px; }
+
   /* Force every card variant to single column (override per-variant rules) */
   .ap.card-v2 .entry-grid,
   .ap.card-v3 .entry-grid,
@@ -870,7 +893,11 @@ section.ya-group { padding: 15px 0; }
 
     <div class="ya-controls">
       <section class="ya-group">
-        <h3>Palette <span id="pal-label" class="ya-sub">· Warm rust</span></h3>
+       <details class="ya-dd" open>
+        <summary class="ya-dd-summary">
+          <h3>Palette <span id="pal-label" class="ya-sub">· Warm rust</span></h3>
+          <span class="ya-dd-caret" aria-hidden="true">▾</span>
+        </summary>
         <div class="swatches" id="palette-picker">
           <button class="swatch-btn active" data-key="rust" data-name="Warm rust"><span class="sw"><i style="background:#faf9f6"></i><i style="background:#c2410c"></i><i style="background:#1a1a1a"></i></span>Warm rust</button>
           <button class="swatch-btn" data-key="paper" data-name="Paper &amp; ink"><span class="sw"><i style="background:#fbf7ea"></i><i style="background:#a84a07"></i><i style="background:#2a1e12"></i></span>Paper &amp; ink</button>
@@ -881,11 +908,16 @@ section.ya-group { padding: 15px 0; }
           <button class="swatch-btn" data-key="solarized" data-name="Solarized"><span class="sw"><i style="background:#fdf6e3"></i><i style="background:#b58900"></i><i style="background:#586e75"></i></span>Solarized</button>
           <button class="swatch-btn" data-key="nord" data-name="Nord"><span class="sw"><i style="background:#2e3440"></i><i style="background:#88c0d0"></i><i style="background:#eceff4"></i></span>Nord</button>
         </div>
+       </details>
       </section>
 
       <div class="ya-split">
         <section class="ya-group">
-          <h3>Layout <span id="skel-label" class="ya-sub">· Hero + footer</span></h3>
+         <details class="ya-dd" open>
+          <summary class="ya-dd-summary">
+            <h3>Layout <span id="skel-label" class="ya-sub">· Hero + footer</span></h3>
+            <span class="ya-dd-caret" aria-hidden="true">▾</span>
+          </summary>
           <div class="layout-picks" id="skeleton-picker">
             <button class="layout-btn active" data-key="s1" data-name="Hero + footer"><svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><rect x="10" y="6" width="60" height="16" rx="1" fill="currentColor" opacity=".15"/><circle cx="40" cy="14" r="3" fill="currentColor"/><rect x="10" y="26" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="30" y="26" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="50" y="26" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="10" y="42" width="60" height="3" rx="1" fill="currentColor" opacity=".2"/></svg><span class="n">s1</span></button>
             <button class="layout-btn" data-key="s2" data-name="Top bar + footer"><svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2" y="2" width="76" height="7" rx="1" fill="currentColor" opacity=".2"/><rect x="10" y="14" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="30" y="14" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="50" y="14" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="10" y="30" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="30" y="30" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="50" y="30" width="16" height="12" rx="1" fill="currentColor" opacity=".4"/><rect x="2" y="43" width="76" height="5" fill="currentColor" opacity=".15"/></svg><span class="n">s2</span></button>
@@ -894,10 +926,15 @@ section.ya-group { padding: 15px 0; }
             <button class="layout-btn" data-key="s5" data-name="Magazine"><svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><rect x="2" y="2" width="76" height="22" fill="currentColor" opacity=".2"/><rect x="8" y="8" width="30" height="3" fill="currentColor" opacity=".6"/><rect x="8" y="14" width="22" height="2" fill="currentColor" opacity=".5"/><rect x="50" y="6" width="24" height="14" rx="1" fill="currentColor" opacity=".55"/><rect x="10" y="28" width="18" height="14" rx="1" fill="currentColor" opacity=".4"/><rect x="32" y="28" width="18" height="14" rx="1" fill="currentColor" opacity=".4"/><rect x="54" y="28" width="18" height="14" rx="1" fill="currentColor" opacity=".4"/></svg><span class="n">s5</span></button>
             <button class="layout-btn" data-key="s6" data-name="Terminal"><svg width="80" height="50" viewBox="0 0 80 50"><rect x="2" y="2" width="76" height="46" rx="3" fill="none" stroke="currentColor" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="currentColor" opacity=".5"/><circle cx="13" cy="8" r="1.5" fill="currentColor" opacity=".5"/><circle cx="18" cy="8" r="1.5" fill="currentColor" opacity=".5"/><rect x="6" y="14" width="30" height="1.5" fill="currentColor" opacity=".6"/><rect x="6" y="19" width="40" height="1.5" fill="currentColor" opacity=".4"/><rect x="6" y="24" width="36" height="1.5" fill="currentColor" opacity=".4"/><rect x="6" y="29" width="44" height="1.5" fill="currentColor" opacity=".4"/><rect x="6" y="34" width="28" height="1.5" fill="currentColor" opacity=".4"/><rect x="2" y="42" width="76" height="6" fill="currentColor" opacity=".2"/></svg><span class="n">s6</span></button>
           </div>
+         </details>
         </section>
 
         <section class="ya-group">
-          <h3>Card style <span id="card-label" class="ya-sub">· Image-top</span></h3>
+         <details class="ya-dd" open>
+          <summary class="ya-dd-summary">
+            <h3>Card style <span id="card-label" class="ya-sub">· Image-top</span></h3>
+            <span class="ya-dd-caret" aria-hidden="true">▾</span>
+          </summary>
           <div class="card-picks" id="card-picker">
             <button class="card-btn active" data-key="v1" data-name="Image-top">v1<span class="label">image-top</span></button>
             <button class="card-btn" data-key="v2" data-name="Horizontal">v2<span class="label">horizontal</span></button>
@@ -907,6 +944,7 @@ section.ya-group { padding: 15px 0; }
             <button class="card-btn" data-key="v6" data-name="No-image">v6<span class="label">no image</span></button>
             <button class="card-btn" data-key="v7" data-name="Compact">v7<span class="label">compact</span></button>
           </div>
+         </details>
         </section>
       </div>
     </div>
@@ -1168,6 +1206,19 @@ section.ya-group { padding: 15px 0; }
   wire('palette-picker', 'palette', 'paletteName');
   wire('skeleton-picker', 'skeleton', 'skeletonName');
   wire('card-picker', 'card', 'cardName');
+
+  const mqMobile = window.matchMedia('(max-width: 600px)');
+  const dropdowns = document.querySelectorAll('.ya-dd');
+  function syncDropdowns() {
+    dropdowns.forEach(dd => { dd.open = !mqMobile.matches; });
+  }
+  syncDropdowns();
+  mqMobile.addEventListener('change', syncDropdowns);
+  document.querySelectorAll('.ya-dd [data-key]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (mqMobile.matches) btn.closest('.ya-dd').open = false;
+    });
+  });
 
   function installCommand() {
     const cfg = `${state.skeleton}.${state.palette}.${state.card}`;
