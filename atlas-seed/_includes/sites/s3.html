@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ page.title | default: site.title | default: 'Atlas' }}</title>
   {%- if site.description -%}<meta name="description" content="{{ site.description }}">{%- endif -%}
+  <link rel="icon" type="image/png" href="{{ '/assets/icon.png' | relative_url }}">
+  <link rel="apple-touch-icon" href="{{ '/assets/icon.png' | relative_url }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ '/assets/palettes/' | append: site.palette | append: '.css' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/base.css' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/sites/' | append: site.skeleton | append: '.css' | relative_url }}">
@@ -17,35 +19,33 @@
   {%- assign entries = site.pages | where: "type", "research" | sort: 'date' | reverse -%}
   {%- assign all_tags = '' | split: '' -%}
   {%- for e in entries -%}{%- for t in e.tags -%}{%- unless all_tags contains t -%}{%- assign all_tags = all_tags | push: t -%}{%- endunless -%}{%- endfor -%}{%- endfor -%}
-  {%- assign ceo_count = 0 -%}{%- assign std_count = 0 -%}{%- assign deep_count = 0 -%}
-  {%- for e in entries -%}
-    {%- if e.depth == 'ceo' -%}{%- assign ceo_count = ceo_count | plus: 1 -%}{%- endif -%}
-    {%- if e.depth == 'standard' -%}{%- assign std_count = std_count | plus: 1 -%}{%- endif -%}
-    {%- if e.depth == 'deep' -%}{%- assign deep_count = deep_count | plus: 1 -%}{%- endif -%}
-  {%- endfor -%}
 
-  <main class="s3">
+  <div class="s3">
     <header class="s3-topbar">
-      <a href="{{ '/' | relative_url }}" class="s3-brand">
-        <span class="s3-mark">{{ site.title | default: 'Atlas' | slice: 0,1 | upcase }}</span>
-        <span>{{ site.title | default: 'Atlas' }}</span>
-      </a>
+      <div class="s3-brand"><img class="s3-mark" src="{{ '/assets/icon.png' | relative_url }}" alt=""> {{ site.title | default: 'Atlas' }}</div>
       <div class="s3-spacer"></div>
-      {%- if site.scout_repo -%}<a class="s3-nav" href="https://github.com/{{ site.scout_repo }}">Scout ↗</a>{%- endif -%}
+      {%- if site.scout_repo -%}
+      <a class="s3-cta" href="https://github.com/{{ site.scout_repo }}/issues/new?template=research.yml" target="_blank" rel="noopener">+ New research</a>
+      {%- endif -%}
     </header>
-
     <div class="s3-main">
       <aside class="s3-sidenav">
         <h4>Filter</h4>
         <ul>
           <li class="active">All <span class="c">{{ entries | size }}</span></li>
-          <li>Latest <span class="c">{{ entries | size }}</span></li>
         </ul>
         <h4>Depth</h4>
         <ul>
-          <li>CEO <span class="c">{{ ceo_count }}</span></li>
-          <li>Standard <span class="c">{{ std_count }}</span></li>
-          <li>Deep <span class="c">{{ deep_count }}</span></li>
+          {%- assign recon_count = 0 -%}{%- assign survey_count = 0 -%}{%- assign exped_count = 0 -%}
+          {%- for e in entries -%}
+            {%- if e.depth == 'ceo' -%}{%- assign recon_count = recon_count | plus: 1 -%}
+            {%- elsif e.depth == 'standard' -%}{%- assign survey_count = survey_count | plus: 1 -%}
+            {%- elsif e.depth == 'deep' -%}{%- assign exped_count = exped_count | plus: 1 -%}
+            {%- endif -%}
+          {%- endfor -%}
+          <li>Recon <span class="c">{{ recon_count }}</span></li>
+          <li>Survey <span class="c">{{ survey_count }}</span></li>
+          <li>Expedition <span class="c">{{ exped_count }}</span></li>
         </ul>
         {%- if all_tags.size > 0 -%}
         <h4>Tags</h4>
@@ -59,13 +59,12 @@
         {%- endif -%}
       </aside>
       <section class="s3-content">
-        <div class="entry-grid" style="grid-template-columns: repeat(2, 1fr);">
+        <div class="entry-grid">
           {%- for e in entries -%}{%- assign _card_path = site.card | prepend: 'cards/' | append: '.html' -%}{%- include {{ _card_path }} entry=e -%}{%- endfor -%}
         </div>
       </section>
     </div>
-
-    <footer class="s3-footer">{{ site.title | default: 'Atlas' }} · {{ entries | size }} entries · built by Scout</footer>
-  </main>
+    <footer class="s3-footer">{{ site.title | default: 'Atlas' }} · <a href="https://github.com/{{ site.github.owner_name }}/{{ site.github.repository_name }}" target="_blank" rel="noopener">{{ site.github.owner_name }}/{{ site.github.repository_name }} ↗</a>{% if site.scout_repo %} · Built with <a href="https://github.com/{{ site.scout_repo }}" target="_blank" rel="noopener">Scout ↗</a>{% endif %}</footer>
+  </div>
 </body>
 </html>

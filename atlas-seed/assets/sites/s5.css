@@ -1,85 +1,85 @@
 /* Site S5 — Magazine cover */
 .s5 { display: flex; flex-direction: column; min-height: 100vh; max-width: 1280px; margin: 0 auto; }
+
 .s5-fold {
-  position: relative;
-  padding: 64px 48px 72px;
+  position: relative; padding: 40px 36px 48px;
   background:
-    radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--pal-accent) 30%, transparent), transparent 55%),
-    linear-gradient(135deg, var(--pal-surface-tint), var(--pal-bg));
+    linear-gradient(to right, var(--pal-bg) 0%, color-mix(in srgb, var(--pal-bg) 55%, transparent) 45%, color-mix(in srgb, var(--pal-bg) 30%, transparent) 100%),
+    url('../hero-banner.png') center / cover no-repeat;
   border-bottom: 1px solid var(--pal-border);
-  overflow: hidden;
-  min-height: 420px;
-  display: grid; grid-template-columns: 1fr 420px; gap: 48px; align-items: center;
+  overflow: hidden; min-height: 320px;
+  display: grid; grid-template-columns: 1fr 300px; gap: 32px; align-items: center;
 }
 .s5-watermark {
-  position: absolute; right: -40px; bottom: -80px;
-  font: italic 900 260px/0.85 Georgia, serif;
+  position: absolute; right: -30px; bottom: -60px;
+  font: italic 900 200px/0.85 Georgia, serif;
   color: color-mix(in srgb, var(--pal-accent) 10%, transparent);
   letter-spacing: -0.06em; pointer-events: none; user-select: none;
-  z-index: 0;
 }
-.s5-intro { position: relative; z-index: 1; }
 .s5-brand {
-  display: inline-flex; align-items: center; gap: 10px;
-  margin-bottom: 20px;
-  font: 600 11px ui-monospace, Menlo, monospace;
-  letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--pal-fg-muted);
+  display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px;
+  font-family: 'Bodoni Moda', 'Fraunces', Georgia, serif;
+  font-style: italic; font-weight: 700; font-size: 18px; color: var(--pal-fg);
 }
-.s5-mark {
-  width: 24px; height: 24px; border-radius: 5px;
-  background: var(--pal-accent); color: var(--pal-accent-fg);
-  display: grid; place-content: center;
-  font: italic 700 13px/1 Georgia, serif;
-}
+.s5-mark { width: 22px; height: 22px; border-radius: 5px; display: block; }
 .s5-fold h1 {
-  margin: 0 0 12px; font-size: 52px; line-height: 1.05; letter-spacing: -0.03em; color: var(--pal-fg);
+  margin: 0 0 8px;
   font-family: 'Fraunces', Georgia, serif;
+  font-size: 38px; line-height: 1.05; letter-spacing: -0.03em;
+  color: var(--pal-fg);
 }
-.s5-tag { margin: 0; color: var(--pal-fg-muted); font-size: 16px; max-width: 42ch; line-height: 1.5; }
-.s5-cta { margin-top: 26px; display: flex; gap: 10px; flex-wrap: wrap; }
-.s5-cta a {
-  padding: 9px 16px; border-radius: 6px;
-  font-size: 13px; font-weight: 500;
+.s5-tag { color: var(--pal-fg-muted); font-size: 13.5px; max-width: 40ch; margin: 0; }
+.s5-cta {
+  position: absolute; top: 18px; right: 22px;
+  padding: 6px 11px; border-radius: 5px;
+  background: var(--pal-accent); color: var(--pal-accent-fg);
+  font: 600 11.5px/1 ui-monospace, Menlo, monospace;
+  text-decoration: none; z-index: 2;
+  transition: transform .12s ease, filter .12s ease;
 }
-.s5-primary { background: var(--pal-accent); color: var(--pal-accent-fg); }
-.s5-primary:hover { filter: brightness(0.9); }
-.s5-ghost { border: 1px solid var(--pal-border); color: var(--pal-fg-muted); }
-.s5-ghost:hover { border-color: var(--pal-fg-muted); color: var(--pal-fg); }
+.s5-cta:hover { transform: translateY(-1px); filter: brightness(1.05); }
+
 .s5-featured { position: relative; z-index: 1; }
 .s5-tag-above {
-  font: 600 10.5px ui-monospace, Menlo, monospace;
+  font: 600 10px ui-monospace, Menlo, monospace;
   letter-spacing: 0.14em; text-transform: uppercase;
   color: var(--pal-accent);
-  margin-bottom: 10px; display: inline-block;
+  margin-bottom: 8px; display: inline-block;
 }
 .s5-featured-card {
-  display: block;
-  background: var(--pal-surface); border-radius: 10px; overflow: hidden;
+  display: block; background: var(--pal-surface);
+  border-radius: 10px; overflow: hidden;
   box-shadow: 0 8px 24px -8px rgba(0,0,0,.2), 0 0 0 1px var(--pal-border);
-  color: inherit;
+  color: inherit; text-decoration: none;
+  transition: transform .15s ease;
 }
-.s5-featured-card img, .s5-featured-card .cover { width: 100%; aspect-ratio: 3/2; object-fit: cover; }
-.s5-featured-body { padding: 16px 18px 18px; }
-.s5-featured-body h3 { margin: 0 0 6px; font-size: 17px; color: var(--pal-fg); font-family: 'Fraunces', Georgia, serif; }
-.s5-featured-body p { margin: 0; font-size: 13px; color: var(--pal-fg-muted); }
-.s5-content { padding: 48px 48px 32px; }
-.s5-content h2 {
-  margin: 0 0 24px; font-size: 16px;
-  color: var(--pal-fg-muted); font-weight: 600;
-  display: flex; align-items: center; gap: 10px;
+.s5-featured-card:hover { transform: translateY(-2px); }
+.s5-featured-card .cover { aspect-ratio: 3/2; }
+.s5-featured-body { padding: 12px 14px 14px; }
+.s5-featured-body h3 {
+  margin: 0 0 4px;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 15px; color: var(--pal-fg);
 }
-.s5-content h2::after { content: ""; flex: 1; height: 1px; background: var(--pal-border); }
+.s5-featured-body p { margin: 0; font-size: 12px; color: var(--pal-fg-muted); }
+
+.s5-content { padding: 30px 36px 24px; }
 .s5-footer {
-  padding: 20px 48px;
+  margin-top: auto; padding: 14px 36px;
   border-top: 1px solid var(--pal-border);
-  color: var(--pal-fg-faint); font-size: 12px;
-  background: var(--pal-surface-tint);
+  font-size: 11px; color: var(--pal-fg-faint);
+  display: flex; gap: 20px; justify-content: space-between;
 }
-@media (max-width: 900px) {
-  .s5-fold { grid-template-columns: 1fr; padding: 44px 28px; gap: 32px; }
-  .s5-fold h1 { font-size: 36px; }
-  .s5-watermark { font-size: 160px; bottom: -40px; right: -20px; }
-  .s5-content { padding: 32px 24px; }
-  .s5-footer { padding: 16px 24px; }
+.s5-footer a {
+  color: inherit; text-decoration: none;
+  border-bottom: 1px dotted color-mix(in srgb, currentColor 50%, transparent);
+  transition: color .15s ease, border-color .15s ease;
+}
+.s5-footer a:hover { color: var(--pal-accent); border-bottom-color: var(--pal-accent); }
+
+@media (max-width: 800px) {
+  .s5-fold { grid-template-columns: 1fr; padding: 32px 20px 36px; }
+  .s5-fold h1 { font-size: 30px; }
+  .s5-content { padding: 24px 20px; }
+  .s5-footer { padding: 14px 20px; flex-wrap: wrap; }
 }
