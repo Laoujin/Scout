@@ -780,8 +780,10 @@ section > .container > p.lede {
 
     <div id="install-cmd" class="install-cmd">
       <button class="copy-btn" data-copy="install-cmd-text">Copy</button>
-      <div class="line" id="install-cmd-text"><span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-fsSL</span> <span class="str">https://raw.githubusercontent.com/Laoujin/Scout/main/install.sh</span> <span class="comment">\</span></div>
-      <div class="line">  | <span class="cmd">bash</span> <span class="flag">-s</span> -- <span class="flag">--config=</span><span class="str" id="cfg-inline">s1.rust.v1</span></div>
+      <div id="install-cmd-text">
+        <div class="line"><span class="prompt">$</span> <span class="cmd">curl</span> <span class="flag">-fsSL</span> <span class="str">https://raw.githubusercontent.com/Laoujin/Scout/main/install.sh</span> <span class="comment">\</span></div>
+        <div class="line">  | <span class="cmd">bash</span> <span class="flag">-s</span> -- <span class="flag">--config=</span><span class="str" id="cfg-inline">s1.rust.v1</span></div>
+      </div>
     </div>
   </div>
 </section>
@@ -851,24 +853,39 @@ section > .container > p.lede {
   wire('skeleton-picker', 'skeleton', 'skeletonName');
   wire('card-picker', 'card', 'cardName');
 
-  // Copy buttons
+  function installCommand() {
+    const cfg = `${state.skeleton}.${state.palette}.${state.card}`;
+    return `curl -fsSL https://raw.githubusercontent.com/Laoujin/Scout/main/install.sh \\\n  | bash -s -- --config=${cfg}`;
+  }
+
+  async function copyText(btn, text) {
+    const original = btn.textContent;
+    const done = () => {
+      btn.textContent = 'Copied ✓';
+      btn.classList.add('ok');
+      setTimeout(() => { btn.textContent = original; btn.classList.remove('ok'); }, 1400);
+    };
+    try {
+      await navigator.clipboard.writeText(text);
+      done();
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done(); } catch (_) {}
+      document.body.removeChild(ta);
+    }
+  }
+
   document.querySelectorAll('[data-copy]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.dataset.copy;
-      const el = document.getElementById(id);
-      const text = el.innerText;
-      try {
-        await navigator.clipboard.writeText(text);
-        const original = btn.textContent;
-        btn.textContent = 'Copied ✓';
-        btn.classList.add('ok');
-        setTimeout(() => { btn.textContent = original; btn.classList.remove('ok'); }, 1400);
-      } catch (e) {
-        // fallback: select the text
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        const sel = window.getSelection();
-        sel.removeAllRanges(); sel.addRange(range);
+    btn.addEventListener('click', () => {
+      if (btn.dataset.copy === 'install-cmd-text') {
+        copyText(btn, installCommand());
+      } else {
+        const el = document.getElementById(btn.dataset.copy);
+        if (el) copyText(btn, el.innerText);
       }
     });
   });
