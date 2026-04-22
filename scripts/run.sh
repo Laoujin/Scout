@@ -58,6 +58,19 @@ claude --dangerously-skip-permissions \
        --append-system-prompt "$SKILL_CONTENT" \
        "$PROMPT"
 
+# Ledger validation (standard and deep only — ceo may not produce a ledger).
+LEDGER="$RESEARCH_DIR/citations.jsonl"
+if [ -f "$LEDGER" ]; then
+  ARTIFACT=""
+  for CAND in "$RESEARCH_DIR/index.md" "$RESEARCH_DIR/index.html"; do
+    [ -f "$CAND" ] && ARTIFACT="$CAND" && break
+  done
+  bash "$SCOUT_DIR/scripts/validate_ledger.sh" "$LEDGER" "$ARTIFACT"
+elif [ "$DEPTH" != "ceo" ]; then
+  echo "run.sh: expected citations.jsonl for depth=$DEPTH but none found" >&2
+  exit 1
+fi
+
 TOPIC="$TOPIC" SLUG="$FINAL_SLUG" DATE="$DATE" ATLAS_REPO="$ATLAS_REPO" \
   ISSUE_NUMBER="${ISSUE_NUMBER:-}" \
   bash "$SCOUT_DIR/scripts/publish.sh"
