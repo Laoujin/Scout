@@ -24,7 +24,15 @@
 | `depth`  | `ceo` / `standard` / `deep` | `standard` |
 | `format` | `md` / `html` / `auto`      | `auto`     |
 
-See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour, and [`skills/scout/tighten.md`](skills/scout/tighten.md) for how raw topics get sharpened into research briefs before a run.
+See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour, [`skills/scout/deep.md`](skills/scout/deep.md) for the parallel-sub-agent flow that `depth=deep` triggers, and [`skills/scout/tighten.md`](skills/scout/tighten.md) for how raw topics get sharpened into research briefs before a run.
+
+### Depth tiers
+
+| Tier | Shape | Artifacts | Wall-clock |
+|------|-------|-----------|------------|
+| `ceo` | Single pass, inline cites | `index.{md,html}` | ~2–5 min |
+| `standard` | Single pass + on-disk `citations.jsonl` + reflect-and-requery | `index.*`, `citations.jsonl` | ~5–10 min |
+| `deep` | Parent dispatches researcher sub-agents per sub-question (≤6 parallel), merges ledgers, runs post-write reviewer, applies one fix pass | `index.*`, `citations.jsonl`, `citations.a*.jsonl`, `outline.md` | ~15–30 min |
 
 Only the repo OWNER's Issues / dispatches trigger the workflow (author-association gate). Forks are safe out of the box — nobody but you can spend your runner.
 
