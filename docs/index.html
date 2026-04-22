@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="./scout-atlas-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=DM+Serif+Display:ital@0;1&family=Fraunces:opsz,wght@9..144,600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
 <style>
 /* =========================================================================
    Scout marketing site
@@ -331,6 +331,8 @@ section.ya-group { padding: 15px 0; }
 .ap-viewport .cover.ratio { aspect-ratio: 3/2; }
 .ap-viewport .cover-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; z-index: 1; }
 .ap-viewport .cover:has(.cover-img)::before { display: none; }
+.ap-viewport [class$="-footer"] a, .ap-viewport .s4-credits a { color: inherit; text-decoration: none; border-bottom: 1px dotted color-mix(in srgb, currentColor 50%, transparent); transition: color .15s ease, border-color .15s ease; }
+.ap-viewport [class$="-footer"] a:hover, .ap-viewport .s4-credits a:hover { color: var(--pal-accent); border-bottom-color: var(--pal-accent); }
 .ap-viewport .chip {
   display: inline-block; padding: 1px 7px; border-radius: 999px;
   font-size: 11px; color: var(--pal-fg-muted);
@@ -364,8 +366,7 @@ section.ya-group { padding: 15px 0; }
 /* S1 — Hero + footer */
 .ap.skel-s1 .s1 { display: flex; flex-direction: column; min-height: 620px; }
 .ap.skel-s1 .s1-hero {
-  padding: 56px 40px; text-align: left;
-  display: flex; align-items: center; gap: 24px;
+  padding: 56px 32px 40px; text-align: center;
   background:
     linear-gradient(to bottom, color-mix(in srgb, var(--pal-bg) 25%, transparent), var(--pal-bg) 100%),
     url('./hero-banner.png') center / cover no-repeat;
@@ -373,18 +374,19 @@ section.ya-group { padding: 15px 0; }
   position: relative;
 }
 .ap.skel-s1 .s1-logo {
-  width: 72px; height: 72px; margin: 0; border-radius: 14px;
-  display: block; position: relative; flex-shrink: 0;
+  width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 12px;
+  display: block; position: relative;
 }
-.ap.skel-s1 .s1-hero-text { position: relative; }
 .ap.skel-s1 .s1-hero h1 {
-  margin: 0 0 6px;
-  font-family: 'Playfair Display', 'Fraunces', Georgia, serif;
-  font-style: italic; font-weight: 700;
-  font-size: 46px; line-height: 1; letter-spacing: -0.01em;
-  color: var(--pal-fg);
+  margin: 0 0 4px;
+  font-family: 'IM Fell English', 'Fraunces', Georgia, serif;
+  font-weight: 400; font-style: italic;
+  font-size: 42px; line-height: 1.1; letter-spacing: 0;
+  color: var(--pal-fg); position: relative;
 }
-.ap.skel-s1 .s1-hero p { margin: 0; color: var(--pal-fg-muted); font-size: 13px; }
+.ap.skel-s1 .s1-hero p { margin: 0; color: var(--pal-fg-muted); font-size: 13px; position: relative; }
+.ap.skel-s1 .s1-cta { position: absolute; top: 14px; right: 16px; padding: 6px 11px; border-radius: 5px; background: var(--pal-accent); color: var(--pal-accent-fg); font: 600 11.5px/1 ui-monospace, Menlo, monospace; text-decoration: none; transition: transform .12s ease, filter .12s ease; }
+.ap.skel-s1 .s1-cta:hover { transform: translateY(-1px); filter: brightness(1.05); }
 .ap.skel-s1 .s1-filter { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; padding: 12px 32px; border-bottom: 1px solid var(--pal-border); }
 .ap.skel-s1 .s1-content { padding: 20px 28px 24px; flex: 1; }
 .ap.skel-s1 .s1-footer {
@@ -399,12 +401,14 @@ section.ya-group { padding: 15px 0; }
   display: flex; align-items: center; gap: 14px; padding: 10px 20px;
   background: var(--pal-surface); border-bottom: 1px solid var(--pal-border);
 }
-.ap.skel-s2 .s2-brand { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--pal-fg); font-family: 'Fraunces', Georgia, serif; font-size: 16px; }
-.ap.skel-s2 .s2-mark { width: 24px; height: 24px; border-radius: 6px; background: var(--pal-accent); color: var(--pal-accent-fg); display: grid; place-content: center; font: italic 700 13px/1 Georgia, serif; }
+.ap.skel-s2 .s2-brand { display: flex; align-items: center; gap: 8px; color: var(--pal-fg); font-family: 'IM Fell English', 'Fraunces', Georgia, serif; font-style: italic; font-weight: 400; font-size: 20px; }
+.ap.skel-s2 .s2-mark { width: 24px; height: 24px; border-radius: 6px; display: block; }
 .ap.skel-s2 .s2-links { display: flex; gap: 12px; margin-left: 8px; }
 .ap.skel-s2 .s2-links a { font-size: 12px; color: var(--pal-fg-muted); }
 .ap.skel-s2 .s2-spacer { flex: 1; }
 .ap.skel-s2 .s2-search { display: flex; align-items: center; gap: 6px; background: var(--pal-surface-tint); border: 1px solid var(--pal-border); border-radius: 5px; padding: 4px 10px; font-size: 12px; color: var(--pal-fg-faint); min-width: 180px; }
+.ap.skel-s2 .s2-cta { padding: 6px 11px; border-radius: 5px; background: var(--pal-accent); color: var(--pal-accent-fg); font: 600 11.5px/1 ui-monospace, Menlo, monospace; text-decoration: none; transition: transform .12s ease, filter .12s ease; }
+.ap.skel-s2 .s2-cta:hover { transform: translateY(-1px); filter: brightness(1.05); }
 .ap.skel-s2 .s2-search::before { content: "⌕"; font-size: 13px; }
 .ap.skel-s2 .s2-content { padding: 22px 28px; flex: 1; }
 .ap.skel-s2 .s2-content h2 { margin: 0 0 14px; font-size: 15px; color: var(--pal-fg); display: flex; align-items: center; gap: 10px; font-weight: 600; }
@@ -414,10 +418,12 @@ section.ya-group { padding: 15px 0; }
 /* S3 — Top bar + sidenav */
 .ap.skel-s3 .s3 { display: grid; grid-template-rows: auto 1fr auto; min-height: 620px; }
 .ap.skel-s3 .s3-topbar { display: flex; align-items: center; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--pal-border); background: var(--pal-surface); }
-.ap.skel-s3 .s3-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--pal-fg); font-family: 'Fraunces', Georgia, serif; font-size: 15px; }
-.ap.skel-s3 .s3-mark { width: 24px; height: 24px; border-radius: 6px; background: var(--pal-accent); color: var(--pal-accent-fg); display: grid; place-content: center; font: italic 700 13px/1 Georgia, serif; }
+.ap.skel-s3 .s3-brand { display: flex; align-items: center; gap: 8px; color: var(--pal-fg); font-family: 'Cormorant Garamond', 'Fraunces', Georgia, serif; font-style: italic; font-weight: 600; font-size: 20px; }
+.ap.skel-s3 .s3-mark { width: 24px; height: 24px; border-radius: 6px; display: block; }
 .ap.skel-s3 .s3-spacer { flex: 1; }
 .ap.skel-s3 .s3-nav { font-size: 11.5px; color: var(--pal-fg-muted); }
+.ap.skel-s3 .s3-cta { padding: 6px 11px; border-radius: 5px; background: var(--pal-accent); color: var(--pal-accent-fg); font: 600 11.5px/1 ui-monospace, Menlo, monospace; text-decoration: none; transition: transform .12s ease, filter .12s ease; }
+.ap.skel-s3 .s3-cta:hover { transform: translateY(-1px); filter: brightness(1.05); }
 .ap.skel-s3 .s3-main { display: grid; grid-template-columns: 170px 1fr; min-height: 0; }
 .ap.skel-s3 .s3-sidenav { padding: 16px 14px; background: var(--pal-surface-tint); border-right: 1px solid var(--pal-border); }
 .ap.skel-s3 .s3-sidenav h4 { margin: 0 0 6px; font: 600 10px/1 ui-monospace, Menlo, monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pal-fg-faint); }
@@ -436,17 +442,19 @@ section.ya-group { padding: 15px 0; }
   border-right: 1px solid var(--pal-border);
   display: flex; flex-direction: column; gap: 16px;
 }
-.ap.skel-s4 .s4-logo { width: 52px; height: 52px; border-radius: 12px; background: var(--pal-accent); color: var(--pal-accent-fg); display: grid; place-content: center; font: italic 700 28px/1 Georgia, serif; }
-.ap.skel-s4 .s4-hero h1 { margin: 0; font-family: 'Fraunces', Georgia, serif; font-size: 26px; letter-spacing: -0.02em; line-height: 1.15; color: var(--pal-fg); }
+.ap.skel-s4 .s4-logo { width: 52px; height: 52px; border-radius: 12px; display: block; }
+.ap.skel-s4 .s4-hero h1 { margin: 0; font-family: 'DM Serif Display', 'Fraunces', Georgia, serif; font-style: italic; font-weight: 400; font-size: 38px; letter-spacing: -0.01em; line-height: 1; color: var(--pal-fg); }
 .ap.skel-s4 .s4-hero p { margin: 0; color: var(--pal-fg-muted); font-size: 13px; max-width: 32ch; }
 .ap.skel-s4 .s4-latest { margin-top: 6px; border-top: 1px solid var(--pal-border); padding-top: 14px; }
 .ap.skel-s4 .s4-latest h4 { margin: 0 0 8px; font: 600 10px/1 ui-monospace, Menlo, monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pal-fg-faint); }
 .ap.skel-s4 .s4-latest ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
 .ap.skel-s4 .s4-latest li { display: flex; gap: 8px; align-items: baseline; color: var(--pal-fg); font-size: 12.5px; }
 .ap.skel-s4 .s4-latest .d { font: 500 11px ui-monospace, Menlo, monospace; color: var(--pal-fg-faint); min-width: 54px; flex-shrink: 0; }
-.ap.skel-s4 .s4-content { padding: 26px 26px; overflow: hidden; }
-.ap.skel-s4 .s4-content h2 { margin: 0 0 14px; font-size: 14px; color: var(--pal-fg-muted); font-weight: 600; }
+.ap.skel-s4 .s4-content { padding: 64px 26px 26px; overflow: hidden; position: relative; }
 .ap.skel-s4 .s4-content .entry-grid { grid-template-columns: repeat(2, 1fr); }
+.ap.skel-s4 .s4-cta { position: absolute; top: 18px; right: 22px; padding: 6px 11px; border-radius: 5px; background: var(--pal-accent); color: var(--pal-accent-fg); font: 600 11.5px/1 ui-monospace, Menlo, monospace; text-decoration: none; transition: transform .12s ease, filter .12s ease; z-index: 2; }
+.ap.skel-s4 .s4-cta:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.ap.skel-s4 .s4-credits { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--pal-border); font-size: 11px; color: var(--pal-fg-faint); display: flex; flex-direction: column; gap: 4px; }
 
 /* S5 — Magazine cover */
 .ap.skel-s5 .s5 { display: flex; flex-direction: column; min-height: 620px; }
@@ -866,10 +874,9 @@ section.ya-group { padding: 15px 0; }
     return `<div class="s1">
       <header class="s1-hero">
         <img class="s1-logo" src="./scout-atlas-icon.png" alt="Atlas">
-        <div class="s1-hero-text">
-          <h1>Atlas</h1>
-          <p>Research notes published by Scout.</p>
-        </div>
+        <h1>Atlas</h1>
+        <p>Research notes published by Scout.</p>
+        <a class="s1-cta" href="https://github.com/Laoujin/Scout/issues/new?template=research.yml" target="_blank" rel="noopener">+ New research</a>
       </header>
       <nav class="s1-filter">
         <span class="chip solid">All · ${entries.length}</span>
@@ -882,8 +889,8 @@ section.ya-group { padding: 15px 0; }
       </nav>
       <section class="s1-content">${renderGrid()}</section>
       <footer class="s1-footer">
-        <span>Atlas · built by Scout</span>
-        <span>github.com/you/Atlas</span>
+        <span>Atlas · <a href="#">yourname/atlas ↗</a></span>
+        <span>Built with <a href="#">Scout ↗</a></span>
       </footer>
     </div>`;
   }
@@ -891,18 +898,17 @@ section.ya-group { padding: 15px 0; }
   function renderS2() {
     return `<div class="s2">
       <header class="s2-topbar">
-        <div class="s2-brand"><span class="s2-mark">A</span> Atlas</div>
-        <nav class="s2-links"><a>Latest</a><a>Tags</a><a>About</a></nav>
+        <div class="s2-brand"><img class="s2-mark" src="./scout-atlas-icon.png" alt=""> Atlas</div>
         <div class="s2-spacer"></div>
         <div class="s2-search">Search research…</div>
+        <a class="s2-cta" href="https://github.com/Laoujin/Scout/issues/new?template=research.yml" target="_blank" rel="noopener">+ New research</a>
       </header>
       <section class="s2-content">
-        <h2>Recent</h2>
         ${renderGrid()}
       </section>
       <footer class="s2-footer">
-        <span>Atlas</span>
-        <span>built by Scout · github.com/you/Atlas</span>
+        <span>Atlas · <a href="#">yourname/atlas ↗</a></span>
+        <span>Built with <a href="#">Scout ↗</a></span>
       </footer>
     </div>`;
   }
@@ -911,10 +917,9 @@ section.ya-group { padding: 15px 0; }
     const tags = [...new Set(entries.flatMap(e => e.tags))];
     return `<div class="s3">
       <header class="s3-topbar">
-        <div class="s3-brand"><span class="s3-mark">A</span> Atlas</div>
+        <div class="s3-brand"><img class="s3-mark" src="./scout-atlas-icon.png" alt=""> Atlas</div>
         <div class="s3-spacer"></div>
-        <a class="s3-nav">About</a>
-        <a class="s3-nav">Scout ↗</a>
+        <a class="s3-cta" href="https://github.com/Laoujin/Scout/issues/new?template=research.yml" target="_blank" rel="noopener">+ New research</a>
       </header>
       <div class="s3-main">
         <aside class="s3-sidenav">
@@ -941,7 +946,7 @@ section.ya-group { padding: 15px 0; }
         </aside>
         <section class="s3-content">${renderGrid()}</section>
       </div>
-      <footer class="s3-footer">Atlas · ${entries.length} entries · built by Scout</footer>
+      <footer class="s3-footer">Atlas · <a href="#">yourname/atlas ↗</a> · Built with <a href="#">Scout ↗</a></footer>
     </div>`;
   }
 
@@ -949,7 +954,7 @@ section.ya-group { padding: 15px 0; }
     const latest = entries.slice(0, 5);
     return `<div class="s4">
       <aside class="s4-hero">
-        <div class="s4-logo">A</div>
+        <img class="s4-logo" src="./scout-atlas-icon.png" alt="Atlas">
         <h1>Atlas</h1>
         <p>Personal research notes. Cited on every line. Published automatically by Scout.</p>
         <div class="s4-latest">
@@ -958,9 +963,13 @@ section.ya-group { padding: 15px 0; }
             ${latest.map(e => `<li><span class="d">${new Date(e.date).toLocaleString('en-US', {month:'short', day:'2-digit'})}</span> ${e.title}</li>`).join('')}
           </ul>
         </div>
+        <div class="s4-credits">
+          <span>Atlas · <a href="#">yourname/atlas ↗</a></span>
+          <span>Built with <a href="#">Scout ↗</a></span>
+        </div>
       </aside>
       <section class="s4-content">
-        <h2>All research</h2>
+        <a class="s4-cta" href="https://github.com/Laoujin/Scout/issues/new?template=research.yml" target="_blank" rel="noopener">+ New research</a>
         ${renderGrid()}
       </section>
     </div>`;
