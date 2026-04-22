@@ -249,4 +249,11 @@ ATLAS_OWNER=$ATLAS_OWNER
 ATLAS_NAME=$ATLAS_NAME
 EOF
 
+# Chown the Scout clone (and handoff file) back to the host user — the installer
+# ran as root inside the container, so on the bind-mounted host they'd otherwise
+# be root-owned and docker-compose etc. can't read docker/.env (chmod 600).
+if [[ -n "${HOST_UID:-}" && -n "${HOST_GID:-}" ]]; then
+  chown -R "$HOST_UID:$HOST_GID" "$SCOUT_DIR" /work/.next 2>/dev/null || true
+fi
+
 echo "✓ Container work done."

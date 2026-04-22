@@ -142,6 +142,8 @@ docker run --rm -it \
   -e SCOUT_ORG="$ORG" \
   -e SCOUT_HOST_WORK="$INSTALL_DIR" \
   -e SCOUT_NAME_DEFAULT="$SCOUT_NAME_DEFAULT" \
+  -e HOST_UID="$(id -u)" \
+  -e HOST_GID="$(id -g)" \
   -e GH_TOKEN \
   -e GITHUB_TOKEN \
   scout-installer
