@@ -49,6 +49,25 @@ if [ -z "${SCOUT_INSTALL_REEXEC:-}" ] && [ ! -t 0 ]; then
   exec bash "$_tmp" "$@" </dev/tty
 fi
 
+# Warm-rust banner — accent #c2410c matches docs/index.html.
+if [[ -t 1 ]]; then
+  _C=$'\033[38;2;194;65;12m'; _D=$'\033[2m'; _R=$'\033[0m'
+else
+  _C=''; _D=''; _R=''
+fi
+cat <<BANNER
+
+${_C}   ███████   ██████   ██████  ██    ██ ████████${_R}
+${_C}   ██       ██       ██    ██ ██    ██    ██   ${_R}
+${_C}    ██████  ██       ██    ██ ██    ██    ██   ${_R}
+${_C}         ██ ██       ██    ██ ██    ██    ██   ${_R}
+${_C}   ███████   ██████   ██████   ██████     ██   ${_R}
+
+   ${_D}Personal research engine — on your own hardware${_R}
+   ${_D}Scout researches. Atlas remembers.${_R}
+
+BANNER
+
 CONFIG=""
 REF="main"
 UPSTREAM="Laoujin/Scout"
