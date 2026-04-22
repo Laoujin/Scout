@@ -168,5 +168,27 @@ if [[ -f "$INSTALL_DIR/.next" ]]; then
 ────────────────────────────────────────────────────────────────────────
 
 EOF
+
+  # Optional: install the /research Claude Code slash command, baked to
+  # this user's Scout repo so /research targets the right issue tracker.
+  read -rp "Install /research slash command to ~/.claude/commands/? [y/N]: " _ans
+  if [[ "${_ans,,}" =~ ^(y|yes)$ ]]; then
+    _target="$HOME/.claude/commands/research.md"
+    mkdir -p "$(dirname "$_target")"
+    _tpl="$BUILD_CTX/research.md.template"
+    if [[ -n "$LOCAL_SCOUT" ]]; then
+      [[ -f "$LOCAL_SCOUT/commands/research.md" ]] \
+        && cp "$LOCAL_SCOUT/commands/research.md" "$_tpl" \
+        || { echo "  skipped: $LOCAL_SCOUT/commands/research.md missing" >&2; _tpl=""; }
+    else
+      curl -fsSL "https://raw.githubusercontent.com/${UPSTREAM}/${REF}/commands/research.md" -o "$_tpl" \
+        || { echo "  skipped: could not fetch template" >&2; _tpl=""; }
+    fi
+    if [[ -n "$_tpl" ]]; then
+      sed "s|{{SCOUT_REPO}}|$SCOUT_OWNER/$SCOUT_NAME|g" "$_tpl" > "$_target"
+      echo "  installed: $_target → $SCOUT_OWNER/$SCOUT_NAME"
+    fi
+  fi
+
   rm -f "$INSTALL_DIR/.next"
 fi

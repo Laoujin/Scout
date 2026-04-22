@@ -29,7 +29,7 @@ Call `AskUserQuestion` once with these three questions:
 ## Step 3 — Create the Issue
 
 ```
-gh issue create --repo Laoujin/Scout \
+gh issue create --repo {{SCOUT_REPO}} \
   --title "[research] <truncate topic to ~60 chars>" \
   --label scout-research \
   --body "$(printf '### Topic\n\n%s\n\n### Depth\n\n%s\n\n### Format\n\n%s\n\n### Options\n\n- [%s] Skip sharpening (use my topic verbatim)\n' "<topic>" "<depth>" "<format>" "<x if skip else space>")"
