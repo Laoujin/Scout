@@ -169,19 +169,19 @@ if [[ -f "$INSTALL_DIR/.next" ]]; then
 
 EOF
 
-  # Optional: install the /research Claude Code slash command, baked to
-  # this user's Scout repo so /research targets the right issue tracker.
-  read -rp "Install /research slash command to ~/.claude/commands/? [y/N]: " _ans
+  # Optional: install the /scout Claude Code slash command, baked to
+  # this user's Scout repo so /scout targets the right issue tracker.
+  read -rp "Install /scout slash command to ~/.claude/commands/? [y/N]: " _ans
   if [[ "${_ans,,}" =~ ^(y|yes)$ ]]; then
-    _target="$HOME/.claude/commands/research.md"
+    _target="$HOME/.claude/commands/scout.md"
     mkdir -p "$(dirname "$_target")"
-    _tpl="$BUILD_CTX/research.md.template"
+    _tpl="$BUILD_CTX/scout.md.template"
     if [[ -n "$LOCAL_SCOUT" ]]; then
-      [[ -f "$LOCAL_SCOUT/commands/research.md" ]] \
-        && cp "$LOCAL_SCOUT/commands/research.md" "$_tpl" \
-        || { echo "  skipped: $LOCAL_SCOUT/commands/research.md missing" >&2; _tpl=""; }
+      [[ -f "$LOCAL_SCOUT/commands/scout.md" ]] \
+        && cp "$LOCAL_SCOUT/commands/scout.md" "$_tpl" \
+        || { echo "  skipped: $LOCAL_SCOUT/commands/scout.md missing" >&2; _tpl=""; }
     else
-      curl -fsSL "https://raw.githubusercontent.com/${UPSTREAM}/${REF}/commands/research.md" -o "$_tpl" \
+      curl -fsSL "https://raw.githubusercontent.com/${UPSTREAM}/${REF}/commands/scout.md" -o "$_tpl" \
         || { echo "  skipped: could not fetch template" >&2; _tpl=""; }
     fi
     if [[ -n "$_tpl" ]]; then

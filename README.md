@@ -108,13 +108,13 @@ gh run watch --repo Laoujin/Scout
 
 ```bash
 mkdir -p ~/.claude/commands
-cp commands/research.md ~/.claude/commands/research.md
+cp commands/scout.md ~/.claude/commands/scout.md
 ```
 
 In Claude Code:
 
-- `/research Compare X vs Y depth=deep format=html` — opens an Issue (default flow).
-- `/research Compare X vs Y --dispatch` — runs immediately via `workflow_dispatch`.
+- `/scout Compare X vs Y depth=deep format=html` — opens an Issue (default flow).
+- `/scout Compare X vs Y --dispatch` — runs immediately via `workflow_dispatch`.
 
 
 ## Troubleshooting
