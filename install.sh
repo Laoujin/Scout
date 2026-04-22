@@ -185,7 +185,10 @@ EOF
         || { echo "  skipped: could not fetch template" >&2; _tpl=""; }
     fi
     if [[ -n "$_tpl" ]]; then
-      sed "s|{{SCOUT_REPO}}|$SCOUT_OWNER/$SCOUT_NAME|g" "$_tpl" > "$_target"
+      _atlas_url="https://${ATLAS_OWNER}.github.io/${ATLAS_NAME}/"
+      sed -e "s|{{SCOUT_REPO}}|$SCOUT_OWNER/$SCOUT_NAME|g" \
+          -e "s|{{ATLAS_URL}}|$_atlas_url|g" \
+          "$_tpl" > "$_target"
       echo "  installed: $_target → $SCOUT_OWNER/$SCOUT_NAME"
     fi
   fi

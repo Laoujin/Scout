@@ -37,4 +37,4 @@ gh issue create --repo {{SCOUT_REPO}} \
 
 Print the Issue URL. If skip-sharpening is No, tell the user: "Scout will reply with a sharpened proposal in ~30s. Tick the **Start research** checkbox to publish, or reply with feedback for another proposal." If skip-sharpening is Yes, tell the user the research job will kick off directly (5-30 min).
 
-Do not poll. The sharpen step takes 10-30 seconds; the research step takes 5-30 minutes. The published artifact will appear at https://laoujin.github.io/atlas/.
+Do not poll. The sharpen step takes 10-30 seconds; the research step takes 5-30 minutes. The published artifact will appear at {{ATLAS_URL}}.
