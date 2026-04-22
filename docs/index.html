@@ -184,6 +184,10 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
 }
 .install-cmd .copy-btn:hover { color: #f4efe6; border-color: #4a4d52; }
 .install-cmd .copy-btn.ok { color: #61c454; border-color: #61c454; }
+.install-alt { font-size: 13px; color: var(--fg-faint); margin: 5px 0 0; }
+.install-alt code { background: var(--surface); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+.install-alt a { color: var(--accent); border-bottom: 1px dotted color-mix(in srgb, var(--accent) 50%, transparent); }
+.install-alt a:hover { border-bottom-color: var(--accent); }
 
 /* =========================================================================
    Your Atlas — picker + live preview
@@ -191,7 +195,7 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
    dogfoods the themes in /themes/. Each skeleton + card is a faithful
    rendering of the mockups in docs/superpowers/atlas-skeleton-mockups.html.
    ========================================================================= */
-.your-atlas-section .install-cmd { margin: 8px 0 24px; }
+.your-atlas-section .install-cmd { margin: 8px 0 24px; margin-bottom: 0; }
 .ya-controls { display: grid; gap: 0; margin-bottom: 18px; }
 section.ya-group { padding: 15px 0; }
 .ya-split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
@@ -892,6 +896,7 @@ section.ya-group { padding: 15px 0; }
         <div class="line">  | <span class="cmd">bash</span> <span class="flag">-s</span> -- <span class="flag">--config=</span><span class="str" id="cfg-inline">s1.rust.v1</span></div>
       </div>
     </div>
+    <p class="install-alt">Don't pipe strangers into <code>bash</code>? <a href="https://github.com/Laoujin/Scout#setup" target="_blank" rel="noopener">Follow the README instead →</a></p>
 
     <div class="ya-controls">
       <section class="ya-group">
