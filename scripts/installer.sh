@@ -18,6 +18,10 @@
 
 set -euo pipefail
 
+# SIGINT during `read` inside the prompt_repo while-true loop would otherwise
+# just fail the read and keep looping (set -e doesn't fire inside loops).
+trap 'echo; echo "Aborted."; exit 130' INT
+
 : "${SCOUT_CONFIG:?SCOUT_CONFIG is required (bug in host install.sh)}"
 : "${SCOUT_UPSTREAM:=Laoujin/Scout}"
 : "${SCOUT_REF:=main}"

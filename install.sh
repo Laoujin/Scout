@@ -21,6 +21,11 @@
 #                                           Laoujin/Scout).
 set -euo pipefail
 
+# Make Ctrl-C reliably abort. Without this, SIGINT during `read` inside a
+# while-true loop just fails the read and keeps going — set -e doesn't fire
+# inside loops.
+trap 'echo; echo "Aborted."; exit 130' INT
+
 # When invoked via `curl … | bash`, bash reads *this script* from stdin line by
 # line. We can't just `exec </dev/tty` — that would make bash read subsequent
 # script lines from the keyboard. Instead, re-download to a temp file and
