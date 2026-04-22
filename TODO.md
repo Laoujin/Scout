@@ -12,9 +12,8 @@ Scout TODO List
     - [x] Make as frictionless as possible (rawgithubusercontent/install.sh | bash)
     - [x] Maybe could be a multi step installation
     - [x] Should not clone my Atlas but start with a bare repository
-- [ ] Slash Claude command
-    - [ ] The options should be the Claude menu, the user picks, then it creates the github issue
-    - [ ] Or we could just remove it
+- [x] Slash Claude command
+    - [x] The options should be the Claude menu, the user picks, then it creates the github issue
 - [ ] Generating an image for the research would be very cool (ie give a Nano Banana API key?)
 - [x] We prefer tables... but on mobile tables are not really handy... how do we handle that?
 - [x] Add Claude cost to frontmatter
