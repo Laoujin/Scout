@@ -27,7 +27,7 @@
       <nav class="s2-links">
         <a href="#recent">Latest</a>
         <a href="#tags">Tags</a>
-        {%- if site.scout_repo -%}<a href="https://github.com/{{ site.github.owner_name }}/{{ site.scout_repo }}">About</a>{%- endif -%}
+        {%- if site.scout_repo -%}<a href="https://github.com/{{ site.scout_repo }}">About</a>{%- endif -%}
       </nav>
       <div class="s2-spacer"></div>
       <div class="s2-search" role="search">Search research…</div>
@@ -49,7 +49,7 @@
 
     <footer class="s2-footer">
       <span>{{ site.title | default: 'Atlas' }}</span>
-      <span>built by Scout · {%- if site.scout_repo -%}<a href="https://github.com/{{ site.github.owner_name }}/{{ site.scout_repo }}">github.com/{{ site.github.owner_name }}/{{ site.scout_repo }}</a>{%- endif -%}</span>
+      <span>built by Scout · {%- if site.scout_repo -%}<a href="https://github.com/{{ site.scout_repo }}">github.com/{{ site.scout_repo }}</a>{%- endif -%}</span>
     </footer>
   </main>
 </body>

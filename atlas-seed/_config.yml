@@ -7,7 +7,7 @@ description: Research compiled on demand by Scout.
 baseurl: /Atlas
 
 # If you renamed your Scout fork, the installer updates this too.
-scout_repo: Scout
+scout_repo: Laoujin/Scout
 
 # --- Theme variables (edit any of these, push, GitHub Pages rebuilds) ---
 # Skeletons:  s1 s2 s3 s4 s5 s6   (site layout)

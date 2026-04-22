@@ -135,7 +135,7 @@ cp -a "$SCOUT_DIR/atlas-seed/." "$STAGE/"
 
 sed -i \
   -e "s#^baseurl:.*#baseurl: /$ATLAS_NAME#" \
-  -e "s#^scout_repo:.*#scout_repo: $SCOUT_NAME#" \
+  -e "s#^scout_repo:.*#scout_repo: $SCOUT_OWNER/$SCOUT_NAME#" \
   -e "s#^skeleton:.*#skeleton: $SKEL#" \
   -e "s#^palette:.*#palette: $PAL#" \
   -e "s#^card:.*#card: $CARD#" \
@@ -156,7 +156,9 @@ sed -i \
 )
 rm -rf "$STAGE"
 
-# ---------- Step 8: Enable GitHub Pages ----------
+# ---------- Step 8: Enable GitHub Pages + set repo website ----------
+PAGES_URL="https://${ATLAS_OWNER}.github.io/${ATLAS_NAME}/"
+
 echo "→ Enabling Pages on $ATLAS_OWNER/$ATLAS_NAME..."
 if ! gh api -X POST "repos/$ATLAS_OWNER/$ATLAS_NAME/pages" \
        -f "source[branch]=main" -f "source[path]=/" >/dev/null 2>&1; then
@@ -165,6 +167,12 @@ if ! gh api -X POST "repos/$ATLAS_OWNER/$ATLAS_NAME/pages" \
            -f "source[branch]=main" -f "source[path]=/" 2>&1 | tail -1 | grep -oE '[0-9]{3}' | head -1 || true)
   [[ "$code" == "409" ]] || echo "  ! Pages API returned non-409 error; check https://github.com/$ATLAS_OWNER/$ATLAS_NAME/settings/pages"
 fi
+
+# Set the repo's "Website" field to the Pages URL (matches the "Use your
+# GitHub Pages website" toggle in the repo About dialog).
+echo "→ Setting repo homepage to $PAGES_URL..."
+gh api -X PATCH "repos/$ATLAS_OWNER/$ATLAS_NAME" \
+  -f "homepage=$PAGES_URL" >/dev/null
 
 # ---------- Step 9: Atlas deploy key ----------
 echo "→ Generating + uploading Atlas deploy key..."
