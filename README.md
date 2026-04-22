@@ -36,7 +36,7 @@ See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behavio
 | `survey` (CLI: `standard`) | Single pass + on-disk `citations.jsonl` + reflect-and-requery | `index.*`, `citations.jsonl` | ~5–10 min |
 | `expedition` (CLI: `deep`) | Parent dispatches researcher sub-agents per sub-question (≤6 parallel), merges ledgers, runs post-write reviewer, applies one fix pass | `index.*`, `citations.jsonl`, `citations.a*.jsonl`, `outline.md` | ~15–30 min |
 
-Only the repo OWNER's Issues / dispatches trigger the workflow (author-association gate). Forks are safe out of the box — nobody but you can spend your runner.
+Only Issues / dispatches from the repo owner or an org member trigger the workflow (author-association gate: `OWNER` or `MEMBER`). Outside users can open Issues but nothing fires — your runner is safe.
 
 ## Fork for your own use
 

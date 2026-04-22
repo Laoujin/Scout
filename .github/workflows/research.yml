@@ -37,7 +37,7 @@ jobs:
     if: >
       github.event_name == 'issues' &&
       github.event.action == 'opened' &&
-      github.event.issue.author_association == 'OWNER' &&
+      (github.event.issue.author_association == 'OWNER' || github.event.issue.author_association == 'MEMBER') &&
       (startsWith(github.event.issue.title, '[research] ') ||
        contains(github.event.issue.labels.*.name, 'scout-research'))
     runs-on: [self-hosted, scout]
@@ -76,7 +76,7 @@ jobs:
     if: >
       github.event_name == 'issue_comment' &&
       github.event.action == 'created' &&
-      github.event.issue.author_association == 'OWNER' &&
+      (github.event.issue.author_association == 'OWNER' || github.event.issue.author_association == 'MEMBER') &&
       github.event.comment.user.type != 'Bot' &&
       (startsWith(github.event.issue.title, '[research] ') ||
        contains(github.event.issue.labels.*.name, 'scout-research')) &&
@@ -120,7 +120,7 @@ jobs:
     if: >
       github.event_name == 'issue_comment' &&
       github.event.action == 'edited' &&
-      github.event.issue.author_association == 'OWNER' &&
+      (github.event.issue.author_association == 'OWNER' || github.event.issue.author_association == 'MEMBER') &&
       github.event.comment.user.type == 'Bot' &&
       contains(github.event.changes.body.from, '- [ ] **Start research**') &&
       (contains(github.event.comment.body, '- [x] **Start research**') ||
