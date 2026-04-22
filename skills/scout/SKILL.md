@@ -141,6 +141,7 @@ Example body structures (not prescriptive):
 3. Research loop: WebSearch to discover URLs, WebFetch to read. When WebFetch returns empty/JS-walled content, fall back to `npx playwright chromium -o rendered.html <url>` and read the rendered HTML.
 4. For `depth=standard` and `depth=deep`, append to `RESEARCH_DIR/citations.jsonl` as each usable claim is extracted from a source. For `depth=ceo`, track `{claim, url}` pairs in memory (single pass is short enough). No claim without URL.
 5. Draft the body with inline citations. Use tables for comparisons.
+5.5. **Reflect and requery (standard and deep).** Before the self-check, read the draft alongside the ledger. List 1–3 explicit knowledge gaps: claims that feel thin, perspectives missing, numbers or dates that need corroboration. For each gap, fire one targeted search (WebSearch/WebFetch), append new ledger entries, and revise the draft to incorporate the findings. Hard cap: one reflect round for standard; deep handles its own reflection inside each researcher sub-agent (see `skills/scout/deep.md`). If no gaps are found, state that in a single line at the top of the self-check output.
 6. **Self-check before writing:**
    - Artifact opens with a TL;DR / Decision block (1-3 sentences, cited)?
    - Every claim has ≥1 URL?
