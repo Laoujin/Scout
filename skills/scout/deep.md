@@ -24,8 +24,9 @@ When `DEPTH=deep`, the parent (you, the main Scout session) becomes planner + wr
    Researcher summaries stay in your context as draft material.
 5. Draft the body (index.md or index.html) from the researcher summaries and the merged ledger.
    The body is the publishing artifact; researcher summaries are intermediate material — rewrite, don't copy-paste.
-6. Dispatch scout-reviewer sub-agent (Agent tool, subagent_type="scout-reviewer").
-   Pass: ARTIFACT_PATH, LEDGER_PATH=citations.jsonl, OUTLINE_PATH=outline.md, TOPIC, DEPTH=deep.
+6. Dispatch scout-reviewer AND scout-illustrator in parallel (one message, two Agent tool calls).
+   Reviewer: subagent_type="scout-reviewer". Pass: ARTIFACT_PATH, LEDGER_PATH=citations.jsonl, OUTLINE_PATH=outline.md, TOPIC, DEPTH=deep.
+   Illustrator: subagent_type="scout-illustrator". Pass: TOPIC, final tags list, RESEARCH_DIR. It writes cover.svg or returns `skipped: <reason>`.
 7. Apply reviewer's blocking-issue deltas in one pass.
    If reviewer's "Coverage gaps" section is non-trivial:
      - Dispatch up to 2 remediation researchers (same scout-researcher type) on the named gaps.
@@ -33,7 +34,7 @@ When `DEPTH=deep`, the parent (you, the main Scout session) becomes planner + wr
      - After they return: re-merge ledgers, add their findings to the body.
      - HARD CAP: one remediation round. No second reviewer pass.
    Apply reviewer's "Prose nits" deltas if trivial; skip if they'd cost another pass.
-8. Final self-check (same as SKILL.md step 6). Write the artifact.
+8. Final self-check (same as SKILL.md step 6). Write the artifact — include `cover: cover.svg` in frontmatter iff the illustrator wrote one.
 9. Report the final path.
 ```
 
@@ -42,6 +43,7 @@ When `DEPTH=deep`, the parent (you, the main Scout session) becomes planner + wr
 - Max 6 concurrent researcher sub-agents in the initial wave.
 - Max 2 remediation researchers in the post-reviewer round.
 - Exactly 1 reviewer sub-agent call. No re-review after fix.
+- Exactly 1 illustrator sub-agent call. If it returns `skipped`, do not retry — honour the skip.
 - If the reviewer returns "artifact needs rewrite" as its blocking issue, write a one-line status to TOPIC frontmatter (`review_status: needs_rewrite`) and publish anyway — the user can decide to re-run. Do not loop.
 
 ## Researcher brief template
@@ -71,3 +73,4 @@ Each researcher has its own 200K context window. The parent's context is the bot
 - **Researchers write:** `citations.a<N>.jsonl` (their per-agent ledger). Nothing else.
 - **`merge_ledgers.sh` writes:** `citations.jsonl` (the merged, deduped, renumbered file).
 - **Reviewer writes:** nothing (tool allowlist is Read-only).
+- **Illustrator writes:** `cover.svg` (or nothing, if it returned `skipped`).

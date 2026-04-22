@@ -30,6 +30,10 @@ Use `.svg` for diagrams or flow charts you generate. `.png` at ~1200 px wide for
 
 Create assets only when they add information the text can't convey concisely. Prose first, images when they pay for themselves.
 
+### Cover image
+
+Each research folder gets an optional `cover.svg` (3:2, no text, rust-family palette) shown on Atlas's index cards. **Do not draft it yourself** — delegate to the `scout-illustrator` sub-agent (see Procedure step 6.5). If the agent writes a cover, add `cover: cover.svg` to the frontmatter; if it skips, omit the field and Atlas renders a typographic fallback.
+
 ## Inputs (parsed from the prompt)
 
 ```
@@ -141,6 +145,7 @@ Field notes:
 - `citations`: count of distinct source URLs you cited in the artifact.
 - `reading_time_min`: estimate as `max(1, round(word_count / 200))`.
 - `cost_usd`, `duration_sec`: **injected by `run.sh` after you finish** — do not write these yourself. They end up inside the frontmatter block alongside the fields above.
+- `cover`: filename of the SVG cover in this folder (`cover.svg`). Include only when the `scout-illustrator` sub-agent returned `wrote cover.svg`; omit the field when it skipped.
 
 ## Body content
 
@@ -176,7 +181,8 @@ Example body structures (not prescriptive):
    - For HTML: no `<!doctype>`, `<head>`, `<body>`, `<link>`, or "← Atlas" back-link (layout provides them).
    - For standard/deep: `citations.jsonl` exists; line count equals the `citations` frontmatter field; every `[[n]]` in the body matches a ledger entry's `n`; no ledger entry has empty `url`.
    - For standard/deep: no duplicate URLs in the ledger (the same source is one entry, cited multiple times via the same `n`).
-7. Write the file with the `Write` tool.
+6.5. **Dispatch scout-illustrator.** Call `Agent(subagent_type="scout-illustrator", ...)` with a brief that contains `TOPIC`, the final `tags` list, and `RESEARCH_DIR`. It returns `wrote cover.svg` or `skipped: <reason>`. Record which.
+7. Write the file with the `Write` tool. If the illustrator wrote a cover, include `cover: cover.svg` in the frontmatter; otherwise omit the field.
 8. Report: one line with the final path. `run.sh` handles commit and push.
 
 ## Failure modes to avoid
