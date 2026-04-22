@@ -77,16 +77,25 @@ prompt_repo() {
   done
 }
 
-prompt_repo "Create Scout fork" "Scout" SCOUT_NAME
+prompt_repo "Fork Scout"       "Scout" SCOUT_NAME
 prompt_repo "Create Atlas repo" "Atlas" ATLAS_NAME
 
-# ---------- Step 6: Create Scout from template, clone into /work ----------
-echo "→ Creating $OWNER/$SCOUT_NAME from template $SCOUT_UPSTREAM..."
-gh repo create "$OWNER/$SCOUT_NAME" --template "$SCOUT_UPSTREAM" --public >/dev/null
+# ---------- Step 6: Fork Scout, enable Actions, clone into /work ----------
+echo "→ Forking $SCOUT_UPSTREAM as $OWNER/$SCOUT_NAME..."
+gh repo fork "$SCOUT_UPSTREAM" \
+  --fork-name "$SCOUT_NAME" \
+  --clone=false \
+  --default-branch-only >/dev/null
+
+# Forks have Actions disabled by default ("I understand my workflows" button).
+# Flip the switch via API so scout-runner actually fires.
+echo "→ Enabling Actions on $OWNER/$SCOUT_NAME..."
+gh api -X PUT "repos/$OWNER/$SCOUT_NAME/actions/permissions" \
+  -f enabled=true -f allowed_actions=all >/dev/null
 
 SCOUT_DIR="/work/$SCOUT_NAME"
 rm -rf "$SCOUT_DIR"
-# Small propagation delay + retries — fresh template repos can 404 briefly
+# Fork can 404 on clone for a moment while GitHub propagates
 for attempt in 1 2 3 4 5; do
   if gh repo clone "$OWNER/$SCOUT_NAME" "$SCOUT_DIR" -- -q 2>/dev/null; then break; fi
   sleep 2
