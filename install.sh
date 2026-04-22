@@ -14,14 +14,27 @@
 #   --dir=<path>                            Default: $PWD/scout-install
 set -euo pipefail
 
-# When invoked via `curl … | bash`, stdin is the pipe. Re-attach to the TTY so
-# interactive prompts (gh auth, repo-name read) and `docker run -it` work.
-if [ ! -t 0 ] && [ -c /dev/tty ]; then
-  exec </dev/tty
-fi
-if [ ! -t 0 ]; then
-  echo "Error: no TTY available. Run install.sh from an interactive shell, or set GH_TOKEN= and retry." >&2
-  exit 1
+# When invoked via `curl … | bash`, bash reads *this script* from stdin line by
+# line. We can't just `exec </dev/tty` — that would make bash read subsequent
+# script lines from the keyboard. Instead, re-download to a temp file and
+# re-exec with /dev/tty as stdin, so the new bash reads the script from a file
+# and interactive prompts work.
+if [ -z "${SCOUT_INSTALL_REEXEC:-}" ] && [ ! -t 0 ]; then
+  if [ ! -c /dev/tty ]; then
+    echo "Error: no TTY available. Run install.sh from an interactive shell." >&2
+    exit 1
+  fi
+  _tmp=$(mktemp)
+  _url="${SCOUT_INSTALL_URL:-https://raw.githubusercontent.com/Laoujin/Scout/main/install.sh}"
+  if ! curl -fsSL "$_url" -o "$_tmp"; then
+    echo "Error: failed to download $_url" >&2
+    rm -f "$_tmp"
+    exit 1
+  fi
+  export SCOUT_INSTALL_REEXEC=1
+  export SCOUT_INSTALL_TMPFILE="$_tmp"
+  # shellcheck disable=SC2093
+  exec bash "$_tmp" "$@" </dev/tty
 fi
 
 CONFIG=""
@@ -60,7 +73,7 @@ docker info >/dev/null 2>&1 || { echo "Docker daemon is not reachable. Start Doc
 
 AUTH_DIR="$(mktemp -d)"
 BUILD_CTX="$(mktemp -d)"
-trap 'rm -rf "$AUTH_DIR" "$BUILD_CTX"' EXIT
+trap 'rm -rf "$AUTH_DIR" "$BUILD_CTX" "${SCOUT_INSTALL_TMPFILE:-}"' EXIT
 
 if [[ -n "$LOCAL_SCOUT" ]]; then
   echo "→ Using local checkout: $LOCAL_SCOUT"
