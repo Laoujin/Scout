@@ -132,6 +132,10 @@ gh repo create "$ATLAS_OWNER/$ATLAS_NAME" --public >/dev/null
 
 STAGE=$(mktemp -d)
 cp -a "$SCOUT_DIR/atlas-seed/." "$STAGE/"
+# atlas-seed/research/ ships sample content used only for local preview.
+# The new Atlas starts empty — Scout runs will populate research/ over time.
+rm -rf "$STAGE/research"/*
+mkdir -p "$STAGE/research"
 
 sed -i \
   -e "s#^baseurl:.*#baseurl: /$ATLAS_NAME#" \
