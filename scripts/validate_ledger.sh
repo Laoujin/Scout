@@ -4,7 +4,7 @@
 # Usage: validate_ledger.sh <ledger_path> [<artifact_path>]
 #   If artifact_path is given, also checks every [[n]] in the artifact resolves.
 
-set -uo pipefail
+set -euo pipefail
 
 LEDGER="${1:?ledger path required}"
 ARTIFACT="${2:-}"
