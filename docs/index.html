@@ -112,6 +112,7 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
   color: var(--fg-faint);
 }
 .hero .meta-row span::before { content: "· "; color: var(--accent); margin-right: 4px; }
+.hero .prereq { font-size: 13px; color: var(--fg-faint); margin: -16px 0 24px; max-width: 60ch; }
 .hero .ctas { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
@@ -763,14 +764,15 @@ section.ya-group { padding: 15px 0; }
 <section class="hero">
   <div class="container hero-grid">
     <div>
-      <h1>Research on demand,<br><span class="accent">cited on every line.</span></h1>
-      <p class="tagline">Open a GitHub issue and Claude Code starts researching your topic, then publishes to GitHub Pages.</p>
+      <h1>A research library<br><span class="accent">you actually own.</span></h1>
+      <p class="tagline">Open a GitHub issue. Claude researches, cites every claim, and publishes to a Jekyll site at a URL you own.</p>
       <div class="meta-row">
-        <span>Self-hosted</span>
-        <span>Claude</span>
-        <span>Docker</span>
+        <span>Your Claude subscription</span>
+        <span>Your Docker</span>
+        <span>Your URL</span>
         <span>Open source</span>
       </div>
+      <p class="prereq">Requires: Claude Code or Anthropic API key · Docker · a GitHub account.</p>
       <div class="ctas">
         <a href="#your-atlas" class="btn btn-primary">Install <span class="arrow">→</span></a>
         <a href="https://laoujin.github.io/Atlas/" target="_blank" class="btn btn-ghost">See an example Atlas</a>
