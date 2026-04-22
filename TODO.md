@@ -9,9 +9,9 @@ Scout TODO List
 ## Scout functionality
 
 - [x] How to make this your own: how to set this up with your own Atlas
-    - [ ] Make as frictionless as possible (rawgithubusercontent/install.sh | bash)
-    - [ ] Maybe could be a multi step installation
-    - [ ] Should not clone my Atlas but start with a bare repository
+    - [x] Make as frictionless as possible (rawgithubusercontent/install.sh | bash)
+    - [x] Maybe could be a multi step installation
+    - [x] Should not clone my Atlas but start with a bare repository
 - [ ] Slash Claude command
     - [ ] The options should be the Claude menu, the user picks, then it creates the github issue
     - [ ] Or we could just remove it
