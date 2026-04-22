@@ -522,7 +522,7 @@ section.ya-group { padding: 15px 0; }
 .ap-viewport .meta-chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font: 500 10.5px/1.4 ui-monospace, Menlo, monospace; color: var(--pal-fg-muted); background: var(--pal-surface-tint); border: 1px solid var(--pal-border); }
 
 /* V1 — badges floated over cover top-right */
-.ap.card-v1 .card-top { position: absolute; top: 10px; right: 10px; left: auto; z-index: 3; margin: 0; }
+.ap.card-v1 .card-top { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 3; margin: 0; }
 
 /* V2 horizontal */
 .ap.card-v2 .entry-grid { grid-template-columns: repeat(2, 1fr); }
@@ -620,6 +620,28 @@ section.ya-group { padding: 15px 0; }
   .ap.skel-s5 .s5-fold { grid-template-columns: 1fr; padding: 28px 24px; gap: 24px; }
   .ap.skel-s5 .s5-fold h1 { font-size: 30px; }
   .ap.skel-s5 .s5-watermark { font-size: 120px; }
+
+  /* Preview skeletons — tighter padding when the preview is full-width */
+  .ap.skel-s1 .s1-hero { padding: 42px 22px 28px; }
+  .ap.skel-s1 .s1-hero h1 { font-size: 34px; }
+  .ap.skel-s1 .s1-content { padding: 16px 20px 20px; }
+  .ap.skel-s1 .s1-footer { padding: 12px 20px; }
+  .ap.skel-s2 .s2-topbar { padding: 10px 14px; gap: 10px; flex-wrap: wrap; }
+  .ap.skel-s2 .s2-search { min-width: 0; flex: 1 1 140px; }
+  .ap.skel-s2 .s2-content { padding: 18px 18px; }
+  .ap.skel-s2 .s2-footer { padding: 10px 18px; }
+  .ap.skel-s3 .s3-content { padding: 16px 18px; }
+  .ap.skel-s3 .s3-content .entry-grid { grid-template-columns: repeat(2, 1fr); }
+  .ap.skel-s4 .s4-hero { padding: 24px 20px; }
+  .ap.skel-s4 .s4-content { padding: 50px 20px 22px; }
+  .ap.skel-s5 .s5-content { padding: 22px 22px; }
+  .ap.skel-s5 .s5-footer { padding: 12px 22px; }
+  .ap.skel-s6 .s6-listing { grid-template-columns: 80px 70px 1fr 64px; gap: 2px 10px; font-size: 11px; }
+  .ap.skel-s6 .s6-body { padding: 12px 14px 8px; }
+
+  /* Card variants — drop denser grids one step */
+  .ap.card-v5 .entry-grid,
+  .ap.card-v6 .entry-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 }
 @media (max-width: 600px) {
   .ap-viewport .entry-grid { grid-template-columns: 1fr; }
@@ -627,6 +649,76 @@ section.ya-group { padding: 15px 0; }
   .layout-picks { grid-template-columns: repeat(2, 1fr); }
   .hero h1 { font-size: 32px; }
   section > .container > h2 { font-size: 24px; }
+
+  /* Preview frame — less chrome, shorter min */
+  .ap { padding: 6px; border-radius: 10px; }
+  .ap-bar { padding: 4px 8px 6px; }
+  .ap-dots { display: none; }
+  .ap-url { font-size: 10.5px; padding: 3px 8px; }
+  .ap-viewport { min-height: 480px; }
+
+  /* Force every card variant to single column (override per-variant rules) */
+  .ap.card-v2 .entry-grid,
+  .ap.card-v3 .entry-grid,
+  .ap.card-v4 .entry-grid,
+  .ap.card-v5 .entry-grid,
+  .ap.card-v6 .entry-grid,
+  .ap.skel-s3 .s3-content .entry-grid,
+  .ap.skel-s4 .s4-content .entry-grid { grid-template-columns: 1fr; }
+
+  /* S1 */
+  .ap.skel-s1 .s1-hero { padding: 30px 14px 20px; }
+  .ap.skel-s1 .s1-hero h1 { font-size: 28px; }
+  .ap.skel-s1 .s1-hero p { font-size: 12px; }
+  .ap.skel-s1 .s1-cta { top: 10px; right: 10px; padding: 5px 9px; font-size: 10.5px; }
+  .ap.skel-s1 .s1-filter { padding: 10px 14px; gap: 5px; }
+  .ap.skel-s1 .s1-content { padding: 14px 14px 16px; }
+  .ap.skel-s1 .s1-footer { padding: 10px 14px; flex-direction: column; gap: 2px; }
+
+  /* S2 — drop the nav links and inline search, keep brand + CTA */
+  .ap.skel-s2 .s2-topbar { padding: 8px 12px; gap: 8px; flex-wrap: nowrap; }
+  .ap.skel-s2 .s2-links,
+  .ap.skel-s2 .s2-search { display: none; }
+  .ap.skel-s2 .s2-content { padding: 16px 14px; }
+  .ap.skel-s2 .s2-footer { padding: 10px 14px; flex-direction: column; gap: 2px; }
+
+  /* S3 */
+  .ap.skel-s3 .s3-topbar { padding: 8px 12px; }
+  .ap.skel-s3 .s3-content { padding: 16px 14px; }
+  .ap.skel-s3 .s3-footer { padding: 10px 14px; }
+
+  /* S4 */
+  .ap.skel-s4 .s4-hero { padding: 22px 16px; gap: 14px; }
+  .ap.skel-s4 .s4-hero h1 { font-size: 30px; }
+  .ap.skel-s4 .s4-content { padding: 48px 16px 18px; }
+  .ap.skel-s4 .s4-cta { top: 12px; right: 14px; }
+
+  /* S5 — watermark is decorative, drop it; ease the fold */
+  .ap.skel-s5 .s5-fold { padding: 22px 16px; gap: 16px; min-height: 0; }
+  .ap.skel-s5 .s5-fold h1 { font-size: 26px; }
+  .ap.skel-s5 .s5-content { padding: 18px 16px; }
+  .ap.skel-s5 .s5-footer { padding: 10px 16px; flex-direction: column; gap: 2px; }
+  .ap.skel-s5 .s5-watermark { display: none; }
+  .ap.skel-s5 .s5-cta { top: 12px; right: 14px; }
+  .ap.skel-s5 .s5-featured-body h3 { font-size: 14px; }
+
+  /* S6 — shrink the listing columns and drop the cit column if too tight */
+  .ap.skel-s6 .s6-body { padding: 10px 12px 6px; font-size: 11px; }
+  .ap.skel-s6 .s6-listing { grid-template-columns: 70px 60px 1fr 54px; gap: 2px 8px; font-size: 10.5px; }
+  .ap.skel-s6 .s6-statusbar { font-size: 10px; padding: 5px 12px; }
+
+  /* V2 horizontal — cover scales down so body fits */
+  .ap.card-v2 .card-cover { width: 88px; }
+  .ap.card-v2 .card-body { padding: 8px 10px; }
+
+  /* V5 index card — straighten so rotated edges don't clip the single column */
+  .ap.card-v5 .card,
+  .ap.card-v5 .card:nth-child(3n+2) { transform: none; }
+}
+@media (max-width: 400px) {
+  .ap.skel-s6 .s6-listing { grid-template-columns: 64px 1fr 52px; }
+  .ap.skel-s6 .s6-cell:nth-child(4n+2),
+  .ap.skel-s6 .s6-header:nth-child(2) { display: none; }
 }
 </style>
 </head>
