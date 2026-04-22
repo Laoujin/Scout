@@ -174,16 +174,32 @@ if [[ -f "$INSTALL_DIR/.next" ]]; then
   cat <<EOF
 
 ────────────────────────────────────────────────────────────────────────
-  Scout installed. Two things left — you do these:
+  Scout installed. How the pieces fit:
 
-    cd "$INSTALL_DIR/$SCOUT_NAME/docker"
-    docker-compose up -d --build
+    You open an Issue on $SCOUT_OWNER/$SCOUT_NAME  →  GitHub Actions
+    fires the research workflow  →  the workflow runs on a self-hosted
+    runner (the Docker container below, on your hardware)  →  it uses
+    Claude Code to research the topic and pushes the artifact to
+    $ATLAS_OWNER/$ATLAS_NAME  →  GitHub Pages rebuilds Atlas.
 
-    docker exec -it scout-runner runuser -u runner -- claude
-      (Log in to Anthropic, then /exit. One-time.)
+  Two things left — you do these on this host:
 
-  Open a research issue: https://github.com/$SCOUT_OWNER/$SCOUT_NAME/issues/new?template=research.yml
-  Atlas (first build ~1 min): https://$ATLAS_OWNER.github.io/$ATLAS_NAME/
+    1) Start the runner container. It registers with GitHub and polls
+       for jobs. Must stay running for Scout to respond to issues.
+
+         cd "$INSTALL_DIR/$SCOUT_NAME/docker"
+         docker-compose up -d --build
+
+    2) Authenticate Claude inside the runner. One-time; your login is
+       stored on a named volume and survives rebuilds.
+
+         docker exec -it scout-runner runuser -u runner -- claude
+         # log in, then /exit
+
+  Open a research issue:
+    https://github.com/$SCOUT_OWNER/$SCOUT_NAME/issues/new?template=research.yml
+  Your Atlas (first Pages build takes ~1 min):
+    https://$ATLAS_OWNER.github.io/$ATLAS_NAME/
 ────────────────────────────────────────────────────────────────────────
 
 EOF
