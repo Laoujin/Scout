@@ -43,35 +43,43 @@ curl -fsSL https://raw.githubusercontent.com/Laoujin/Scout/main/install.sh \
   | bash -s -- --config=s5.cartography.v1
 ```
 
-Pick your `<skeleton>.<palette>.<card>` on [the picker](https://laoujin.github.io/Scout/#your-atlas) — `s5.cartography.v1` (magazine layout, cartography palette, image-top cards) is a good starting point. You can change it any time by editing `_config.yml` in your Atlas repo.
+Pick your `<skeleton>.<palette>.<card>` with
+[the picker](https://laoujin.github.io/Scout/#your-atlas)
+or go with `s5.cartography.v1`. 
+You can change it any time by editing `_config.yml` in your Atlas repo.
 
-**What it does** (disposable Alpine container, ~30–60 s):
+- `skeleton`: overall site layout (s1 -> s6)
+- `palette`: Colour scheme (ex: cartography, midnight, nord, ...)
+- `card`: Research card style (v1 -> v7)
 
-1. Logs in to `gh` (device flow or `$GH_TOKEN`).
-2. Forks Scout to your account (or `--org`), enables Actions + Issues.
-3. Creates an empty Atlas repo, seeds it from `atlas-seed/` with your config.
-4. Enables GitHub Pages on Atlas.
-5. Generates an ed25519 deploy key, uploads it to Atlas (write access), seeds the `scout_atlas-ssh` Docker volume with it.
-6. Fetches a runner-registration token and writes `docker/.env`.
-7. Optionally installs `/scout` to `~/.claude/commands/`.
+**What the installer does**:
 
-Then two steps you do yourself:
+- Logs in to `gh` (device flow or `$GH_TOKEN`).
+- Forks Scout to your account.
+- Creates the Atlas repo:
+  - seeds it from `atlas-seed/` with your config.
+  - Enables GitHub Pages.
+  - Generates an ed25519 deploy key and uploads it to Atlas with write access then seeds the `scout_atlas-ssh` Docker volume with it.
+- Fetches a runner-registration token and writes `docker/.env`.
+
+Then two manual steps:
 
 ```bash
+# Start the GitHub action workflow runner
 cd Scout/docker && docker-compose up -d --build
-docker exec -it scout-runner runuser -u runner -- claude   # one-time login
+
+# one-time login with your Claude Code subscription
+docker exec -it scout-runner runuser -u runner -- claude
 ```
 
 **Flags:**
 
-| Flag | Default | Purpose |
-|------|---------|---------|
-| `--config=<skeleton>.<palette>.<card>` | *required* | Atlas theme (see picker) |
-| `--dir=<path>` | `$PWD/Scout` | Where the Scout clone lands |
-| `--org=<org>` | — | Fork into an org instead of your user (required if you already own the upstream) |
-| `--ref=<branch\|tag>` | `main` | Which Scout version to install from |
-| `--upstream=<owner>/<repo>` | `Laoujin/Scout` | Template source |
-| `--local=<path>` | — | Use a local Scout checkout instead of fetching from GitHub (dev) |
+| Flag                                   | Default         | Purpose                             |
+|----------------------------------------|-----------------|-------------------------------------|
+| `--config=<skeleton>.<palette>.<card>` | *required*      | Atlas theme (see picker)            |
+| `--dir=<path>`                         | `$PWD/Scout`    | Where the Scout clone lands         |
+| `--ref=<branch\|tag>`                  | `main`          | Which Scout version to install from |
+| `--upstream=<owner>/<repo>`            | `Laoujin/Scout` | Template source                     |
 
 Don't want to pipe strangers into `bash`? See [INSTALL.md](INSTALL.md) for the manual step-by-step.
 
@@ -81,16 +89,14 @@ Don't want to pipe strangers into `bash`? See [INSTALL.md](INSTALL.md) for the m
 
 [Open a new Issue](https://github.com/Laoujin/Scout/issues/new?template=research.yml) using the **Research request** template. Fill in `Topic`, `Depth`, `Format`. Optional: tick **Skip sharpening** if your topic is already exactly what you want researched.
 
-Within ~30 s Scout replies with a sharpened proposal (or your raw topic when skip is ticked) plus a `- [ ] Start research` checkbox.
+Scout replies with a sharpened proposal (or your raw topic when skip is ticked) plus a `- [ ] Start research` checkbox.
 
 - **Tick the checkbox** → research runs, publishes to Atlas, comments the link back, closes the Issue.
 - **Reply with feedback** ("focus on r/homelab", "shorter, decision-only") → Scout posts a revised proposal as a new comment. Loop until happy.
 
-Mobile UX: GitHub mobile app → Scout → New issue → pick the template → confirm via the checkbox on Scout's reply.
-
 ### `/scout` slash command
 
-Opens an Issue from inside Claude Code via a guided picker. The installer offers to drop it in; to add it manually:
+Open an Issue from inside Claude Code (via gh CLI):
 
 ```bash
 mkdir -p ~/.claude/commands
@@ -105,55 +111,31 @@ sed -i \
 
 Usage in Claude Code:
 
-```
+```txt
 /scout Compare the top 3 static site generators in 2026
-/scout                                     # prompts for topic
 ```
-
-Claude asks you for Depth / Format / Skip-sharpening via `AskUserQuestion`, then creates the Issue on your Scout fork. From there it's the normal Issue flow above.
 
 ## Depth tiers
 
 `Topic`, `Depth`, and `Format` are the three Issue inputs:
 
-| Depth | Shape | Artifacts | Wall-clock |
-|-------|-------|-----------|------------|
-| `recon` | Single pass, inline cites | `index.{md,html}` | ~2–5 min |
-| `survey` | Single pass + on-disk `citations.jsonl` + reflect-and-requery | `index.*`, `citations.jsonl` | ~5–10 min |
+| Depth        | Shape | Artifacts | Wall-clock |
+|--------------|-------|-----------|------------|
+| `recon`      | Single pass, inline cites | `index.{md,html}` | ~2–5 min |
+| `survey`     | Single pass + on-disk `citations.jsonl` + reflect-and-requery | `index.*`, `citations.jsonl` | ~5–10 min |
 | `expedition` | Parent dispatches researcher sub-agents per sub-question (≤6 parallel), merges ledgers, runs post-write reviewer, applies one fix pass | `index.*`, `citations.jsonl`, `citations.a*.jsonl`, `outline.md` | ~15–30 min |
-
-`Format` is `md`, `html`, or `auto` (Scout picks — `html` for comparisons and custom layouts, `md` for briefs).
 
 See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for how these drive behaviour, [`skills/scout/deep.md`](skills/scout/deep.md) for the parallel sub-agent flow that `expedition` triggers, and [`skills/scout/sharpen.md`](skills/scout/sharpen.md) for how raw topics get sharpened into research briefs.
 
-## Atlas configuration
+## Theme Tinkering
 
-### Theme variables
+If you want to tune your Atlas theme/layout:
 
-Three knobs in `_config.yml` in your Atlas repo — edit, push, Pages rebuilds:
 
-| Key | Values | Effect |
-|-----|--------|--------|
-| `skeleton` | `s1` Hero + footer · `s2` Top bar + footer · `s3` Top bar + sidenav · `s4` Split hero · `s5` Magazine cover · `s6` Terminal frame | Overall site layout |
-| `palette` | `rust` · `paper` · `cartography` · `midnight` · `minimal` · `fieldnotes` · `solarized` · `nord` | Colour scheme |
-| `card` | `v1` Image-top · `v2` Horizontal · `v3` Hero overlay · `v4` Terminal · `v5` Index card · `v6` No-image · `v7` Compact row | Research card style on the index |
+### Preview theme changes locally
 
-`s6` (Terminal frame) ignores `card` — it renders the list as terminal output.
-
-### Change after install
-
-```bash
-cd ~/Atlas
-sed -i 's#^palette:.*#palette: midnight#' _config.yml
-git commit -am "theme: midnight palette"
-git push
-```
-
-GitHub Pages picks it up on push; the rebuild is typically under a minute. No Scout involvement — Atlas is just a Jekyll repo you own.
-
-### Preview locally
-
-`atlas-seed/serve.ps1` (PowerShell, requires Docker + Python) builds every variant of one axis into its own subdir and serves the lot:
+`atlas-seed/serve.ps1` (PowerShell, Docker, Python) builds every variant of one axis
+into its own subdir and [serves the lot](http://localhost:4000/):
 
 ```powershell
 cd atlas-seed
@@ -162,19 +144,16 @@ cd atlas-seed
 ./serve.ps1 -Sweep cards       # sweep all cards
 ```
 
-Then browse http://localhost:4000/ to flip between previews.
-
 For a single build on any platform:
 
 ```bash
 cd atlas-seed
-docker run --rm -p 4000:4000 -v "$PWD:/srv/jekyll" jekyll/jekyll:4 \
-  jekyll serve --host 0.0.0.0 --baseurl '/'
+docker run --rm -p 4000:4000 -v "$PWD:/srv/jekyll" jekyll/jekyll:4 jekyll serve --host 0.0.0.0 --baseurl '/'
 ```
 
 ## Operate
 
-### Update Scout
+### Update Scout, Claude
 
 ```bash
 cd ~/Scout
@@ -186,18 +165,9 @@ docker-compose up -d
 
 Named Docker volumes preserve the Claude login, runner registration, and Atlas deploy key across rebuilds. You don't re-auth.
 
-### Update Claude CLI
-
-The CLI ships inside the runner image — rebuild with `--pull` to get the latest:
-
-```bash
-cd ~/Scout/docker
-docker-compose build --pull && docker-compose up -d
-```
-
 ### Re-authenticate Claude
 
-If the subscription auth expires (rare):
+If the subscription auth expires:
 
 ```bash
 docker exec -it scout-runner runuser -u runner -- claude
@@ -219,7 +189,6 @@ docker volume rm scout_runner-config   # discard old registration state
 docker-compose up -d
 ```
 
-Keep the `scout_atlas-ssh` and `scout_claude-auth` volumes — those are unrelated.
 
 ## Troubleshooting
 
@@ -246,3 +215,4 @@ Egress allow-listing, capability drops, and a seccomp profile are on the roadmap
 ## Alternatives
 
 - ⭐ 515 [199-biotechnologies/claude-deep-research-skill](https://github.com/199-biotechnologies/claude-deep-research-skill)
+- ⭐ 503 [Weizhena/Deep-Research-skills](https://github.com/Weizhena/Deep-Research-skills)
