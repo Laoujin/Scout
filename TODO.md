@@ -1,32 +1,54 @@
 Scout TODO List
 ===============
 
-- [x] How to make this your own: how to set this up with your own Atlas
-    - [ ] Make as frictionless as possible (rawgithubusercontent/install.sh | bash)
-    - [ ] Maybe could be a multi step installation
-    - [ ] Should not clone my Atlas but start with a bare repository
 - [x] RESEARCH: Agents that could be used for doing research for Scout
 - [ ] RESEARCH: Need an always on something instead of Synology which has problems: need more CPU/RAM, newer kernel, CPU with AVX2, no lock-in with custom DSM/Linux.
 - [ ] RESEARCH: Need to buy a birthday gift for my girlfriend, I know about flowers, a massage, a cooking workshop ... I need truly unique ideas here
 - [ ] RESEARCH: I need a listing of restaurants in Ghent. Everything romantic.
-- [ ] Installation / command in Claude Code (via marketplace?) + In README -- do we even want to keep this?
-- [x] A mobile run would now start the action workflow -- but that's not very user friendly...
-- [x] The committer should be "me", not "scout Erin" Github user...
-- [ ] Instead of doing a new research, "redo" an existing one, or build upon an existing one
+
+## Scout functionality
+
+- [x] How to make this your own: how to set this up with your own Atlas
+    - [ ] Make as frictionless as possible (rawgithubusercontent/install.sh | bash)
+    - [ ] Maybe could be a multi step installation
+    - [ ] Should not clone my Atlas but start with a bare repository
+- [ ] Slash Claude command
+    - [ ] The options should be the Claude menu, the user picks, then it creates the github issue
+    - [ ] Or we could just remove it
 - [ ] Generating an image for the research would be very cool (ie give a Nano Banana API key?)
-- [ ] Cross reference with my Obsidian (option)
-- [ ] Frontmatter to hide a "old" research from the index site
 - [ ] We prefer tables... but on mobile tables are not really handy... how do we handle that?
 - [ ] A log of what the LLM did? Useful?
-
-I said:
-
-"Agents that could be used for doing research for Scout"
-
-
-I entered this in Claude and it turned it into:
-
-"Survey of research agents / deep-research tools available in 2026 that could serve a role like Scout (my custom Claude-Code-based research engine). Compare the main options, note what's production-ready vs experimental, and flag anything I should steal ideas from."
+- [ ] Security: what can be stolen from me?
+- [x] Add Claude cost to frontmatter
+- [ ] Cleanup README
 
 
-Maybe this needs to be the first step of Scout as well...?
+## Security
+
+--> The GH token & the Claude Subscription
+
+┌────────┬──────────────────────────────────────────────────────────────────┬─────────┐
+│ Effort │                            Mitigation                            │  Stops  │
+├────────┼──────────────────────────────────────────────────────────────────┼─────────┤
+│ Low    │ Docker network without route to LAN (network_mode: bridge +      │ #1      │
+│        │ firewall rule dropping RFC1918 egress)                           │         │
+├────────┼──────────────────────────────────────────────────────────────────┼─────────┤
+│ Low    │ GH_TOKEN minimum scope — already contents: read, issues: write,  │ limits  │
+│        │ which is good; double-check no broader PAT                       │ #2      │
+├────────┼──────────────────────────────────────────────────────────────────┼─────────┤
+│ Low    │ Never mount ~/.claude/ read-write; read-only bind if at all      │ limits  │
+│        │                                                                  │ #2      │
+├────────┼──────────────────────────────────────────────────────────────────┼─────────┤
+│ Low    │ Read-only root filesystem, writable tmpfs for scratch            │ #3      │
+├────────┼──────────────────────────────────────────────────────────────────┼─────────┤
+│ Medium │ Require human approval before Scout commits & pushes to Atlas    │ #3, #4  │
+│        │ (manual gh pr merge or workflow_dispatch)                        │         │
+├────────┼──────────────────────────────────────────────────────────────────┼─────────┤
+│ Medium │ Output validator: reject published content containing <script>,  │ #4      │
+│        │ off-topic URLs, secrets-like strings                             │         │
+├────────┼──────────────────────────────────────────────────────────────────┼─────────┤
+│ Medium │ Egress allowlist (only anthropic.com, github.com, approved       │ #1, #2  │
+│        │ search domains) via squid/envoy sidecar                          │         │
+├────────┼──────────────────────────────────────────────────────────────────┼─────────┤
+│ High   │ Seccomp + AppArmor profile, drop all caps, non-root user         │ #6      │
+└────────┴──────────────────────────────────────────────────────────────────┴─────────┘

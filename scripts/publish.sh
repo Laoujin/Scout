@@ -36,9 +36,15 @@ owner="${atlas_slug%%/*}"; repo="${atlas_slug##*/}"
 ATLAS_URL="https://${owner,,}.github.io/${repo}/research/${DATE}-${SLUG}/"
 echo "Published: ${ATLAS_URL}"
 
-# If this run came from an issue, comment the artifact link and close it.
+# If this run came from an issue, comment the artifact link. Close the issue
+# only when no soft failures were recorded — otherwise leave it open with a
+# second comment so the user can decide how to handle the partial success.
 if [ -n "${ISSUE_NUMBER:-}" ] && [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ]; then
   gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" \
     --body "Published: ${ATLAS_URL}"
-  gh issue close "$ISSUE_NUMBER" --repo "$GH_REPO" --reason completed
+  if [ -n "${SOFT_FAIL_LOG:-}" ] && [ -s "$SOFT_FAIL_LOG" ]; then
+    gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "$(printf 'Published, but some non-blocking steps failed. Review and close manually.\n\n```\n%s\n```' "$(cat "$SOFT_FAIL_LOG")")"
+  else
+    gh issue close "$ISSUE_NUMBER" --repo "$GH_REPO" --reason completed
+  fi
 fi

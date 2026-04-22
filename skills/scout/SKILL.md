@@ -140,6 +140,7 @@ Field notes:
 - `issue`: the Scout issue number that drove this run. Omit the field when ISSUE_NUMBER is empty (workflow_dispatch path).
 - `citations`: count of distinct source URLs you cited in the artifact.
 - `reading_time_min`: estimate as `max(1, round(word_count / 200))`.
+- `cost_usd`, `duration_sec`: **injected by `run.sh` after you finish** — do not write these yourself. They end up inside the frontmatter block alongside the fields above.
 
 ## Body content
 
