@@ -174,6 +174,12 @@ EOF
   read -rp "Install /scout slash command to ~/.claude/commands/? [y/N]: " _ans
   if [[ "${_ans,,}" =~ ^(y|yes)$ ]]; then
     _target="$HOME/.claude/commands/scout.md"
+    if [[ -e "$_target" ]]; then
+      read -rp "  $_target exists. Overwrite? [y/N]: " _ow
+      [[ "${_ow,,}" =~ ^(y|yes)$ ]] || { echo "  skipped"; _ans=no; }
+    fi
+  fi
+  if [[ "${_ans,,}" =~ ^(y|yes)$ ]]; then
     mkdir -p "$(dirname "$_target")"
     _tpl="$BUILD_CTX/scout.md.template"
     if [[ -n "$LOCAL_SCOUT" ]]; then
