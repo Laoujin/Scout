@@ -124,7 +124,7 @@ docker run --rm -it \
   -e GITHUB_TOKEN \
   scout-installer
 
-# Post-install next steps — installer wrote SCOUT_NAME + ATLAS_NAME + OWNER to /work/.next
+# Post-install next steps — installer wrote SCOUT_OWNER/NAME + ATLAS_OWNER/NAME to /work/.next
 if [[ -f "$INSTALL_DIR/.next" ]]; then
   # shellcheck disable=SC1091
   source "$INSTALL_DIR/.next"
@@ -139,8 +139,8 @@ if [[ -f "$INSTALL_DIR/.next" ]]; then
     docker exec -it scout-runner runuser -u runner -- claude
       (Log in to Anthropic, then /exit. One-time.)
 
-  Open a research issue: https://github.com/$OWNER/$SCOUT_NAME/issues/new?template=research.yml
-  Atlas (first build ~1 min): https://$OWNER.github.io/$ATLAS_NAME/
+  Open a research issue: https://github.com/$SCOUT_OWNER/$SCOUT_NAME/issues/new?template=research.yml
+  Atlas (first build ~1 min): https://$ATLAS_OWNER.github.io/$ATLAS_NAME/
 ────────────────────────────────────────────────────────────────────────
 
 EOF

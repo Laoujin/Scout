@@ -58,63 +58,75 @@ fi
 # Git credential helper for push/clone over HTTPS
 gh auth setup-git >/dev/null
 
-# ---------- Step 3: Resolve owner ----------
+# ---------- Step 3: Resolve default owner ----------
 AUTHED_USER=$(gh api user --jq .login)
 echo "→ Authenticated as: $AUTHED_USER"
 
-# Both repos land under SCOUT_ORG when set (required if AUTHED_USER already owns
-# the upstream — e.g. Laoujin forking Laoujin/Scout into a personal account
-# fails with "single user cannot own both parent and fork").
-OWNER="${SCOUT_ORG:-$AUTHED_USER}"
-if [[ -n "${SCOUT_ORG:-}" ]]; then
-  echo "→ Target owner (--org): $SCOUT_ORG"
-fi
+# Default owner for the prompts. --org on the host overrides, and the user
+# can still type owner/name at the prompt to pick a different one per repo.
+DEFAULT_OWNER="${SCOUT_ORG:-$AUTHED_USER}"
 
-# ---------- Steps 4 + 5: Repo-name prompts ----------
+# ---------- Steps 4 + 5: Repo prompts (accept owner/name or name) ----------
+# Sets ${prefix}_OWNER and ${prefix}_NAME.
 prompt_repo() {
-  local label="$1" default="$2" outvar="$3" name
+  local label="$1" def_owner="$2" def_name="$3" prefix="$4"
+  local input owner name
   while true; do
-    read -rp "  $label as $OWNER/[${default}]: " name
-    name="${name:-$default}"
-    if gh repo view "$OWNER/$name" >/dev/null 2>&1; then
-      echo "  ! $OWNER/$name already exists. Pick another name (or Ctrl-C to abort)."
+    read -rp "  $label [${def_owner}/${def_name}]: " input
+    input="${input:-$def_owner/$def_name}"
+    if [[ "$input" == */* ]]; then
+      owner="${input%%/*}"
+      name="${input#*/}"
     else
-      printf -v "$outvar" '%s' "$name"
+      owner="$def_owner"
+      name="$input"
+    fi
+    if [[ -z "$owner" || -z "$name" || "$name" == */* ]]; then
+      echo "  ! Invalid: expected <owner>/<name> or <name>. Try again."
+      continue
+    fi
+    if gh repo view "$owner/$name" >/dev/null 2>&1; then
+      echo "  ! $owner/$name already exists. Pick another (or Ctrl-C to abort)."
+    else
+      printf -v "${prefix}_OWNER" '%s' "$owner"
+      printf -v "${prefix}_NAME"  '%s' "$name"
       return
     fi
   done
 }
 
-prompt_repo "Fork Scout"       "Scout" SCOUT_NAME
-prompt_repo "Create Atlas repo" "Atlas" ATLAS_NAME
+prompt_repo "Fork Scout as"        "$DEFAULT_OWNER" "Scout" SCOUT
+prompt_repo "Create Atlas repo as" "$DEFAULT_OWNER" "Atlas" ATLAS
 
 # ---------- Step 6: Fork Scout, enable Actions, clone into /work ----------
-echo "→ Forking $SCOUT_UPSTREAM as $OWNER/$SCOUT_NAME..."
+echo "→ Forking $SCOUT_UPSTREAM as $SCOUT_OWNER/$SCOUT_NAME..."
 fork_args=(--fork-name "$SCOUT_NAME" --clone=false --default-branch-only)
-[[ -n "${SCOUT_ORG:-}" ]] && fork_args+=(--org "$SCOUT_ORG")
+# Forking to any owner other than the authed user requires --org (only orgs
+# supported by gh — you can't fork into someone else's personal account).
+[[ "$SCOUT_OWNER" != "$AUTHED_USER" ]] && fork_args+=(--org "$SCOUT_OWNER")
 gh repo fork "$SCOUT_UPSTREAM" "${fork_args[@]}" >/dev/null
 
 # Forks have Actions disabled by default ("I understand my workflows" button).
 # Flip the switch via API so scout-runner actually fires.
-echo "→ Enabling Actions on $OWNER/$SCOUT_NAME..."
-gh api -X PUT "repos/$OWNER/$SCOUT_NAME/actions/permissions" \
+echo "→ Enabling Actions on $SCOUT_OWNER/$SCOUT_NAME..."
+gh api -X PUT "repos/$SCOUT_OWNER/$SCOUT_NAME/actions/permissions" \
   -f enabled=true -f allowed_actions=all >/dev/null
 
 SCOUT_DIR="/work/$SCOUT_NAME"
 rm -rf "$SCOUT_DIR"
 # Fork can 404 on clone for a moment while GitHub propagates
 for attempt in 1 2 3 4 5; do
-  if gh repo clone "$OWNER/$SCOUT_NAME" "$SCOUT_DIR" -- -q 2>/dev/null; then break; fi
+  if gh repo clone "$SCOUT_OWNER/$SCOUT_NAME" "$SCOUT_DIR" -- -q 2>/dev/null; then break; fi
   sleep 2
 done
-[[ -d "$SCOUT_DIR/.git" ]] || { echo "Error: failed to clone $OWNER/$SCOUT_NAME" >&2; exit 1; }
+[[ -d "$SCOUT_DIR/.git" ]] || { echo "Error: failed to clone $SCOUT_OWNER/$SCOUT_NAME" >&2; exit 1; }
 
 # ---------- Step 7: Create Atlas, seed from atlas-seed/, push ----------
-echo "→ Creating $OWNER/$ATLAS_NAME (empty)..."
-gh repo create "$OWNER/$ATLAS_NAME" --public >/dev/null
+echo "→ Creating $ATLAS_OWNER/$ATLAS_NAME (empty)..."
+gh repo create "$ATLAS_OWNER/$ATLAS_NAME" --public >/dev/null
 
 [[ -d "$SCOUT_DIR/atlas-seed" ]] || {
-  echo "Error: $SCOUT_DIR/atlas-seed/ missing in template $SCOUT_UPSTREAM@$SCOUT_REF" >&2
+  echo "Error: $SCOUT_DIR/atlas-seed/ missing in $SCOUT_UPSTREAM@$SCOUT_REF" >&2
   exit 1
 }
 
@@ -133,9 +145,9 @@ sed -i \
   cd "$STAGE"
   git init -q -b main
   git add -A
-  git -c user.name="$OWNER" -c user.email="${OWNER}@users.noreply.github.com" \
+  git -c user.name="$AUTHED_USER" -c user.email="${AUTHED_USER}@users.noreply.github.com" \
       commit -qm "Initial Atlas seed (skeleton=$SKEL palette=$PAL card=$CARD)"
-  git remote add origin "https://github.com/$OWNER/$ATLAS_NAME.git"
+  git remote add origin "https://github.com/$ATLAS_OWNER/$ATLAS_NAME.git"
   # Retry push briefly — empty repo occasionally 404s right after create
   for attempt in 1 2 3 4 5; do
     if git push -q -u origin main 2>/dev/null; then break; fi
@@ -145,13 +157,13 @@ sed -i \
 rm -rf "$STAGE"
 
 # ---------- Step 8: Enable GitHub Pages ----------
-echo "→ Enabling Pages on $OWNER/$ATLAS_NAME..."
-if ! gh api -X POST "repos/$OWNER/$ATLAS_NAME/pages" \
+echo "→ Enabling Pages on $ATLAS_OWNER/$ATLAS_NAME..."
+if ! gh api -X POST "repos/$ATLAS_OWNER/$ATLAS_NAME/pages" \
        -f "source[branch]=main" -f "source[path]=/" >/dev/null 2>&1; then
   # 409 Conflict = already enabled (safe on re-run); anything else is a real error
-  code=$(gh api -X POST "repos/$OWNER/$ATLAS_NAME/pages" \
+  code=$(gh api -X POST "repos/$ATLAS_OWNER/$ATLAS_NAME/pages" \
            -f "source[branch]=main" -f "source[path]=/" 2>&1 | tail -1 | grep -oE '[0-9]{3}' | head -1 || true)
-  [[ "$code" == "409" ]] || echo "  ! Pages API returned non-409 error; check https://github.com/$OWNER/$ATLAS_NAME/settings/pages"
+  [[ "$code" == "409" ]] || echo "  ! Pages API returned non-409 error; check https://github.com/$ATLAS_OWNER/$ATLAS_NAME/settings/pages"
 fi
 
 # ---------- Step 9: Atlas deploy key ----------
@@ -160,11 +172,11 @@ KEYDIR=$(mktemp -d)
 ssh-keygen -t ed25519 -f "$KEYDIR/atlas_deploy" -C "scout-nas" -N "" -q
 
 # Remove any prior scout-nas key so re-runs don't duplicate
-gh api "repos/$OWNER/$ATLAS_NAME/keys" --jq '.[] | select(.title=="scout-nas") | .id' | while read -r kid; do
-  [[ -n "$kid" ]] && gh api -X DELETE "repos/$OWNER/$ATLAS_NAME/keys/$kid" >/dev/null
+gh api "repos/$ATLAS_OWNER/$ATLAS_NAME/keys" --jq '.[] | select(.title=="scout-nas") | .id' | while read -r kid; do
+  [[ -n "$kid" ]] && gh api -X DELETE "repos/$ATLAS_OWNER/$ATLAS_NAME/keys/$kid" >/dev/null
 done
 
-gh api -X POST "repos/$OWNER/$ATLAS_NAME/keys" \
+gh api -X POST "repos/$ATLAS_OWNER/$ATLAS_NAME/keys" \
   -f title=scout-nas \
   -f "key=$(cat "$KEYDIR/atlas_deploy.pub")" \
   -F read_only=false >/dev/null
@@ -195,21 +207,22 @@ rm -rf "$KEYDIR"
 
 # ---------- Step 10: Runner registration token + docker/.env ----------
 echo "→ Fetching runner-registration token..."
-RUNNER_TOKEN=$(gh api -X POST "repos/$OWNER/$SCOUT_NAME/actions/runners/registration-token" --jq .token)
+RUNNER_TOKEN=$(gh api -X POST "repos/$SCOUT_OWNER/$SCOUT_NAME/actions/runners/registration-token" --jq .token)
 
 cat > "$SCOUT_DIR/docker/.env" <<EOF
 # Generated by Scout installer on $(date -u +%Y-%m-%dT%H:%M:%SZ)
-RUNNER_URL=https://github.com/$OWNER/$SCOUT_NAME
-ATLAS_REPO=git@github.com-atlas:$OWNER/$ATLAS_NAME.git
+RUNNER_URL=https://github.com/$SCOUT_OWNER/$SCOUT_NAME
+ATLAS_REPO=git@github.com-atlas:$ATLAS_OWNER/$ATLAS_NAME.git
 RUNNER_TOKEN=$RUNNER_TOKEN
 EOF
 chmod 600 "$SCOUT_DIR/docker/.env"
 
 # ---------- Step 11: Hand off post-install summary to host install.sh ----------
 cat > /work/.next <<EOF
+SCOUT_OWNER=$SCOUT_OWNER
 SCOUT_NAME=$SCOUT_NAME
+ATLAS_OWNER=$ATLAS_OWNER
 ATLAS_NAME=$ATLAS_NAME
-OWNER=$OWNER
 EOF
 
 echo "✓ Container work done."
