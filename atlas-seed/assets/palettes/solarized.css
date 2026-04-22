@@ -1,0 +1,11 @@
+:root {
+  --pal-bg: #fdf6e3;       --pal-surface: #eee8d5;      --pal-surface-tint: #ece4c6;
+  --pal-fg: #586e75;       --pal-fg-muted: #657b83;     --pal-fg-faint: #93a1a1;
+  --pal-border: #e0dab3;   --pal-accent: #b58900;       --pal-accent-soft: #f4ecc2;
+  --pal-accent-fg: #fdf6e3;
+  --d-ceo:      #cb4b16;   --d-ceo-bg:      #fce3cd;
+  --d-standard: #268bd2;   --d-standard-bg: #d6ecf7;
+  --d-deep:     #6c71c4;   --d-deep-bg:     #dfe1f4;
+  --fmt-md:     #859900;   --fmt-md-bg:     #edf1c9;
+  --fmt-html:   #d33682;   --fmt-html-bg:   #f9d8e8;
+}

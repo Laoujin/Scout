@@ -1,0 +1,54 @@
+/* Site S4 — Split hero */
+.s4 { display: grid; grid-template-columns: 38% 1fr; min-height: 100vh; }
+.s4-hero {
+  padding: 56px 40px;
+  background:
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--pal-accent) 22%, transparent), transparent 60%),
+    var(--pal-surface-tint);
+  border-right: 1px solid var(--pal-border);
+  display: flex; flex-direction: column; gap: 22px;
+  position: sticky; top: 0;
+  align-self: start;
+  max-height: 100vh;
+  overflow-y: auto;
+}
+.s4-logo {
+  width: 64px; height: 64px; border-radius: 14px;
+  background: var(--pal-accent); color: var(--pal-accent-fg);
+  display: grid; place-content: center;
+  font: italic 700 34px/1 Georgia, serif;
+}
+.s4-hero h1 {
+  margin: 0; font-size: 36px; letter-spacing: -0.02em; line-height: 1.1; color: var(--pal-fg);
+  font-family: 'Fraunces', Georgia, serif;
+}
+.s4-hero p { margin: 0; color: var(--pal-fg-muted); font-size: 15px; max-width: 34ch; }
+.s4-latest {
+  margin-top: 8px;
+  border-top: 1px solid var(--pal-border);
+  padding-top: 18px;
+}
+.s4-latest h4 {
+  margin: 0 0 10px; font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--pal-fg-faint);
+}
+.s4-latest ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.s4-latest li a {
+  display: flex; gap: 10px; align-items: baseline;
+  color: var(--pal-fg); font-size: 13.5px;
+  line-height: 1.4;
+}
+.s4-latest li a:hover { color: var(--pal-accent); }
+.s4-latest .d { font: 500 11px ui-monospace, Menlo, monospace; color: var(--pal-fg-faint); min-width: 58px; flex-shrink: 0; }
+.s4-content { padding: 40px 40px; overflow-y: auto; }
+.s4-content h2 {
+  margin: 0 0 20px; font-size: 16px; letter-spacing: -0.01em;
+  color: var(--pal-fg-muted); font-weight: 600;
+}
+@media (max-width: 900px) {
+  .s4 { grid-template-columns: 1fr; }
+  .s4-hero { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--pal-border); padding: 40px 24px; }
+  .s4-content { padding: 28px 24px 40px; }
+  .s4-content .entry-grid { grid-template-columns: 1fr !important; }
+}

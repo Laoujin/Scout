@@ -1,0 +1,33 @@
+title: Atlas
+description: Research compiled on demand by Scout.
+
+# baseurl must match your Atlas repo name for project Pages
+# (e.g. /Atlas serves at https://<you>.github.io/Atlas/).
+# install.sh rewrites this to match the actual Atlas repo name.
+baseurl: /Atlas
+
+# If you renamed your Scout fork, the installer updates this too.
+scout_repo: Scout
+
+# --- Theme variables (edit any of these, push, GitHub Pages rebuilds) ---
+# Skeletons:  s1 s2 s3 s4 s5 s6   (site layout)
+# Palettes:   rust paper cartography midnight minimal fieldnotes solarized nord
+# Cards:      v1 v2 v3 v4 v5 v6 v7
+skeleton: s1
+palette:  rust
+card:     v1
+
+# Research folders under /research/ get layout=research + type=research automatically.
+defaults:
+  - scope:
+      path: research
+    values:
+      layout: research
+      type: research
+
+exclude:
+  - README.md
+  - .gitignore
+
+markdown: kramdown
+highlighter: rouge

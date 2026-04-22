@@ -1,0 +1,56 @@
+/* Card V5 — index card */
+.entry-grid { grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.card {
+  position: relative;
+  background:
+    linear-gradient(to bottom, transparent 27px, color-mix(in srgb, var(--pal-accent) 18%, transparent) 27px 28px, transparent 28px),
+    repeating-linear-gradient(transparent 0 27px, var(--pal-border) 27px 28px),
+    var(--pal-surface);
+  padding: 30px 24px 22px;
+  border-radius: 4px;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.06),
+    0 14px 28px -18px rgba(0,0,0,.25),
+    inset 0 0 0 1px color-mix(in srgb, var(--pal-accent) 8%, transparent);
+  font-family: "Courier New", Courier, monospace;
+  transform: rotate(-0.4deg);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.card:nth-child(3n+2) { transform: rotate(0.5deg); }
+.card:nth-child(3n+3) { transform: rotate(-0.2deg); }
+.card:hover { transform: rotate(0deg); box-shadow: 0 4px 8px rgba(0,0,0,.08), 0 24px 40px -20px rgba(0,0,0,.3); }
+.card-link { color: inherit; display: block; }
+.card .stamp {
+  position: absolute; top: 14px; right: 14px;
+  border: 2px solid currentColor; border-radius: 2px;
+  padding: 2px 8px; font: 700 10px/1.4 "Courier New", monospace;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  transform: rotate(6deg); opacity: 0.85;
+  z-index: 1;
+}
+.card .stamp.depth-ceo      { color: var(--d-ceo); }
+.card .stamp.depth-standard { color: var(--d-standard); }
+.card .stamp.depth-deep     { color: var(--d-deep); }
+.card-no { font-size: 11px; color: var(--pal-fg-faint); letter-spacing: 0.08em; margin: 0 0 4px; }
+.card-thumb {
+  width: 64px; height: 64px; aspect-ratio: 1/1; border-radius: 4px; float: right;
+  margin: 0 0 8px 14px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.1);
+}
+.card-title {
+  margin: 0 0 10px; font-size: 18px; line-height: 1.44;
+  color: var(--pal-fg); font-weight: 700;
+  font-family: "Georgia", serif;
+}
+.card-summary { margin: 0 0 14px; font-size: 13px; line-height: 1.75; color: var(--pal-fg-muted); }
+.card-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 14px; padding-top: 10px;
+  border-top: 1px dashed color-mix(in srgb, var(--pal-accent) 30%, transparent);
+  font-size: 11px; color: var(--pal-fg-faint);
+  clear: both;
+}
+.card-tags { display: flex; gap: 8px; }
+.card-tags span { color: var(--pal-accent); }
+@media (max-width: 900px) { .entry-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .entry-grid { grid-template-columns: 1fr; } }

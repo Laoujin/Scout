@@ -1,3 +1,5 @@
+name: scout
+
 services:
   scout-runner:
     build: .
@@ -19,3 +21,4 @@ volumes:
   claude-auth:
   runner-config:
   atlas-ssh:
+    name: scout_atlas-ssh

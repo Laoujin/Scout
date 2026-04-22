@@ -1,0 +1,37 @@
+---
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% if page.title %}{{ page.title }} — {% endif %}{{ site.title }}</title>
+  <link rel="icon" type="image/png" href="{{ '/assets/icon.png' | relative_url }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/assets/palettes/' | append: site.palette | append: '.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/base.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/assets/research.css' | relative_url }}">
+</head>
+<body class="research-page">
+  <header class="research-hero">
+    <a href="{{ '/' | relative_url }}" class="research-back">← {{ site.title }}</a>
+    {% if page.title %}<h1>{{ page.title }}</h1>{% endif %}
+    <p class="research-meta">
+      {% if page.depth %}<span class="depth-badge depth-{{ page.depth }}">{{ page.depth | capitalize }}</span>{% endif %}
+      {% if page.format %}<span class="fmt-pill fmt-{{ page.format }}">.{{ page.format }}</span>{% endif %}
+      {% if page.date %}<time>{{ page.date | date: "%Y-%m-%d" }}</time>{% endif %}
+      {% if page.citations %}<span>{{ page.citations }} sources</span>{% endif %}
+      {% if page.reading_time %}<span>~{{ page.reading_time }} min</span>{% endif %}
+    </p>
+    {% if page.topic %}<p class="research-topic">{{ page.topic }}</p>{% endif %}
+  </header>
+  <main class="research-main">
+    {{ content }}
+  </main>
+  <footer class="research-footer">
+    <p>Scout researches. Atlas remembers.</p>
+  </footer>
+</body>
+</html>
