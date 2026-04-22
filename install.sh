@@ -78,8 +78,12 @@ fi
 
 docker info >/dev/null 2>&1 || { echo "Docker daemon is not reachable. Start Docker and retry." >&2; exit 1; }
 
-AUTH_DIR="$(mktemp -d)"
-BUILD_CTX="$(mktemp -d)"
+mkdir -p "$INSTALL_DIR"
+# Place the bind-mounted temp dirs inside $INSTALL_DIR rather than /tmp.
+# Docker Desktop on WSL2 can't always see WSL /tmp, but $INSTALL_DIR is
+# under $PWD which is always exposed.
+AUTH_DIR="$(TMPDIR="$INSTALL_DIR" mktemp -d)"
+BUILD_CTX="$(TMPDIR="$INSTALL_DIR" mktemp -d)"
 trap 'rm -rf "$AUTH_DIR" "$BUILD_CTX" "${SCOUT_INSTALL_TMPFILE:-}"' EXIT
 
 if [[ -n "$LOCAL_SCOUT" ]]; then
@@ -108,8 +112,6 @@ DOCKERFILE
 
 echo "→ Building scout-installer image..."
 docker build -q -t scout-installer "$BUILD_CTX" >/dev/null
-
-mkdir -p "$INSTALL_DIR"
 
 echo "→ Running installer..."
 docker run --rm -it \
