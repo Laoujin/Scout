@@ -136,6 +136,13 @@ step "Enabling Issues..."
 gh repo edit "$SCOUT_OWNER/$SCOUT_NAME" --enable-issues >/dev/null
 ok
 
+step "Creating scout-research label..."
+gh label create scout-research \
+  --color c2410c \
+  --description "Scout research request" \
+  --repo "$SCOUT_OWNER/$SCOUT_NAME" 2>/dev/null || true
+ok
+
 SCOUT_DIR="/work/$SCOUT_NAME"
 rm -rf "$SCOUT_DIR"
 step "Cloning into $SCOUT_DIR..."
