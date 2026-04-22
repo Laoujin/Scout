@@ -18,12 +18,13 @@
   <header class="research-hero">
     <a href="{{ '/' | relative_url }}" class="research-back">← {{ site.title }}</a>
     {% if page.title %}<h1>{{ page.title }}</h1>{% endif %}
+    {% assign depth_label = page.depth | replace: 'ceo', 'recon' | replace: 'standard', 'survey' | replace: 'deep', 'expedition' %}
     <p class="research-meta">
-      {% if page.depth %}<span class="depth-badge depth-{{ page.depth }}">{{ page.depth | capitalize }}</span>{% endif %}
+      {% if page.depth %}<span class="depth-badge depth-{{ depth_label }}">{{ depth_label }}</span>{% endif %}
       {% if page.format %}<span class="fmt-pill fmt-{{ page.format }}">.{{ page.format }}</span>{% endif %}
       {% if page.date %}<time>{{ page.date | date: "%Y-%m-%d" }}</time>{% endif %}
       {% if page.citations %}<span>{{ page.citations }} sources</span>{% endif %}
-      {% if page.reading_time %}<span>~{{ page.reading_time }} min</span>{% endif %}
+      {% if page.reading_time_min %}<span>~{{ page.reading_time_min }} min</span>{% endif %}
     </p>
     {% if page.topic %}<p class="research-topic">{{ page.topic }}</p>{% endif %}
   </header>

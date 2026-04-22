@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ page.title | default: site.title | default: 'Atlas' }}</title>
   {%- if site.description -%}<meta name="description" content="{{ site.description }}">{%- endif -%}
+  <link rel="icon" type="image/png" href="{{ '/assets/icon.png' | relative_url }}">
+  <link rel="apple-touch-icon" href="{{ '/assets/icon.png' | relative_url }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ '/assets/palettes/' | append: site.palette | append: '.css' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/base.css' | relative_url }}">
   <link rel="stylesheet" href="{{ '/assets/sites/' | append: site.skeleton | append: '.css' | relative_url }}">
@@ -18,11 +20,14 @@
   {%- assign all_tags = '' | split: '' -%}
   {%- for e in entries -%}{%- for t in e.tags -%}{%- unless all_tags contains t -%}{%- assign all_tags = all_tags | push: t -%}{%- endunless -%}{%- endfor -%}{%- endfor -%}
 
-  <main class="s1">
+  <div class="s1">
     <header class="s1-hero">
-      <div class="s1-logo">{{ site.title | default: 'Atlas' | slice: 0,1 | upcase }}</div>
+      <img class="s1-logo" src="{{ '/assets/icon.png' | relative_url }}" alt="{{ site.title | default: 'Atlas' }}">
       <h1>{{ site.title | default: 'Atlas' }}</h1>
       <p>{{ site.description | default: 'Research notes published by Scout.' }}</p>
+      {%- if site.scout_repo -%}
+      <a class="s1-cta" href="https://github.com/{{ site.scout_repo }}/issues/new?template=research.yml" target="_blank" rel="noopener">+ New research</a>
+      {%- endif -%}
     </header>
 
     <nav class="s1-filter">
@@ -41,9 +46,9 @@
     </section>
 
     <footer class="s1-footer">
-      <span>{{ site.title | default: 'Atlas' }} · built by Scout</span>
-      <span>{%- if site.scout_repo -%}<a href="https://github.com/{{ site.scout_repo }}">github.com/{{ site.scout_repo }}</a>{%- else -%}github.com/{{ site.github.owner_name }}/{{ site.github.repository_name }}{%- endif -%}</span>
+      <span>{{ site.title | default: 'Atlas' }} · <a href="https://github.com/{{ site.github.owner_name }}/{{ site.github.repository_name }}" target="_blank" rel="noopener">{{ site.github.owner_name }}/{{ site.github.repository_name }} ↗</a></span>
+      {%- if site.scout_repo -%}<span>Built with <a href="https://github.com/{{ site.scout_repo }}" target="_blank" rel="noopener">Scout ↗</a></span>{%- endif -%}
     </footer>
-  </main>
+  </div>
 </body>
 </html>
