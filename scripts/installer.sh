@@ -110,7 +110,7 @@ gh repo fork "$SCOUT_UPSTREAM" "${fork_args[@]}" >/dev/null
 # Flip the switch via API so scout-runner actually fires.
 echo "→ Enabling Actions on $SCOUT_OWNER/$SCOUT_NAME..."
 gh api -X PUT "repos/$SCOUT_OWNER/$SCOUT_NAME/actions/permissions" \
-  -f enabled=true -f allowed_actions=all >/dev/null
+  -F enabled=true -f allowed_actions=all >/dev/null
 
 SCOUT_DIR="/work/$SCOUT_NAME"
 rm -rf "$SCOUT_DIR"
