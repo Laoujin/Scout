@@ -112,6 +112,8 @@ docker run --rm -it \
   -e SCOUT_CONFIG="$CONFIG" \
   -e SCOUT_UPSTREAM="$UPSTREAM" \
   -e SCOUT_REF="$REF" \
+  -e GH_TOKEN \
+  -e GITHUB_TOKEN \
   scout-installer
 
 # Post-install next steps — installer wrote SCOUT_NAME + ATLAS_NAME + OWNER to /work/.next
