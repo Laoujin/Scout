@@ -24,12 +24,20 @@ trap 'echo; echo "Aborted."; exit 130' INT
 
 # tty-aware color helpers
 if [[ -t 1 ]]; then
-  C_STEP=$'\033[1;34m' C_OK=$'\033[1;32m' C_WARN=$'\033[1;33m' C_OFF=$'\033[0m'
+  C_STEP=$'\033[0m' C_OK=$'\033[1;32m' C_WARN=$'\033[1;33m' C_OFF=$'\033[0m'
 else
   C_STEP='' C_OK='' C_WARN='' C_OFF=''
 fi
-step() { printf '%s→%s %s\n' "$C_STEP" "$C_OFF" "$*"; }
-ok()   { printf '%s✓%s %s\n' "$C_OK" "$C_OFF" "$*"; }
+# step prints "→ msg" WITHOUT newline. Bare `ok` appends " ✓\n" to that line.
+# `ok "msg"` is a standalone line (no preceding step).
+step() { printf '%s→%s %s' "$C_STEP" "$C_OFF" "$*"; }
+ok() {
+  if [[ $# -eq 0 ]]; then
+    printf ' %s✓%s\n' "$C_OK" "$C_OFF"
+  else
+    printf '%s✓%s %s\n' "$C_OK" "$C_OFF" "$*"
+  fi
+}
 warn() { printf '%s!%s %s\n' "$C_WARN" "$C_OFF" "$*"; }
 
 : "${SCOUT_CONFIG:?SCOUT_CONFIG is required (bug in host install.sh)}"
@@ -115,38 +123,33 @@ prompt_repo "Create Atlas repo as" "$DEFAULT_OWNER" "Atlas" ATLAS
 # ---------- Step 6: Fork Scout, enable Actions + Issues, clone into /work ----------
 step "Forking $SCOUT_UPSTREAM as $SCOUT_OWNER/$SCOUT_NAME..."
 fork_args=(--fork-name "$SCOUT_NAME" --clone=false --default-branch-only)
-# Forking to any owner other than the authed user requires --org (only orgs
-# supported by gh — you can't fork into someone else's personal account).
 [[ "$SCOUT_OWNER" != "$AUTHED_USER" ]] && fork_args+=(--org "$SCOUT_OWNER")
 gh repo fork "$SCOUT_UPSTREAM" "${fork_args[@]}" >/dev/null
-ok "Forked: $SCOUT_OWNER/$SCOUT_NAME"
+ok
 
-# Forks have Actions disabled by default ("I understand my workflows" button).
-step "Enabling Actions on $SCOUT_OWNER/$SCOUT_NAME..."
+step "Enabling Actions..."
 gh api -X PUT "repos/$SCOUT_OWNER/$SCOUT_NAME/actions/permissions" \
   -F enabled=true -f allowed_actions=all >/dev/null
-ok "Actions enabled"
+ok
 
-# Forks also have Issues disabled by default — Scout needs them to receive
-# research requests.
-step "Enabling Issues on $SCOUT_OWNER/$SCOUT_NAME..."
+step "Enabling Issues..."
 gh repo edit "$SCOUT_OWNER/$SCOUT_NAME" --enable-issues >/dev/null
-ok "Issues enabled"
+ok
 
 SCOUT_DIR="/work/$SCOUT_NAME"
 rm -rf "$SCOUT_DIR"
-step "Cloning $SCOUT_OWNER/$SCOUT_NAME into $SCOUT_DIR..."
+step "Cloning into $SCOUT_DIR..."
 for attempt in 1 2 3 4 5; do
   if gh repo clone "$SCOUT_OWNER/$SCOUT_NAME" "$SCOUT_DIR" -- -q 2>/dev/null; then break; fi
   sleep 2
 done
 [[ -d "$SCOUT_DIR/.git" ]] || { echo "Error: failed to clone $SCOUT_OWNER/$SCOUT_NAME" >&2; exit 1; }
-ok "Cloned"
+ok
 
 # ---------- Step 7: Create Atlas, seed from atlas-seed/, push ----------
 step "Creating $ATLAS_OWNER/$ATLAS_NAME (empty)..."
 gh repo create "$ATLAS_OWNER/$ATLAS_NAME" --public >/dev/null
-ok "Created: $ATLAS_OWNER/$ATLAS_NAME"
+ok
 
 [[ -d "$SCOUT_DIR/atlas-seed" ]] || {
   echo "Error: $SCOUT_DIR/atlas-seed/ missing in $SCOUT_UPSTREAM@$SCOUT_REF" >&2
@@ -168,7 +171,7 @@ sed -i \
   -e "s#^card:.*#card: $CARD#" \
   "$STAGE/_config.yml"
 
-step "Seeding Atlas with skeleton=$SKEL palette=$PAL card=$CARD..."
+step "Seeding Atlas (skeleton=$SKEL palette=$PAL card=$CARD)..."
 (
   cd "$STAGE"
   git init -q -b main
@@ -176,31 +179,30 @@ step "Seeding Atlas with skeleton=$SKEL palette=$PAL card=$CARD..."
   git -c user.name="$AUTHED_USER" -c user.email="${AUTHED_USER}@users.noreply.github.com" \
       commit -qm "Initial Atlas seed (skeleton=$SKEL palette=$PAL card=$CARD)"
   git remote add origin "https://github.com/$ATLAS_OWNER/$ATLAS_NAME.git"
-  # Retry push briefly — empty repo occasionally 404s right after create
   for attempt in 1 2 3 4 5; do
     if git push -q -u origin main 2>/dev/null; then break; fi
     sleep 2
   done
 )
 rm -rf "$STAGE"
-ok "Atlas seeded + pushed"
+ok
 
 # ---------- Step 8: Enable GitHub Pages + set repo website ----------
 PAGES_URL="https://${ATLAS_OWNER}.github.io/${ATLAS_NAME}/"
 
-step "Enabling Pages on $ATLAS_OWNER/$ATLAS_NAME..."
+step "Enabling Pages ($PAGES_URL)..."
 if ! gh api -X POST "repos/$ATLAS_OWNER/$ATLAS_NAME/pages" \
        -f "source[branch]=main" -f "source[path]=/" >/dev/null 2>&1; then
   code=$(gh api -X POST "repos/$ATLAS_OWNER/$ATLAS_NAME/pages" \
            -f "source[branch]=main" -f "source[path]=/" 2>&1 | tail -1 | grep -oE '[0-9]{3}' | head -1 || true)
   [[ "$code" == "409" ]] || warn "Pages API returned non-409 error; check https://github.com/$ATLAS_OWNER/$ATLAS_NAME/settings/pages"
 fi
-ok "Pages enabled: $PAGES_URL"
+ok
 
 step "Setting repo homepage..."
 gh api -X PATCH "repos/$ATLAS_OWNER/$ATLAS_NAME" \
   -f "homepage=$PAGES_URL" >/dev/null
-ok "Homepage set"
+ok
 
 # ---------- Step 9: Atlas deploy key ----------
 step "Generating + uploading Atlas deploy key..."
@@ -248,12 +250,12 @@ docker run --rm \
     chmod 644 /dest/atlas_deploy.pub
   ' >/dev/null
 rm -rf "$KEYDIR"
-ok "Deploy key uploaded + volume seeded"
+ok
 
 # ---------- Step 10: Runner registration token + docker/.env ----------
-step "Fetching runner-registration token..."
+step "Fetching runner token + writing docker/.env..."
 RUNNER_TOKEN=$(gh api -X POST "repos/$SCOUT_OWNER/$SCOUT_NAME/actions/runners/registration-token" --jq .token)
-ok "Runner token written to docker/.env"
+ok
 
 cat > "$SCOUT_DIR/docker/.env" <<EOF
 # Generated by Scout installer on $(date -u +%Y-%m-%dT%H:%M:%SZ)
