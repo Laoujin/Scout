@@ -189,6 +189,31 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
 .install-alt a { color: var(--accent); border-bottom: 1px dotted color-mix(in srgb, var(--accent) 50%, transparent); }
 .install-alt a:hover { border-bottom-color: var(--accent); }
 
+/* ---------- FAQ ---------- */
+.faq { max-width: 70ch; }
+.faq details { border-bottom: 1px solid var(--border); }
+.faq details:first-child { border-top: 1px solid var(--border); }
+.faq summary {
+  list-style: none; cursor: pointer;
+  font: 600 16px/1.4 inherit; color: var(--fg);
+  padding: 16px 32px 16px 0; position: relative;
+  transition: color .15s ease;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "+"; position: absolute; right: 4px; top: 50%;
+  transform: translateY(-50%);
+  font: 400 22px/1 ui-monospace, Menlo, monospace;
+  color: var(--fg-faint); transition: transform .2s ease, color .15s ease;
+}
+.faq details[open] summary::after { content: "−"; color: var(--accent); }
+.faq summary:hover { color: var(--accent); }
+.faq details p { margin: 0 0 12px; color: var(--fg-muted); font-size: 15px; }
+.faq details p:last-child { margin-bottom: 16px; }
+.faq details ul { margin: 0 0 12px; padding-left: 20px; color: var(--fg-muted); font-size: 15px; }
+.faq details ul li { margin: 0 0 6px; }
+.faq details code { background: var(--surface); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 13px; color: var(--accent); }
+
 /* =========================================================================
    Your Atlas — picker + live preview
    Picker UI (palette × skeleton × card) and a live preview frame that
@@ -965,6 +990,44 @@ section.ya-group { padding: 15px 0; }
       <div class="ap-viewport" id="ap-viewport"></div>
     </div>
 
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <span class="kicker">FAQ</span>
+    <h2>Questions you may have.</h2>
+    <div class="faq">
+      <details>
+        <summary>What does a run cost?</summary>
+        <p>Scout runs inside your Claude Code subscription, so the marginal cost per research is effectively zero. Each published research carries its own cost in the frontmatter — once I've done enough runs, I'll post average numbers per depth here.</p>
+      </details>
+      <details>
+        <summary>Can I keep research private?</summary>
+        <p>Yes. Make your Atlas repo private (GitHub Pro enables private Pages), or keep Pages off entirely — you still get a themed, git-versioned archive.</p>
+      </details>
+      <details>
+        <summary>Does it work on GitHub-hosted runners?</summary>
+        <p>Not out of the box. The self-hosted runner is what lets Scout use your Claude subscription instead of paying per-request. You can flip <code>runs-on</code> to <code>ubuntu-latest</code> and inject an API key, but you lose the cost advantage.</p>
+      </details>
+      <details>
+        <summary>What data leaves my network?</summary>
+        <p>Research prompts and responses go to Anthropic. Issue comments and published research go to GitHub. During research, Scout fetches URLs you'd otherwise open in a browser (<code>WebFetch</code>, <code>WebSearch</code>). Nothing else — in normal operation.</p>
+      </details>
+      <details>
+        <summary>Is this sandboxed? What if a malicious page prompt-injects Claude?</summary>
+        <p>It's not sandboxed. Scout runs Claude with <code>--dangerously-skip-permissions</code> inside a container with unrestricted network access. A malicious page reached during research could, in principle, instruct Claude to misuse the credentials on the runner or scan your LAN.</p>
+        <p>What's actually on the runner:</p>
+        <ul>
+          <li><code>GITHUB_TOKEN</code> — scoped to <code>issues:write</code> + <code>contents:read</code> on Scout only. Can spam/close issues, cannot push.</li>
+          <li>Atlas SSH deploy key — push access to your Atlas repo. Worst case: attacker publishes anything they like at your <code>github.io</code> URL.</li>
+          <li>Claude Code auth — your subscription. Attacker runs Claude on your bill.</li>
+          <li>Network position on your LAN — scan routers, NAS, Home Assistant, etc.</li>
+        </ul>
+        <p>Egress allow-listing, capability drops, and a proper seccomp profile are on the roadmap. Until then: this is a YOLO box. Keep it on a network you trust and don't point Scout at topics likely to pull in hostile content.</p>
+      </details>
+    </div>
   </div>
 </section>
 
