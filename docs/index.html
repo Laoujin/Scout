@@ -244,6 +244,16 @@ section > .container > p.lede {
   color: var(--fg-muted);
 }
 .ya-sub { color: var(--fg); text-transform: none; font-weight: 400; letter-spacing: 0; }
+.ya-lede {
+  margin: -4px 0 28px;
+  color: var(--fg-muted); font-size: 15px;
+}
+.ya-lede code {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 3px 10px; border-radius: 5px; margin: 0 4px;
+  font: 600 13px ui-monospace, Menlo, monospace;
+  color: var(--accent);
+}
 
 .swatches { display: flex; flex-wrap: wrap; gap: 10px; }
 .swatch-btn {
@@ -687,6 +697,7 @@ section > .container > p.lede {
   <div class="container">
     <span class="kicker">Configure</span>
     <h2>Your Atlas.</h2>
+    <p class="ya-lede">Pick a palette, layout, and card — your config <code id="cfg-your-atlas">s1.rust.v1</code> feeds the install command below.</p>
 
     <div class="ya-controls">
       <section class="ya-group">
@@ -816,6 +827,7 @@ section > .container > p.lede {
   function updateOutputs() {
     const short = `${state.skeleton}.${state.palette}.${state.card}`;
     document.getElementById('cfg-inline').textContent = short;
+    document.getElementById('cfg-your-atlas').textContent = short;
     document.getElementById('pal-label').textContent = '· ' + names.paletteName;
     document.getElementById('skel-label').textContent = '· ' + names.skeletonName;
     document.getElementById('card-label').textContent = '· ' + names.cardName;
