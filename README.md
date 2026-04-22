@@ -117,8 +117,9 @@ In Claude Code:
 
 ## Troubleshooting
 
-- **Runner offline** → `docker logs scout-runner`; `docker compose restart`.
-- **Token expired** (~1 h after issue) → new token, update `.env`, `docker compose down && docker compose up -d`.
+- **Runner offline** → `docker logs scout-runner`; `docker-compose restart`.
+- **Token expired** (~1 h after issue) → new token, update `.env`, `docker-compose down && docker-compose up -d`.
 - **Push fails** → `docker exec scout-runner runuser -u runner -- ssh -T github.com-atlas`; verify deploy key has write access.
 - **Claude auth expired** → `docker exec -it scout-runner runuser -u runner -- claude`.
-- **Update Claude CLI** → `docker compose build --pull && docker compose up -d`.
+- **Update Claude CLI** → `docker-compose build --pull && docker-compose up -d`.
+- **Update Scout** → `git pull` in the Scout repo, then `cd docker && docker-compose build --pull && docker-compose up -d`. Claude auth, runner registration, and the Atlas SSH key survive the rebuild (they're on named volumes).
