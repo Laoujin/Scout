@@ -77,11 +77,18 @@ Use the tag in the ledger. Optionally surface it as a small label next to a cita
 
 ## Depth behaviour
 
-| Depth | Target length | Content |
-|---|---|---|
-| ceo | ~400 words, fits on one page | Decision framework. 1 comparison table max. 5-8 citations. |
-| standard | 2-4 pages | Full comparison tables, trade-offs, caveats. 15-30 citations. |
-| deep | as long as needed | All angles, minority views, edge cases, controversies. 40+ citations. |
+Depth selects both the target length and the process shape. The tiers are distinct workflows, not just different word counts.
+
+| Dimension | `ceo` | `standard` | `deep` |
+|---|---|---|---|
+| Shape | Single pass | Single pass + discipline | Parent + researcher sub-agents + post-write reviewer |
+| Ledger on disk | No (inline cites only) | Yes | Yes (merged from per-agent ledgers) |
+| Reflect + requery | No | One round | Per researcher + one remediation round |
+| Reviewer | No | No | Yes, post-write |
+| Length target | ~400 words, fits on one page | 2–4 pages | as long as needed |
+| Citations target | 5–8 | 15–30 | 40+ |
+
+**For `depth=deep`, follow the extended procedure in `skills/scout/deep.md`** — it supersedes the single-session Procedure below from step 3 onward (planning, dispatch, merge, review, fix). Steps 1–2 (parse inputs, pick source rubric) and the final write step still apply.
 
 ## Output contract (hard rules)
 
