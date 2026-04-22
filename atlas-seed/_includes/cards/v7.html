@@ -1,17 +1,1 @@
-{%- comment -%}Atlas card · V7 · compact row (list density){%- endcomment -%}
-{%- assign e = include.entry -%}
-<a href="{{ e.url | relative_url }}" class="card">
-  {%- if e.cover -%}
-    <img class="card-thumb" src="{{ e.cover | relative_url }}" alt="" loading="lazy">
-  {%- else -%}
-    <div class="cover ratio card-thumb" style="--h:{{ e.hue | default: 210 }};"><span class="mark tiny">{{ e.title | slice: 0,3 | upcase }}</span></div>
-  {%- endif -%}
-  <span class="card-date">{{ e.date | date: "%Y-%m-%d" }}</span>
-  <div class="card-main">
-    <h4 class="card-title">{{ e.title }}</h4>
-    {%- if e.summary -%}<p class="card-summary">{{ e.summary }}</p>{%- endif -%}
-  </div>
-  <div class="card-tags">{%- if e.tags -%}{% for t in e.tags %}<span class="chip">{{ t }}</span>{% endfor %}{%- endif -%}</div>
-  {%- if e.depth -%}<span class="depth-badge depth-{{ e.depth }}">{{ e.depth | capitalize }}</span>{%- endif -%}
-  {%- if e.citations -%}<span class="card-meta">{{ e.citations }}c · {{ e.reading_time | default: 0 }}m</span>{%- endif -%}
-</a>
+{%- include cards/_base.html entry=include.entry -%}
