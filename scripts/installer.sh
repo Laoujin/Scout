@@ -222,6 +222,7 @@ gh api -X POST "repos/$ATLAS_OWNER/$ATLAS_NAME/keys" \
   -f title=scout-nas \
   -f "key=$(cat "$KEYDIR/atlas_deploy.pub")" \
   -F read_only=false >/dev/null
+ok
 
 cat > "$KEYDIR/config" <<'CFG'
 Host github.com-atlas
