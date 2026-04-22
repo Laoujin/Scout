@@ -6,3 +6,4 @@ work/
 atlas-checkout/
 .env
 .env.local
+.superpowers/
