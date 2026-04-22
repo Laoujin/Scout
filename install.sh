@@ -51,9 +51,9 @@ fi
 
 # Warm-rust banner — accent #c2410c matches docs/index.html.
 if [[ -t 1 ]]; then
-  _C=$'\033[38;2;194;65;12m'; _D=$'\033[2m'; _G=$'\033[90m'; _R=$'\033[0m'
+  _C=$'\033[38;2;194;65;12m'; _D=$'\033[2m'; _G=$'\033[90m'; _B=$'\033[94m'; _R=$'\033[0m'
 else
-  _C=''; _D=''; _G=''; _R=''
+  _C=''; _D=''; _G=''; _B=''; _R=''
 fi
 cat <<BANNER
 
@@ -197,9 +197,9 @@ if [[ -f "$INSTALL_DIR/.next" ]]; then
          ${_G}# log in, then /exit${_R}
 
   Open a research issue:
-    https://github.com/$SCOUT_OWNER/$SCOUT_NAME/issues/new?template=research.yml
+    ${_B}https://github.com/$SCOUT_OWNER/$SCOUT_NAME/issues/new?template=research.yml${_R}
   Your Atlas (first Pages build takes ~1 min):
-    https://$ATLAS_OWNER.github.io/$ATLAS_NAME/
+    ${_B}https://$ATLAS_OWNER.github.io/$ATLAS_NAME/${_R}
 ────────────────────────────────────────────────────────────────────────
 
 EOF
