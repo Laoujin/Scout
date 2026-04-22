@@ -51,9 +51,9 @@ fi
 
 # Warm-rust banner — accent #c2410c matches docs/index.html.
 if [[ -t 1 ]]; then
-  _C=$'\033[38;2;194;65;12m'; _D=$'\033[2m'; _R=$'\033[0m'
+  _C=$'\033[38;2;194;65;12m'; _D=$'\033[2m'; _G=$'\033[90m'; _R=$'\033[0m'
 else
-  _C=''; _D=''; _R=''
+  _C=''; _D=''; _G=''; _R=''
 fi
 cat <<BANNER
 
@@ -187,14 +187,14 @@ if [[ -f "$INSTALL_DIR/.next" ]]; then
     1) Start the runner container. It registers with GitHub and polls
        for jobs. Must stay running for Scout to respond to issues.
 
-         cd "$INSTALL_DIR/$SCOUT_NAME/docker"
-         docker-compose up -d --build
+         ${_G}cd "$INSTALL_DIR/$SCOUT_NAME/docker"${_R}
+         ${_G}docker-compose up -d --build${_R}
 
     2) Authenticate Claude inside the runner. One-time; your login is
        stored on a named volume and survives rebuilds.
 
-         docker exec -it scout-runner runuser -u runner -- claude
-         # log in, then /exit
+         ${_G}docker exec -it scout-runner runuser -u runner -- claude${_R}
+         ${_G}# log in, then /exit${_R}
 
   Open a research issue:
     https://github.com/$SCOUT_OWNER/$SCOUT_NAME/issues/new?template=research.yml
