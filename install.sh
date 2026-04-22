@@ -88,17 +88,17 @@ trap 'rm -rf "$AUTH_DIR" "$BUILD_CTX" "${SCOUT_INSTALL_TMPFILE:-}"' EXIT
 
 if [[ -n "$LOCAL_SCOUT" ]]; then
   echo "→ Using local checkout: $LOCAL_SCOUT"
-  [[ -f "$LOCAL_SCOUT/scripts/installer.sh" && -f "$LOCAL_SCOUT/themes/manifest.json" ]] || {
-    echo "Error: --local=$LOCAL_SCOUT missing scripts/installer.sh or themes/manifest.json" >&2
+  [[ -f "$LOCAL_SCOUT/scripts/installer.sh" && -f "$LOCAL_SCOUT/scripts/manifest.json" ]] || {
+    echo "Error: --local=$LOCAL_SCOUT missing scripts/installer.sh or scripts/manifest.json" >&2
     exit 1
   }
   cp "$LOCAL_SCOUT/scripts/installer.sh" "$BUILD_CTX/installer.sh"
-  cp "$LOCAL_SCOUT/themes/manifest.json" "$BUILD_CTX/manifest.json"
+  cp "$LOCAL_SCOUT/scripts/manifest.json" "$BUILD_CTX/manifest.json"
 else
   RAW="https://raw.githubusercontent.com/${UPSTREAM}/${REF}"
   echo "→ Fetching installer components from ${UPSTREAM}@${REF}..."
-  curl -fsSL "$RAW/scripts/installer.sh"   -o "$BUILD_CTX/installer.sh"
-  curl -fsSL "$RAW/themes/manifest.json"   -o "$BUILD_CTX/manifest.json"
+  curl -fsSL "$RAW/scripts/installer.sh"    -o "$BUILD_CTX/installer.sh"
+  curl -fsSL "$RAW/scripts/manifest.json"   -o "$BUILD_CTX/manifest.json"
 fi
 
 cat > "$BUILD_CTX/Dockerfile" <<'DOCKERFILE'
