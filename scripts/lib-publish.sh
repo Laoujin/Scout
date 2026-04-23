@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Helpers for scripts/publish.sh: push recovery primitives.
+#
+# Usage (source this file):
+#   source scripts/lib-publish.sh
+
+# is_non_ff <stderr-text>
+# Returns 0 (true) if stderr looks like a non-fast-forward push rejection,
+# 1 otherwise. Narrow match: both "rejected" and one of "non-fast-forward" /
+# "fetch first" must appear. Any other error (auth, network, etc) returns 1
+# so the caller fails loud instead of retrying.
+is_non_ff() {
+  local text="$1"
+  [[ "$text" == *"rejected"* ]] || return 1
+  [[ "$text" == *"non-fast-forward"* || "$text" == *"fetch first"* ]]
+}
+
+# try_push
+# Pushes current HEAD to origin/master. Returns:
+#   0 on success, 1 on non-fast-forward rejection, 2 on any other failure.
+# Mirrors git's own stderr to stderr so CI logs are unchanged on real errors.
+try_push() {
+  local err rc=0
+  err=$(git push origin master 2>&1) || rc=$?
+  [ -n "$err" ] && printf '%s\n' "$err" >&2
+  if [ "$rc" -eq 0 ]; then return 0; fi
+  if is_non_ff "$err"; then return 1; fi
+  return 2
+}
+
+# rebase_onto_remote
+# Fetches origin/master and rebases current branch onto it. On conflict,
+# aborts the rebase to leave a clean tree. Returns 0 on clean rebase, 1 on
+# conflict or fetch failure.
+rebase_onto_remote() {
+  git fetch origin master >&2 || return 1
+  if git rebase origin/master >&2; then
+    return 0
+  fi
+  git rebase --abort >&2 2>/dev/null || true
+  return 1
+}
+
+# compare_url <atlas-repo-url> <branch>
+# Derives the GitHub compare URL from ATLAS_REPO (git@...:owner/repo.git
+# or file path). Returns empty string if ATLAS_REPO doesn't look like a
+# GitHub SSH URL (test/file-URL case).
+compare_url() {
+  local repo="$1" branch="$2"
+  [[ "$repo" == *":"* ]] || { echo ""; return; }
+  local slug="${repo#*:}"; slug="${slug%.git}"
+  echo "https://github.com/${slug}/compare/master...${branch}?expand=1"
+}
+
+# pr_fallback <branch> <atlas-repo> [issue-comment-args...]
+# Push HEAD to <branch> on origin. Print the compare URL. If GH_TOKEN,
+# GH_REPO, and ISSUE_NUMBER are set in the environment, post a comment
+# with the URL. Returns 0 on successful branch push (comment failure is
+# surfaced via set -e in the caller).
+pr_fallback() {
+  local branch="$1" repo="$2"
+  git push origin "HEAD:refs/heads/$branch" >&2
+  local url; url=$(compare_url "$repo" "$branch")
+  [ -z "$url" ] && url="(could not derive compare URL from ATLAS_REPO='$repo')"
+  echo "Atlas master moved during this run. Branch pushed: $branch"
+  echo "Open PR: $url"
+  if [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ] && [ -n "${ISSUE_NUMBER:-}" ]; then
+    gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body \
+      "Atlas \`master\` moved during this run. Branch pushed: \`$branch\`. Open PR: $url"
+  fi
+}

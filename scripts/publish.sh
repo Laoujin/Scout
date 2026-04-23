@@ -4,6 +4,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib-publish.sh
+source "$SCRIPT_DIR/lib-publish.sh"
+
 ATLAS_DIR="atlas-checkout"
 TOPIC="${TOPIC:-research}"
 SLUG="${SLUG:-unknown}"
@@ -28,7 +32,26 @@ git -c user.name="${GIT_AUTHOR_NAME:-Scout}" \
     -c user.email="${GIT_AUTHOR_EMAIL:-scout@users.noreply.github.com}" \
   commit -m "research: ${DATE} ${SLUG}" -m "Topic: ${TOPIC}"
 
-git push origin master
+BRANCH="scout/${DATE}-${SLUG}"
+
+rc=0; try_push || rc=$?
+if [ "$rc" -eq 2 ]; then exit 1; fi
+if [ "$rc" -eq 1 ]; then
+  for i in 1 2 3; do
+    if ! rebase_onto_remote; then
+      pr_fallback "$BRANCH" "$ATLAS_REPO"
+      exit 0
+    fi
+    rc=0; try_push || rc=$?
+    [ "$rc" -eq 0 ] && break
+    [ "$rc" -eq 2 ] && exit 1
+    sleep $((2 ** (i - 1)))
+  done
+  if [ "$rc" -ne 0 ]; then
+    pr_fallback "$BRANCH" "$ATLAS_REPO"
+    exit 0
+  fi
+fi
 
 # Derive the Pages URL from ATLAS_REPO (git@github.com-atlas:<owner>/<repo>.git).
 atlas_slug="${ATLAS_REPO#*:}"; atlas_slug="${atlas_slug%.git}"
