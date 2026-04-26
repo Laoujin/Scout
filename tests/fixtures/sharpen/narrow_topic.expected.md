@@ -1,0 +1,1 @@
+Decision framework comparing ripgrep, ag, ack, and grep for repository-scale code search in 2026, focused on speed on a 50k-file tree, ergonomic fit (PCRE/regex flavor, smart-case, gitignore awareness), packaging maturity, and the maintenance state of each tool. Decision-only.

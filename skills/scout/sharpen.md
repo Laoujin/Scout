@@ -45,18 +45,59 @@ User feedback to incorporate: <user's reply asking for changes>
 
 ## Output
 
-One paragraph. No preamble ("Here is..."), no quotes, no bullet list, no markdown headers, no explanation of what you changed. Just the sharpened topic, ready to be passed verbatim to the research playbook.
+Always emit the sharpened topic as one paragraph. No preamble ("Here is..."), no quotes, no bullet list, no markdown headers, no explanation of what you changed. Just the paragraph, ready to be passed verbatim to the research playbook.
 
-## Example
+**Then judge whether the topic is multi-angled.** A topic is multi-angled when it bundles independent sub-systems each worth their own deep dive (e.g., issue #10 mixes Slack remote control, branch/PR automation, deployment, routing, and orchestration). It is NOT multi-angled when the angles share a common axis the research already compares along (e.g. "compare ripgrep vs ag vs ack" — single comparison, not multi-angled).
 
-Input:
+If multi-angled and `Depth: deep` (expedition), append a fenced `scout-subtopics` block listing 2–8 sub-topics. Otherwise emit nothing after the paragraph.
+
+### Sub-topics block format
+
+````
+```scout-subtopics
+- (depth) **Title** — one-line rationale.
+- (depth) **Title** — one-line rationale.
 ```
-Raw topic: Agents that could be used for doing research for Scout
+````
+
+- `depth` is one of `recon` / `survey` / `expedition`.
+- Default each child to `survey`; downgrade to `recon` for narrow angles; upgrade to `expedition` only when the sub-topic is itself multi-angled.
+- Avoid `expedition` for more than one or two children — each `expedition` child internally spawns 3–8 parallel sub-agents, so stacking them runs hot.
+- Cap at 8 sub-topics.
+- Every sub-topic must have a `(depth)` prefix and a `— rationale`. Title in `**bold**`.
+- Don't propose sub-topics that are mere sub-questions of one angle — those belong to the angle's own deep dive.
+
+### Examples
+
+**Narrow input:**
+```
+Raw topic: Compare ripgrep, ag, ack, and grep for searching a 50k-file repo. Decision-only.
 Depth: standard
 Format: auto
 ```
 
 Output:
 ```
-Survey of research agents and deep-research tools available in 2026 that could serve a role like Scout (a custom Claude-Code-based research engine that publishes cited artifacts to a Jekyll site). Compare the main options across production-readiness, openness, citation quality, and cost. Note what's experimental versus shipping, and flag any ideas worth stealing for Scout's own playbook.
+Decision framework comparing ripgrep, ag, ack, and grep for repository-scale code search in 2026, focused on speed on a 50k-file tree, ergonomic fit (PCRE/regex flavor, smart-case, gitignore awareness), packaging maturity, and the maintenance state of each tool.
+```
+
+(No `scout-subtopics` block — single comparison axis.)
+
+**Wide input:**
+```
+Raw topic: I want to chat with Claude Code on Slack about a project, give a go, have a feature branch built, deployed to my Synology, and exposed via ProjectName-FeatureX.sangu.be. I need a workflow for this.
+Depth: deep
+Format: auto
+```
+
+Output:
+```
+Design and implement an end-to-end workflow that lets the user chat with Claude Code on Slack to spec, build, and review a feature, then auto-deploy each branch to a per-feature subdomain on Synology. Cover the wiring, state, and failure modes that tie the pieces together; favor production-ready open-source components in 2026.
+```
+```scout-subtopics
+- (expedition) **Slack ↔ Claude Code remote control** — Per-project channels, message → agent invocation, approval/handoff, mobile UX. Needs survey of GitHub App vs Agent SDK vs self-hosted bot.
+- (survey) **Branch and PR automation from a remote trigger** — How a "go" message produces a branch + commits + PR without a local checkout in the loop.
+- (survey) **Synology preview deployments** — Container Manager / Docker Compose lifecycle per branch, build pipeline, teardown on branch delete.
+- (expedition) **Per-feature subdomain routing** — Wildcard `*.sangu.be` reverse proxy (Traefik/Caddy/nginx), wildcard TLS via Let's Encrypt DNS-01, dynamic config from branch metadata.
+- (recon) **Orchestration and state** — Glue tying the four pieces above; where state lives; failure modes and recovery.
 ```
