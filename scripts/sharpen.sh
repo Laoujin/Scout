@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Sharpen a raw research topic. Prints the sharpened topic to stdout.
 # Required env: RAW_TOPIC, DEPTH, FORMAT.
-# Optional env: PREVIOUS_SHARPENED, USER_FEEDBACK, PREVIOUS_SUB_TOPICS (for re-sharpen on user feedback).
+# Optional env (re-sharpen): PREVIOUS_SHARPENED, USER_FEEDBACK, PREVIOUS_SUB_TOPICS.
+# PREVIOUS_SUB_TOPICS is only meaningful alongside PREVIOUS_SHARPENED — its content
+# is what the prior bot comment proposed under "### Sub-topics".
 
 set -euo pipefail
 
