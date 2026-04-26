@@ -70,6 +70,12 @@ layout: default
 ---
 HTML
 
+cat > Gemfile <<'RUBY'
+source "https://rubygems.org"
+gem "jekyll", "~> 4.3"
+gem "webrick", "~> 1.8"
+RUBY
+
 git init -b main
 git submodule add https://github.com/Laoujin/Compass.git compass
 git add -A

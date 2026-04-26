@@ -212,6 +212,23 @@ layout: default
 ---
 EOF
 
+cat > "$STAGE/Gemfile" <<'EOF'
+source "https://rubygems.org"
+
+gem "jekyll", "~> 4.3"
+gem "webrick", "~> 1.8"
+EOF
+
+cat > "$STAGE/.gitignore" <<'EOF'
+.DS_Store
+*.swp
+node_modules/
+_previews
+_site
+.jekyll-cache
+Gemfile.lock
+EOF
+
 step "Scaffolding Atlas (skeleton=$SKEL palette=$PAL card=$CARD) with compass submodule..."
 (
   cd "$STAGE"
