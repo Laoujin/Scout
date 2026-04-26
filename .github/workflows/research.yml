@@ -97,18 +97,25 @@ jobs:
           set -euo pipefail
           source scripts/lib-issue-parse.sh
           parse_issue_body "$ISSUE_BODY"
-          PREVIOUS_SHARPENED="$(
-            gh issue view "$ISSUE_NUMBER" --repo "$GH_REPO" \
-                --json comments \
-                --jq '[.comments[] | select(.author.login == "github-actions[bot]")] | last | .body' \
-            | awk '
-                /^```scout-topic[[:space:]]*$/ { in_block=1; next }
-                /^```[[:space:]]*$/ && in_block { exit }
-                in_block { print }
-              '
-          )"
+          PREVIOUS_BODY="$(gh issue view "$ISSUE_NUMBER" --repo "$GH_REPO" \
+              --json comments \
+              --jq '[.comments[] | select(.author.login == "github-actions[bot]")] | last | .body')"
+
+          PREVIOUS_SHARPENED="$(printf '%s' "$PREVIOUS_BODY" | awk '
+            /^```scout-topic[[:space:]]*$/ { in_block=1; next }
+            /^```[[:space:]]*$/ && in_block { exit }
+            in_block { print }
+          ')"
+
+          PREVIOUS_SUB_TOPICS="$(printf '%s' "$PREVIOUS_BODY" | awk '
+            /^### Sub-topics[[:space:]]*$/ { in_section=1; next }
+            /^### / && in_section { exit }
+            in_section { print }
+          ' | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')"
+
           SHARPENED_TOPIC="$(RAW_TOPIC="$RAW_TOPIC" DEPTH="$DEPTH" FORMAT="$FORMAT" \
                              PREVIOUS_SHARPENED="$PREVIOUS_SHARPENED" \
+                             PREVIOUS_SUB_TOPICS="$PREVIOUS_SUB_TOPICS" \
                              USER_FEEDBACK="$USER_FEEDBACK" \
                              bash scripts/sharpen.sh)"
           ISSUE_NUMBER="$ISSUE_NUMBER" SHARPENED_TOPIC="$SHARPENED_TOPIC" \

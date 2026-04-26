@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Sharpen a raw research topic. Prints the sharpened topic to stdout.
 # Required env: RAW_TOPIC, DEPTH, FORMAT.
-# Optional env: PREVIOUS_SHARPENED, USER_FEEDBACK (for re-sharpen on user feedback).
+# Optional env: PREVIOUS_SHARPENED, USER_FEEDBACK, PREVIOUS_SUB_TOPICS (for re-sharpen on user feedback).
 
 set -euo pipefail
 
@@ -23,6 +23,11 @@ fi
 if [ -n "${USER_FEEDBACK:-}" ]; then
   input+="
 User feedback to incorporate: ${USER_FEEDBACK}"
+fi
+if [ -n "${PREVIOUS_SUB_TOPICS:-}" ]; then
+  input+="
+Previous sub-topics:
+${PREVIOUS_SUB_TOPICS}"
 fi
 
 claude --dangerously-skip-permissions \

@@ -43,6 +43,8 @@ User feedback to incorporate: <user's reply asking for changes>
 
 7. **On a re-sharpen:** treat `User feedback to incorporate` as a hard constraint. Take the previous sharpened proposal, apply the feedback as a delta, output the revised version. Don't drift away from the user's original intent.
 
+   **Sub-topic continuity on re-sharpen.** When `Previous sub-topics:` is present in the input, treat the listed sub-topics as the working set. Apply the user's feedback as a delta to that set: merge, drop, reorder, retitle, or change `(depth)` per the feedback's intent. If the feedback is paragraph-only (no sub-topic guidance), preserve the prior sub-topic list unchanged in your output's `scout-subtopics` block. Only re-decide the multi-angled judgment from scratch if the user explicitly asks ("decompose differently", "treat as one topic", etc.).
+
 ## Output
 
 Always emit the sharpened topic as one paragraph. No preamble ("Here is..."), no quotes, no bullet list, no markdown headers, no explanation of what you changed. Just the paragraph, ready to be passed verbatim to the research playbook.
