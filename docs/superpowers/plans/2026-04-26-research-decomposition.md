@@ -36,7 +36,8 @@
 | 2 | Modify | `scout/tests/test_publish.sh` | Add mixed-success case |
 | 2 | Modify | `scout/scripts/research-from-issue.sh` | Branch on Sub-topics presence + Start choice |
 | 2 | Modify | `scout/scripts/publish.sh` | Soft-fail comment template lists failed children |
-| 2 | Modify | `scout/.github/workflows/research.yml` | Trigger condition includes "Research as one expedition instead" variant |
+| 2 | Modify | `scout/.github/workflows/research.yml` | Trigger condition includes "Research as one expedition instead" variant; resharpen-on-comment job harvests `### Sub-topics` from prior bot comment |
+| 2 | Modify | `scout/scripts/sharpen.sh` | Forward optional `PREVIOUS_SUB_TOPICS` env into Claude prompt |
 | 3 | Create | `atlas/_layouts/expedition.html` | Parent overview layout |
 | 3 | Create | `atlas/_includes/research-children.html` | Children-card grid with success/failed states |
 | 3 | Modify | `atlas/_config.yml` | Add `--expedition` palette token mapping |
@@ -602,6 +603,107 @@ Expected: `OK1 OK2 OK3 OK4 OK5 OK6 OK7 OK8`.
 ```bash
 git add scripts/issue-comment.sh
 git commit -m "feat(comment): add escape-hatch checkbox + final disclaimer"
+```
+
+### Task 4b: Preserve sub-topics across re-sharpen
+
+**Files:**
+- Modify: `scout/.github/workflows/research.yml` (resharpen-on-comment job)
+- Modify: `scout/scripts/sharpen.sh`
+- Modify: `scout/skills/scout/sharpen.md`
+
+When the user replies to the bot comment asking for revision (e.g. "merge angles 2 and 3"), the `resharpen-on-comment` job currently extracts only the paragraph (`PREVIOUS_SHARPENED`) from the prior bot comment's `scout-topic` block. After Stage 1, the prior sub-topics live in the `### Sub-topics` markdown section that sits OUTSIDE the `scout-topic` block — so they're invisible to the re-sharpen pass. Result: feedback like "merge angles 2 and 3" is meaningless because the sharpener doesn't see what 2 and 3 were.
+
+This task harvests the prior sub-topics too and feeds them to the sharpener as a labeled input.
+
+- [ ] **Step 4b.1: Update `sharpen.sh` to forward `PREVIOUS_SUB_TOPICS` env into the Claude prompt.**
+
+In `scripts/sharpen.sh`, after the existing `if [ -n "${USER_FEEDBACK:-}" ]` block, add:
+
+```bash
+if [ -n "${PREVIOUS_SUB_TOPICS:-}" ]; then
+  input+="
+Previous sub-topics:
+${PREVIOUS_SUB_TOPICS}"
+fi
+```
+
+Update the file's header comment to list `PREVIOUS_SUB_TOPICS` as an optional env. The variable holds the verbatim content of the prior `### Sub-topics` section (including the `- [ ]` checkbox lines), without the heading itself.
+
+- [ ] **Step 4b.2: Update `skills/scout/sharpen.md` Rule 7 (re-sharpen rule) to use the new input.**
+
+Find the existing Rule 7 in `skills/scout/sharpen.md` (it currently says: *"On a re-sharpen: treat `User feedback to incorporate` as a hard constraint. Take the previous sharpened proposal, apply the feedback as a delta, output the revised version. Don't drift away from the user's original intent."*).
+
+Append:
+
+> **Sub-topic continuity on re-sharpen.** When `Previous sub-topics:` is present in the input, treat the listed sub-topics as the working set. Apply the user's feedback as a delta to that set: merge, drop, reorder, retitle, or change `(depth)` per the feedback's intent. If the feedback is paragraph-only (no sub-topic guidance), preserve the prior sub-topic list unchanged in your output's `scout-subtopics` block. Only re-decide the multi-angled judgment from scratch if the user explicitly asks ("decompose differently", "treat as one topic", etc.).
+
+- [ ] **Step 4b.3: Update the `resharpen-on-comment` job in `.github/workflows/research.yml`.**
+
+The job currently extracts `PREVIOUS_SHARPENED` via:
+
+```bash
+PREVIOUS_SHARPENED="$(
+  gh issue view "$ISSUE_NUMBER" --repo "$GH_REPO" \
+      --json comments \
+      --jq '[.comments[] | select(.author.login == "github-actions[bot]")] | last | .body' \
+  | awk '
+      /^```scout-topic[[:space:]]*$/ { in_block=1; next }
+      /^```[[:space:]]*$/ && in_block { exit }
+      in_block { print }
+    '
+)"
+```
+
+Add a parallel extraction for `PREVIOUS_SUB_TOPICS` from the `### Sub-topics` markdown section of the same comment body. Capture the comment body once into a variable to avoid two `gh` calls:
+
+```bash
+PREVIOUS_BODY="$(gh issue view "$ISSUE_NUMBER" --repo "$GH_REPO" \
+    --json comments \
+    --jq '[.comments[] | select(.author.login == "github-actions[bot]")] | last | .body')"
+
+PREVIOUS_SHARPENED="$(printf '%s' "$PREVIOUS_BODY" | awk '
+  /^```scout-topic[[:space:]]*$/ { in_block=1; next }
+  /^```[[:space:]]*$/ && in_block { exit }
+  in_block { print }
+')"
+
+PREVIOUS_SUB_TOPICS="$(printf '%s' "$PREVIOUS_BODY" | awk '
+  /^### Sub-topics[[:space:]]*$/ { in_section=1; next }
+  /^### / && in_section { exit }
+  in_section { print }
+' | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')"
+```
+
+Then add `PREVIOUS_SUB_TOPICS="$PREVIOUS_SUB_TOPICS"` to the env block of the `bash scripts/sharpen.sh` invocation that follows.
+
+`PREVIOUS_SUB_TOPICS` will be empty for narrow topics (no `### Sub-topics` section in the prior comment), and the new `sharpen.md` rule degrades gracefully when the input is absent.
+
+- [ ] **Step 4b.4: Smoke-test the resharpen extraction.**
+
+Stage a fake bot-comment body that contains both a `scout-topic` block and a `### Sub-topics` section, and verify both extractions yield the expected content:
+
+```bash
+BODY="$(printf '### Sharpened proposal\n\n> Para.\n\n<!-- scout-topic-start -->\n```scout-topic\nPara.\n```\n<!-- scout-topic-end -->\n\nDisclaimer.\n\n### Sub-topics\n\n- [ ] (survey) **A** — first.\n- [ ] (recon) **B** — second.\n\n### Go\n\n- [ ] **Start research**\n')"
+
+PREV_TOPIC="$(printf '%s' "$BODY" | awk '/^```scout-topic[[:space:]]*$/ { i=1; next } /^```[[:space:]]*$/ && i { exit } i { print }')"
+PREV_SUBS="$(printf '%s' "$BODY" | awk '/^### Sub-topics[[:space:]]*$/ { i=1; next } /^### / && i { exit } i { print }' | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')"
+
+[ "$PREV_TOPIC" = "Para." ] && echo OK1 || echo FAIL1
+echo "$PREV_SUBS" | grep -q '\[ \] (survey) \*\*A\*\*' && echo OK2 || echo FAIL2
+echo "$PREV_SUBS" | grep -q '\[ \] (recon) \*\*B\*\*' && echo OK3 || echo FAIL3
+echo "$PREV_SUBS" | grep -q 'Start research' && echo FAIL4 || echo OK4
+```
+
+Expected: `OK1 OK2 OK3 OK4`. (OK4 confirms the `### Go` boundary stops the extractor before the Start checkbox is included.)
+
+- [ ] **Step 4b.5: Commit.**
+
+```bash
+git add scripts/sharpen.sh \
+        skills/scout/sharpen.md \
+        .github/workflows/research.yml
+git commit -m "feat(resharpen): preserve sub-topics across user re-sharpen feedback"
 ```
 
 ### Task 5: Add `synthesis.md` skill
@@ -2149,6 +2251,7 @@ This section is the executor's checklist for verifying spec coverage before decl
 | Sharpener T2 judgment | Task 2 (sharpen.md instructions) |
 | Bot comment template (split, Sub-topics section, Go header) | Stage 1 (shipped 2026-04-26 — pulled forward from original Task 4) |
 | Bot comment escape-hatch checkbox + final disclaimer | Stage 2 Task 4 (slimmed) |
+| Sub-topic continuity across user re-sharpen | Stage 2 Task 4b (`PREVIOUS_SUB_TOPICS` harvest + sharpen.md Rule 7 extension) |
 | Sub-topic line regex + lenience | Task 3 (parse_sub_topics + tests) |
 | Fuzzy depth matching ≤ 2 | Task 3 (_lev + _snap_depth + tests) |
 | Internal-code aliases (ceo/standard/deep) | Task 3 (_snap_depth) |
