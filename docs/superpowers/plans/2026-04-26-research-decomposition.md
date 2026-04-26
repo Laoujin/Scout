@@ -285,6 +285,8 @@ git commit -m "feat(sharpen): emit sub-topics block for multi-angled expeditions
 - Modify: `scout/scripts/lib-issue-parse.sh`
 - Create: `scout/tests/test_lib_issue_parse_subtopics.sh`
 
+> **Note for Stage 2:** After Stage 1, the bot comment contains a `### Sub-topics` markdown section but **no `scout-subtopics` fenced block** (the fence is stripped by `issue-comment.sh`). The parser must read the markdown section directly. The existing `_extract_section "$body" 'Sub-topics'` helper handles this correctly, but the test suite below should include at least one case using a *full real-shape bot-comment body* — header + blockquote + `scout-topic` fenced block + Sub-topics section + `### Go` + Start checkboxes — to verify the parser walks past the upstream `<!-- scout-topic-start --> ... <!-- scout-topic-end -->` markers and the `scout-topic` block without false positives. The isolated `### Sub-topics\n...` snippets below are the unit cases; add one integration-shape case before committing.
+
 - [ ] **Step 3.1: Write the failing tests first.**
 
 ```bash
