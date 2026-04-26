@@ -170,7 +170,7 @@ parse_sub_topics() {
       else
         depth_internal="standard"
       fi
-      SUB_TOPICS+=("${rationale}|${depth_internal}|${title}|${checked}")
+      SUB_TOPICS+=("${title}|${depth_internal}|${rationale}|${checked}")
     fi
   done <<< "$section"
 }

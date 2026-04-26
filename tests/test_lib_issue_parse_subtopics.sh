@@ -23,7 +23,7 @@ parse_sub_topics "$COMMENT"
 assert_eq "canonical: count" "2" "${#SUB_TOPICS[@]}"
 assert_eq "canonical: line0 checked" "true"        "${SUB_TOPICS[0]##*|}"
 assert_eq "canonical: line0 depth"   "deep"        "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f2)"
-assert_eq "canonical: line0 title"   "Routing"     "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f3)"
+assert_eq "canonical: line0 title"   "Routing"     "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f1)"
 assert_eq "canonical: line1 checked" "false"       "${SUB_TOPICS[1]##*|}"
 assert_eq "canonical: line1 depth"   "ceo"         "$(echo "${SUB_TOPICS[1]}" | cut -d'|' -f2)"
 
@@ -53,7 +53,7 @@ assert_eq "unknown depth: defaults"      "standard" "$(echo "${SUB_TOPICS[0]}" |
 COMMENT=$'### Sub-topics\n  * [x] (survey) **Asterisk** — alt bullet.\n'
 parse_sub_topics "$COMMENT"
 assert_eq "asterisk bullet ok"           "standard" "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f2)"
-assert_eq "asterisk bullet title"        "Asterisk" "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f3)"
+assert_eq "asterisk bullet title"        "Asterisk" "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f1)"
 
 # --- absent Sub-topics section -> empty array ---
 COMMENT=$'### Go\n- [ ] **Start research**\n'
@@ -91,7 +91,7 @@ parse_sub_topics "$COMMENT"
 assert_eq "integration: count"           "3"        "${#SUB_TOPICS[@]}"
 assert_eq "integration: line0 depth"     "deep"     "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f2)"
 assert_eq "integration: line1 checked"   "true"     "${SUB_TOPICS[1]##*|}"
-assert_eq "integration: line2 title"     "Glue"     "$(echo "${SUB_TOPICS[2]}" | cut -d'|' -f3)"
+assert_eq "integration: line2 title"     "Glue"     "$(echo "${SUB_TOPICS[2]}" | cut -d'|' -f1)"
 # Start research is in the body but we only consume Sub-topics section content
 parse_start_choice "$COMMENT"
 assert_eq "integration: start choice"    "none"     "$START_CHOICE"   # none ticked
