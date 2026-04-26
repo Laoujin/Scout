@@ -28,7 +28,7 @@ for fix in "$FIXTURES"/*.txt; do
   base="$(basename "$fix" .txt)"
   expected="$FIXTURES/$base.expected.md"
   topic="$(cat "$fix")"
-  actual="$(RAW_TOPIC="$topic" DEPTH=expedition FORMAT=auto \
+  actual="$(RAW_TOPIC="$topic" DEPTH=deep FORMAT=auto \
             bash "$REPO_ROOT/scripts/sharpen.sh")"
   if [ "${UPDATE_SNAPSHOTS:-}" = "1" ]; then
     printf '%s\n' "$actual" > "$expected"
