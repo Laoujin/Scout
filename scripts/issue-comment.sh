@@ -56,6 +56,8 @@ This topic has several independent angles. The list below is informational for n
 
 ${SUB_TOPICS_BLOCK}
 
+### Go
+
 - [ ] **Start research** — tick this to publish to Atlas (depth: \`${DEPTH_LABEL}\`, format: \`${FORMAT}\`).
 
 Not what you wanted? Reply with feedback (e.g. "merge angles 2 and 3", "drop the routing one") and I'll propose a new sharpened version.
