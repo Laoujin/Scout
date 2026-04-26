@@ -50,7 +50,7 @@ ${TOPIC_ONLY}
 \`\`\`
 <!-- scout-topic-end -->
 
-This topic has several independent angles. The list below is informational for now — Start research will run a single expedition over the whole topic. (Per-angle decomposition is being wired in a follow-up.)
+This topic has several independent angles. Tick the ones to research as part of this expedition; each becomes its own page, and the parent produces an overview that ties them together. Edit a \`(depth)\` to override the recommended level.
 
 ### Sub-topics
 
@@ -58,7 +58,8 @@ ${SUB_TOPICS_BLOCK}
 
 ### Go
 
-- [ ] **Start research** — tick this to publish to Atlas (depth: \`${DEPTH_LABEL}\`, format: \`${FORMAT}\`).
+- [ ] **Start research** (runs every ticked sub-topic in parallel and generates an overview page; depth: \`${DEPTH_LABEL}\`, format: \`${FORMAT}\`)
+- [ ] **Research as one expedition instead** (skip decomposition)
 
 Not what you wanted? Reply with feedback (e.g. "merge angles 2 and 3", "drop the routing one") and I'll propose a new sharpened version.
 EOF
