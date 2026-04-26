@@ -2,6 +2,9 @@
 # Post a sharpen-result comment to the triggering Issue.
 # Comment shape: human-readable blockquote + machine-parseable scout-topic fenced
 # block + a [ ] Start research checkbox the user ticks to publish to Atlas.
+# When the sharpener emits a scout-subtopics block, the comment also includes
+# a `### Sub-topics` markdown section, a `### Go` header, and a second
+# `Research as one expedition instead` checkbox alongside Start research.
 #
 # Required env: ISSUE_NUMBER, SHARPENED_TOPIC, DEPTH, FORMAT, GH_TOKEN, GH_REPO.
 # Optional env: COMMENT_HEADER (defaults to "Sharpened proposal").
