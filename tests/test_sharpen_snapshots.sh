@@ -22,6 +22,8 @@ if [ "${SCOUT_SKIP_CLAUDE:-}" = "1" ]; then
   exit 0
 fi
 
+echo "Testing sharpen_snapshots.sh..."
+
 for fix in "$FIXTURES"/*.txt; do
   base="$(basename "$fix" .txt)"
   expected="$FIXTURES/$base.expected.md"
@@ -46,5 +48,8 @@ for fix in "$FIXTURES"/*.txt; do
 done
 
 echo
-echo "Passed: $PASS, Failed: $FAIL"
-[ $FAIL -eq 0 ]
+echo "Results: $PASS passed, $FAIL failed"
+if [ $FAIL -gt 0 ]; then
+  printf '  %s\n' "${FAIL_MSGS[@]}"
+  exit 1
+fi
