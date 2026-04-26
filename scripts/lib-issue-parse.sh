@@ -170,6 +170,9 @@ parse_sub_topics() {
       else
         depth_internal="standard"
       fi
+      # Pipe characters would corrupt the |-delimited array entry shape.
+      title="${title//|/}"
+      rationale="${rationale//|/}"
       SUB_TOPICS+=("${title}|${depth_internal}|${rationale}|${checked}")
     fi
   done <<< "$section"
@@ -182,10 +185,10 @@ parse_sub_topics() {
 parse_start_choice() {
   local body="$1"
   local start_ticked=false as_one_ticked=false
-  if printf '%s' "$body" | grep -qiE '^\s*-[[:space:]]+\[[xX]\][[:space:]]+\*\*Start research\*\*'; then
+  if printf '%s' "$body" | grep -qiE '^\s*[-*][[:space:]]+\[[xX]\][[:space:]]+\*\*Start research\*\*'; then
     start_ticked=true
   fi
-  if printf '%s' "$body" | grep -qiE '^\s*-[[:space:]]+\[[xX]\][[:space:]]+\*\*Research as one expedition instead\*\*'; then
+  if printf '%s' "$body" | grep -qiE '^\s*[-*][[:space:]]+\[[xX]\][[:space:]]+\*\*Research as one expedition instead\*\*'; then
     as_one_ticked=true
   fi
   if $as_one_ticked; then

@@ -15,7 +15,7 @@ assert_eq() {
   else fail "$label: expected [$expected], got [$actual]"; fi
 }
 
-echo "Testing test_lib_issue_parse_subtopics.sh..."
+echo "Testing lib_issue_parse_subtopics.sh..."
 
 # --- canonical sub-topic line ---
 COMMENT=$'### Sub-topics\n- [x] (expedition) **Routing** — Wildcard TLS.\n- [ ] (recon) **Glue** — Orchestration angle.\n\n### Go\n- [ ] **Start research**\n- [ ] **Research as one expedition instead**\n'
@@ -26,6 +26,13 @@ assert_eq "canonical: line0 depth"   "deep"        "$(echo "${SUB_TOPICS[0]}" | 
 assert_eq "canonical: line0 title"   "Routing"     "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f1)"
 assert_eq "canonical: line1 checked" "false"       "${SUB_TOPICS[1]##*|}"
 assert_eq "canonical: line1 depth"   "ceo"         "$(echo "${SUB_TOPICS[1]}" | cut -d'|' -f2)"
+
+# --- Issue 1 regression: pipe in title/rationale stripped to keep delimited format intact ---
+COMMENT=$'### Sub-topics\n- [x] (survey) **Title|with|pipes** — rat|ionale.\n'
+parse_sub_topics "$COMMENT"
+assert_eq "pipe-strip: title"        "Titlewithpipes"  "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f1)"
+assert_eq "pipe-strip: depth"        "standard"        "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f2)"
+assert_eq "pipe-strip: rationale"    "rationale."      "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f3)"
 
 # --- fuzzy depth tokens snap to nearest known token within distance 2 ---
 COMMENT=$'### Sub-topics\n- [x] (suvey) **A** — typo.\n- [x] (expdition) **B** — typo.\n'
