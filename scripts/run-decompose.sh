@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+# Parent orchestrator for decomposed expeditions. Iterates over user-ticked
+# sub-topics, invoking scripts/run.sh per child. Writes parent index.md via
+# a synthesis pass when ≥2 children succeed.
+#
+# Required env: PARENT_DIR, PARENT_TOPIC, PARENT_FORMAT, DATE, SUB_TOPICS_TSV
+# Optional env: SCOUT_DIR (defaults to script's parent), SCOUT_MAX_CHILDREN
+#               (default 8), SCOUT_DECOMPOSE_SOFT_TIMEOUT (4h),
+#               SCOUT_DECOMPOSE_HARD_TIMEOUT (4h20m), SCOUT_SKIP_SYNTHESIS
+#               (test hook), RUN_LOG (test hook to record invocations).
+#
+# SUB_TOPICS_TSV is a newline-separated list of `title|depth|rationale|checked`
+# entries (the same shape parse_sub_topics writes to the SUB_TOPICS array).
+
+set -euo pipefail
+
+: "${PARENT_DIR:?PARENT_DIR is required}"
+: "${PARENT_TOPIC:?PARENT_TOPIC is required}"
+: "${PARENT_FORMAT:=auto}"
+: "${DATE:?DATE is required}"
+: "${SUB_TOPICS_TSV:?SUB_TOPICS_TSV is required}"
+: "${SCOUT_MAX_CHILDREN:=8}"
+: "${SCOUT_DECOMPOSE_SOFT_TIMEOUT:=14400}"   # seconds, 4h
+: "${SCOUT_DECOMPOSE_HARD_TIMEOUT:=15600}"   # seconds, 4h20m
+
+SCOUT_DIR="${SCOUT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+mkdir -p "$PARENT_DIR"
+
+# Slugify (uses existing scripts/slug.sh if available, else simple version).
+if [ -f "$SCOUT_DIR/scripts/slug.sh" ]; then
+  source "$SCOUT_DIR/scripts/slug.sh"
+fi
+_simple_slug() {
+  printf '%s' "$1" | tr '[:upper:]' '[:lower:]' \
+    | sed -e 's/[^a-z0-9]/-/g' -e 's/--*/-/g' -e 's/^-//' -e 's/-$//' \
+    | cut -c1-60
+}
+_slugify_or_simple() {
+  if declare -F slugify >/dev/null 2>&1; then slugify "$1"
+  else _simple_slug "$1"
+  fi
+}
+
+# Frontmatter helper: extracts a field's value from an index.md file.
+_frontmatter_field() {
+  local file="$1" field="$2"
+  awk -v f="$field" '
+    /^---[[:space:]]*$/ { in_fm = !in_fm; next }
+    in_fm && $0 ~ "^"f":" { sub("^"f":[[:space:]]*", ""); print; exit }
+  ' "$file"
+}
+
+# Returns 0 if child has a successful (non-placeholder) index.{md,html}.
+_child_is_success() {
+  local dir="$1"
+  local file
+  for file in "$dir/index.md" "$dir/index.html"; do
+    [ -f "$file" ] || continue
+    local status
+    status="$(_frontmatter_field "$file" status)"
+    [ "$status" = "failed" ] && return 1
+    return 0
+  done
+  return 1
+}
+
+# Write a failure placeholder index.md for a child.
+_write_placeholder() {
+  local dir="$1" depth="$2" reason="$3"
+  mkdir -p "$dir"
+  cat > "$dir/index.md" <<MD
+---
+layout: research
+title: $(basename "$dir")
+status: failed
+failure_reason: $reason
+attempted_at: $(date -u +%FT%TZ)
+depth: $depth
+---
+
+Research failed: $reason
+MD
+}
+
+# --- Main loop ----------------------------------------------------------------
+
+START_TS=$(date +%s)
+PARENT_FORMAT_INTERNAL="$PARENT_FORMAT"
+
+# Truncate at SCOUT_MAX_CHILDREN.
+mapfile -t CHILDREN <<< "$(printf '%s\n' "$SUB_TOPICS_TSV" | grep '|true$' | head -n "$SCOUT_MAX_CHILDREN")"
+
+manifest_path="$PARENT_DIR/manifest.json"
+echo "[" > "$manifest_path.tmp"
+manifest_first=1
+
+for entry in "${CHILDREN[@]}"; do
+  [ -n "$entry" ] || continue
+  IFS='|' read -r ctitle cdepth crationale cchecked <<< "$entry"
+  cslug="$(_slugify_or_simple "$ctitle")"
+  child_dir="$PARENT_DIR/$cslug"
+  child_status="unknown"
+  child_start=$(date +%s)
+
+  if _child_is_success "$child_dir"; then
+    echo "[run-decompose] skip (already success): $cslug" >&2
+    child_status="skipped_success"
+  else
+    elapsed=$(( $(date +%s) - START_TS ))
+    if [ "$elapsed" -ge "$SCOUT_DECOMPOSE_SOFT_TIMEOUT" ]; then
+      echo "[run-decompose] soft timeout reached, skipping: $cslug" >&2
+      _write_placeholder "$child_dir" "$cdepth" "soft timeout reached before start"
+      child_status="skipped_soft_timeout"
+    else
+      remaining=$(( SCOUT_DECOMPOSE_HARD_TIMEOUT - elapsed ))
+      [ "$remaining" -lt 60 ] && remaining=60
+      echo "[run-decompose] running child $cslug (depth=$cdepth, remaining=${remaining}s)" >&2
+      rm -rf "$child_dir"
+      mkdir -p "$child_dir"
+      set +e
+      env TOPIC="$ctitle" RAW_TOPIC="$ctitle" DEPTH="$cdepth" \
+          FORMAT="$PARENT_FORMAT_INTERNAL" RESEARCH_DIR="$child_dir" \
+          ATLAS_REPO="${ATLAS_REPO:-}" \
+          ${RUN_LOG:+RUN_LOG="$RUN_LOG"} \
+          timeout "${remaining}s" bash "$SCOUT_DIR/scripts/run.sh"
+      rc=$?
+      set -e
+      if [ "$rc" -eq 0 ] && _child_is_success "$child_dir"; then
+        child_status="success"
+      elif [ "$rc" -eq 124 ]; then
+        _write_placeholder "$child_dir" "$cdepth" "hard timeout"
+        child_status="failed_hard_timeout"
+      else
+        _write_placeholder "$child_dir" "$cdepth" "child run.sh exit $rc"
+        child_status="failed"
+      fi
+    fi
+  fi
+
+  # Append to manifest.
+  child_end=$(date +%s)
+  if [ "$manifest_first" -eq 1 ]; then manifest_first=0; else echo "," >> "$manifest_path.tmp"; fi
+  printf '  {"slug":"%s","title":"%s","depth":"%s","status":"%s","start":%d,"end":%d}' \
+    "$cslug" "$(printf '%s' "$ctitle" | sed 's/"/\\"/g')" "$cdepth" \
+    "$child_status" "$child_start" "$child_end" >> "$manifest_path.tmp"
+done
+
+echo >> "$manifest_path.tmp"
+echo "]" >> "$manifest_path.tmp"
+mv "$manifest_path.tmp" "$manifest_path"
+
+# --- Synthesis pass -----------------------------------------------------------
+
+if [ "${SCOUT_SKIP_SYNTHESIS:-0}" = "1" ]; then
+  exit 0
+fi
+
+# Synthesis is wired in Task 8. For now exit cleanly so the resumability
+# test passes (it sets SCOUT_SKIP_SYNTHESIS=1 explicitly).
+exit 0
