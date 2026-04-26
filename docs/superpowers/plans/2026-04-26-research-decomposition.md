@@ -51,9 +51,19 @@ Working directory for all `bash` and `git` commands below is `/mnt/c/Users/woute
 
 ## Stage 1 — Sharpener emits sub-topics (informational only)
 
-**Outcome:** When the sharpener judges a topic multi-angled, it appends a `scout-subtopics` fenced block to its output. `issue-comment.sh` is *not yet* modified, so the new block is currently rendered verbatim into the bot comment as part of the `scout-topic` fenced block — the rendering is visually ugly (nested code fences, blockquoted bullet lines), but the proposed sub-topics are readable in the raw markdown. Lets us iterate on Claude's decomposition quality on real topics with zero execution-path blast radius. Workflow trigger and `run.sh` invocation are unchanged.
+**Outcome (as actually delivered, 2026-04-26):**
 
-**If the visual ugliness is a blocker for Stage 1 review**, the executor may pull Task 4 (issue-comment.sh rendering, *without* the escape-hatch checkbox) forward into Stage 1 — see Task 4.1's body for the sub-topics-only branch. The Stage 1 commit boundary then includes that rendering change, and Stage 2's Task 4 reduces to "add the escape-hatch checkbox + wire decomposition trigger." This is a judgment call by the executor; the spec is silent on Stage 1's rendering aesthetics.
+When the sharpener judges a topic multi-angled, it appends a `scout-subtopics` fenced block to its output. `issue-comment.sh` was modified (pulled forward from Task 4) to split `TOPIC_ONLY` from `SUB_TOPICS_BLOCK`: the paragraph goes inside the existing `scout-topic` fenced block; the sub-topics render as a separate `### Sub-topics` markdown section followed by a `### Go` header and the existing single `Start research` checkbox. The pull-forward was required because the original "leave the block inside `scout-topic`" approach silently corrupted `TOPIC` for every wide-topic single-pass run (the bare-fence awk extractor in `research-from-issue.sh` exits at the first `^```$` it sees, which would be the inner closing fence). With the split in place, downstream extraction works correctly and the workflow trigger + `run.sh` invocation remain unchanged.
+
+**Stage 1 ships sub-topics as informational only.** Ticking `Start research` still runs single-pass `run.sh`. The bot comment includes a one-sentence disclaimer ("The list below is informational for now — Start research will run a single expedition over the whole topic. Per-angle decomposition is being wired in a follow-up.") so users aren't confused by the inert checkboxes on each sub-topic line.
+
+**Deferred to Stage 2 (originally bundled in Task 4):**
+- Adding the `Research as one expedition instead` escape-hatch checkbox.
+- Replacing the "informational for now" disclaimer with the real "Tick the ones to research..." text.
+- Updating the workflow trigger (Task 11) to fire on either Start checkbox variant.
+- Wiring `research-from-issue.sh` (Task 10) to branch on which checkbox was ticked.
+
+The work the original Task 4 prescribed for `issue-comment.sh` is therefore ~50% done. Stage 2's Task 4 is reduced to the items in the deferred list above; the `TOPIC_ONLY` / `SUB_TOPICS_BLOCK` split, the `### Sub-topics` rendering, and the `### Go` header are already in place at the Stage 1 ship state.
 
 ### Task 1: Sharpener output contract — fixtures + snapshot harness
 
@@ -517,95 +527,42 @@ git add scripts/lib-issue-parse.sh tests/test_lib_issue_parse_subtopics.sh
 git commit -m "feat(parser): parse Sub-topics list with fuzzy depth + start choice"
 ```
 
-### Task 4: Render sub-topics + escape hatch in `issue-comment.sh`
+### Task 4: Add escape-hatch checkbox + finalize disclaimer in `issue-comment.sh`
 
 **Files:**
 - Modify: `scout/scripts/issue-comment.sh`
 
-The bot comment now embeds the sharpener's `scout-subtopics` block (if present) as a `### Sub-topics` markdown section and adds the "Research as one expedition instead" checkbox alongside the existing Start checkbox.
+> **Stage 1 already shipped half of this task.** The `TOPIC_ONLY` / `SUB_TOPICS_BLOCK` split, the `### Sub-topics` markdown section rendering, and the `### Go` header are all in place at Stage 1 ship state (commit `db90e1a` and predecessors). What remains is: replace the "informational for now" disclaimer with the real "Tick the ones..." text, and add the `Research as one expedition instead` checkbox under `### Go`.
 
-- [ ] **Step 4.1: Update `issue-comment.sh` to detect and render the block.**
+- [ ] **Step 4.1: Update the wide branch's disclaimer + add the escape-hatch checkbox.**
 
-Replace the body construction (lines 21–38 of the current file) with:
+In `scripts/issue-comment.sh`, find the wide branch (the `if [ -n "$SUB_TOPICS_BLOCK" ]; then` block). Make two changes:
 
-```bash
-# Blockquote each line of the sharpened topic for the human-readable section.
-quoted="$(printf '%s\n' "$SHARPENED_TOPIC" | sed 's/^/> /')"
+1. Replace the disclaimer paragraph that currently reads:
+   > `This topic has several independent angles. The list below is informational for now — Start research will run a single expedition over the whole topic. (Per-angle decomposition is being wired in a follow-up.)`
 
-# If the sharpener emitted a scout-subtopics fenced block, extract it for
-# rendering as a markdown section. Absence ⇒ narrow mode (no extra section,
-# no escape-hatch checkbox — keeps today's UX for narrow topics).
-SUB_TOPICS_BLOCK="$(printf '%s' "$SHARPENED_TOPIC" | awk '
-  /^```scout-subtopics[[:space:]]*$/ { in_block=1; next }
-  /^```[[:space:]]*$/ && in_block { exit }
-  in_block { print }
-')"
+   with:
 
-# Strip the scout-subtopics fenced block (and its closing fence) from the
-# topic shown in the human-readable blockquote and the scout-topic block.
-TOPIC_ONLY="$(printf '%s' "$SHARPENED_TOPIC" | awk '
-  /^```scout-subtopics[[:space:]]*$/ { in_block=1; next }
-  /^```[[:space:]]*$/ && in_block { in_block=0; next }
-  !in_block { print }
-' | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')"
+   > `This topic has several independent angles. Tick the ones to research as part of this expedition; each becomes its own page, and the parent produces an overview that ties them together. Edit a \`(depth)\` to override the recommended level.`
 
-quoted="$(printf '%s\n' "$TOPIC_ONLY" | sed 's/^/> /')"
+2. Under the existing `### Go` header, the wide branch currently has only:
+   ```
+   - [ ] **Start research** — tick this to publish to Atlas (depth: ...).
+   ```
+   Replace those two lines with the dual-checkbox version:
+   ```
+   - [ ] **Start research** (runs every ticked sub-topic in parallel and generates an overview page; depth: \`${DEPTH_LABEL}\`, format: \`${FORMAT}\`)
+   - [ ] **Research as one expedition instead** (skip decomposition)
+   ```
 
-if [ -n "$SUB_TOPICS_BLOCK" ]; then
-  body="$(cat <<EOF
-### ${COMMENT_HEADER}
+The narrow branch is unchanged — it has no Sub-topics section and no escape hatch.
 
-${quoted}
-
-<!-- scout-topic-start -->
-\`\`\`scout-topic
-${TOPIC_ONLY}
-\`\`\`
-<!-- scout-topic-end -->
-
-This topic has several independent angles. Tick the ones to research as part of this expedition; each becomes its own page, and the parent produces an overview that ties them together. Edit a \`(depth)\` to override the recommended level.
-
-### Sub-topics
-
-${SUB_TOPICS_BLOCK}
-
-### Go
-
-- [ ] **Start research** (runs every ticked sub-topic in parallel and generates an overview page; depth: \`${DEPTH_LABEL}\`, format: \`${FORMAT}\`)
-- [ ] **Research as one expedition instead** (skip decomposition)
-
-Not what you wanted? Reply with feedback (e.g. "merge angles 2 and 3", "drop the routing one") and I'll propose a new sharpened version.
-EOF
-)"
-else
-  body="$(cat <<EOF
-### ${COMMENT_HEADER}
-
-${quoted}
-
-<!-- scout-topic-start -->
-\`\`\`scout-topic
-${TOPIC_ONLY}
-\`\`\`
-<!-- scout-topic-end -->
-
-- [ ] **Start research** — tick this to publish to Atlas (depth: \`${DEPTH_LABEL}\`, format: \`${FORMAT}\`).
-
-Not what you wanted? Reply with feedback (e.g. "focus on open-source", "shorter, decision-only") and I'll propose a new sharpened version.
-EOF
-)"
-fi
-
-gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "$body"
-```
-
-- [ ] **Step 4.2: Smoke-test `issue-comment.sh` locally with a stubbed `gh`.**
+- [ ] **Step 4.2: Smoke-test the dual-checkbox rendering with a stubbed `gh`.**
 
 ```bash
 mkdir -p /tmp/scout-stub
 cat > /tmp/scout-stub/gh <<'EOF'
 #!/bin/sh
-echo "stub gh: $@" >&2
 shift 2
 while [ "$1" != "--body" ]; do shift; done; shift
 printf '%s\n' "$1"
@@ -615,31 +572,34 @@ chmod +x /tmp/scout-stub/gh
 PATH="/tmp/scout-stub:$PATH" \
 ISSUE_NUMBER=1 GH_TOKEN=x GH_REPO=test/test \
 DEPTH=deep DEPTH_LABEL=expedition FORMAT=auto \
-SHARPENED_TOPIC="$(printf 'Test paragraph.\n```scout-subtopics\n- (survey) **Angle A** — first.\n- (recon) **Angle B** — second.\n```\n')" \
-bash scripts/issue-comment.sh > /tmp/comment.out 2>&1
+SHARPENED_TOPIC="$(printf 'Test paragraph.\n\n```scout-subtopics\n- [ ] (survey) **Angle A** — first.\n- [ ] (recon) **Angle B** — second.\n```\n')" \
+bash scripts/issue-comment.sh > /tmp/comment.out
 
 grep -q '### Sub-topics' /tmp/comment.out && echo OK1 || echo FAIL1
-grep -q 'Research as one expedition instead' /tmp/comment.out && echo OK2 || echo FAIL2
-grep -q 'Angle A' /tmp/comment.out && echo OK3 || echo FAIL3
+grep -q '### Go' /tmp/comment.out && echo OK2 || echo FAIL2
+grep -q '\*\*Start research\*\*' /tmp/comment.out && echo OK3 || echo FAIL3
+grep -q '\*\*Research as one expedition instead\*\*' /tmp/comment.out && echo OK4 || echo FAIL4
+grep -q 'informational for now' /tmp/comment.out && echo FAIL5 || echo OK5
+grep -q 'Tick the ones to research' /tmp/comment.out && echo OK6 || echo FAIL6
 
-# Narrow case
+# Narrow case unchanged
 PATH="/tmp/scout-stub:$PATH" \
 ISSUE_NUMBER=1 GH_TOKEN=x GH_REPO=test/test \
 DEPTH=standard DEPTH_LABEL=survey FORMAT=auto \
 SHARPENED_TOPIC="Plain narrow topic with no subtopics block." \
-bash scripts/issue-comment.sh > /tmp/comment2.out 2>&1
+bash scripts/issue-comment.sh > /tmp/comment2.out
 
-grep -q '### Sub-topics' /tmp/comment2.out && echo FAIL4 || echo OK4
-grep -q 'Research as one expedition instead' /tmp/comment2.out && echo FAIL5 || echo OK5
+grep -q '### Sub-topics' /tmp/comment2.out && echo FAIL7 || echo OK7
+grep -q 'Research as one expedition instead' /tmp/comment2.out && echo FAIL8 || echo OK8
 ```
 
-Expected: `OK1 OK2 OK3 OK4 OK5`. (The narrow case must NOT render the Sub-topics section or escape hatch.)
+Expected: `OK1 OK2 OK3 OK4 OK5 OK6 OK7 OK8`.
 
 - [ ] **Step 4.3: Commit.**
 
 ```bash
 git add scripts/issue-comment.sh
-git commit -m "feat(comment): render sub-topics + escape hatch when sharpener emits"
+git commit -m "feat(comment): add escape-hatch checkbox + final disclaimer"
 ```
 
 ### Task 5: Add `synthesis.md` skill
@@ -2185,7 +2145,8 @@ This section is the executor's checklist for verifying spec coverage before decl
 |---|---|
 | Goal: decompose wide topics | Stages 1–3 collectively |
 | Sharpener T2 judgment | Task 2 (sharpen.md instructions) |
-| Bot comment template | Task 4 (issue-comment.sh) |
+| Bot comment template (split, Sub-topics section, Go header) | Stage 1 (shipped 2026-04-26 — pulled forward from original Task 4) |
+| Bot comment escape-hatch checkbox + final disclaimer | Stage 2 Task 4 (slimmed) |
 | Sub-topic line regex + lenience | Task 3 (parse_sub_topics + tests) |
 | Fuzzy depth matching ≤ 2 | Task 3 (_lev + _snap_depth + tests) |
 | Internal-code aliases (ceo/standard/deep) | Task 3 (_snap_depth) |
