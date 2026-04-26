@@ -1,0 +1,9 @@
+- Claude Code and I chat on Slack about a project
+- Slack channel per project maybe?
+- At some point I give a go
+- Claude Code implements the feature/bugfix
+- A branch, and a PR are created
+- The change is deployed on my NAS (Synology)
+- The change is exposed via a url (ex: ProjectName-FeatureX.sangu.be)
+
+I need a workflow for this

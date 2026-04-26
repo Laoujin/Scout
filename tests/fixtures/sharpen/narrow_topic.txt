@@ -1,0 +1,2 @@
+Compare ripgrep, ag, ack, and grep for searching a 50k-file repo.
+Decision-only.
