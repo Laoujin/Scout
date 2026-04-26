@@ -20,30 +20,67 @@ cd Scout
 
 ## 2. Create Atlas
 
-Create an empty repo `<you>/Atlas` on GitHub (no README, no license). Seed it from `atlas-seed/`:
+Create an empty repo `<you>/Atlas` on GitHub (no README, no license). Scaffold it with the Compass theme as a git submodule:
 
 ```bash
-cp -a atlas-seed/ /tmp/atlas-init
-cd /tmp/atlas-init
-rm -rf research/*              # atlas-seed ships a sample post; drop it
-mkdir -p research
+mkdir /tmp/atlas-init && cd /tmp/atlas-init
+mkdir research
 
-sed -i \
-  -e 's#^baseurl:.*#baseurl: /Atlas#' \
-  -e 's#^scout_repo:.*#scout_repo: <you>/Scout#' \
-  -e 's#^skeleton:.*#skeleton: s5#' \
-  -e 's#^palette:.*#palette: cartography#' \
-  -e 's#^card:.*#card: v1#' \
-  _config.yml
+cat > _config.yml <<'YAML'
+title: Atlas
+description: Research compiled on demand by Scout.
+
+baseurl: /Atlas
+scout_repo: <you>/Scout
+
+skeleton: s5
+palette:  cartography
+card:     v1
+
+defaults:
+  - scope:
+      path: research
+    values:
+      layout: research
+      type: research
+
+# Compass theme (git submodule). Update with:
+#   git submodule update --remote compass && git commit -am "bump compass"
+layouts_dir: compass/_layouts
+includes_dir: compass/_includes
+assets_base: /compass/assets
+
+exclude:
+  - README.md
+  - .gitignore
+  - compass/_config.yml
+  - compass/serve.ps1
+  - compass/research
+  - compass/index.html
+  - compass/Gemfile
+  - compass/Gemfile.lock
+
+markdown: kramdown
+highlighter: rouge
+YAML
+
+cat > index.html <<'HTML'
+---
+layout: default
+---
+HTML
 
 git init -b main
+git submodule add https://github.com/Laoujin/Compass.git compass
 git add -A
-git commit -m "Initial Atlas seed"
+git commit -m "Scaffold Atlas with compass submodule"
 git remote add origin git@github.com:<you>/Atlas.git
 git push -u origin main
 ```
 
 If you renamed Atlas to something other than `Atlas`, set `baseurl` to `/<your-repo-name>`.
+
+To pull layout updates later: `cd Atlas && git submodule update --remote compass && git commit -am "bump compass" && git push`. GitHub Pages automatically initialises public submodules.
 
 ## 3. Enable GitHub Pages
 

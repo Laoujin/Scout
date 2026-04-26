@@ -57,7 +57,7 @@ You can change it any time by editing `_config.yml` in your Atlas repo.
 - Logs in to `gh` (device flow or `$GH_TOKEN`).
 - Forks Scout to your account.
 - Creates the Atlas repo:
-  - seeds it from `atlas-seed/` with your config.
+  - scaffolds a minimal `_config.yml` + empty `research/` and adds [Compass](https://github.com/Laoujin/Compass) (the Jekyll theme) as a git submodule at `compass/`.
   - Enables GitHub Pages.
   - Generates an ed25519 deploy key and uploads it to Atlas with write access then seeds the `scout_atlas-ssh` Docker volume with it.
 - Fetches a runner-registration token and writes `docker/.env`.
@@ -134,11 +134,11 @@ If you want to tune your Atlas theme/layout:
 
 ### Preview theme changes locally
 
-`atlas-seed/serve.ps1` (PowerShell, Docker, Python) builds every variant of one axis
-into its own subdir and [serves the lot](http://localhost:4000/):
+The theme lives in [Compass](https://github.com/Laoujin/Compass). Clone it and use its `serve.ps1` (PowerShell, Docker, Python), which builds every variant of one axis into its own subdir and [serves the lot](http://localhost:4000/):
 
 ```powershell
-cd atlas-seed
+git clone https://github.com/Laoujin/Compass.git
+cd Compass
 ./serve.ps1                    # sweep skeletons (s1..s6)
 ./serve.ps1 -Sweep palettes    # sweep all palettes with current skeleton
 ./serve.ps1 -Sweep cards       # sweep all cards
@@ -147,9 +147,11 @@ cd atlas-seed
 For a single build on any platform:
 
 ```bash
-cd atlas-seed
+cd Compass
 docker run --rm -p 4000:4000 -v "$PWD:/srv/jekyll" jekyll/jekyll:4 jekyll serve --host 0.0.0.0 --baseurl '/'
 ```
+
+To use new compass changes in your Atlas: `cd Atlas && git submodule update --remote compass && git commit -am "bump compass" && git push`.
 
 ## Operate
 
@@ -196,7 +198,7 @@ docker-compose up -d
 - **Runner won't register** → token probably expired. See [Rotate runner token](#rotate-runner-token).
 - **Push to Atlas fails** → `docker exec scout-runner runuser -u runner -- ssh -T github.com-atlas` should greet you. If not, the deploy key is wrong or missing write access. Re-do step 5 + 6 of [INSTALL.md](INSTALL.md).
 - **Claude auth expired** → see [Re-authenticate Claude](#re-authenticate-claude).
-- **Jekyll preview build fails** → delete `atlas-seed/_previews/` and `atlas-seed/_site/`, retry. Jekyll caches are not cross-version.
+- **Jekyll preview build fails** → delete `compass/_previews/` and `compass/_site/`, retry. Jekyll caches are not cross-version.
 - **`.env` permission denied inside container** → the host file must be readable by UID 1000 (the runner). `chmod 600` + `chown <you>:<you>` usually fixes it.
 
 ## Security

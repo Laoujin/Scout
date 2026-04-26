@@ -153,38 +153,73 @@ done
 [[ -d "$SCOUT_DIR/.git" ]] || { echo "Error: failed to clone $SCOUT_OWNER/$SCOUT_NAME" >&2; exit 1; }
 ok
 
-# ---------- Step 7: Create Atlas, seed from atlas-seed/, push ----------
+# ---------- Step 7: Create Atlas, scaffold with compass submodule, push ----------
 step "Creating $ATLAS_OWNER/$ATLAS_NAME (empty)..."
 gh repo create "$ATLAS_OWNER/$ATLAS_NAME" --public >/dev/null
 ok
 
-[[ -d "$SCOUT_DIR/atlas-seed" ]] || {
-  echo "Error: $SCOUT_DIR/atlas-seed/ missing in $SCOUT_UPSTREAM@$SCOUT_REF" >&2
-  exit 1
-}
-
 STAGE=$(mktemp -d)
-cp -a "$SCOUT_DIR/atlas-seed/." "$STAGE/"
-# atlas-seed/research/ ships sample content used only for local preview.
-# The new Atlas starts empty — Scout runs will populate research/ over time.
-rm -rf "$STAGE/research"/*
 mkdir -p "$STAGE/research"
 
-sed -i \
-  -e "s#^baseurl:.*#baseurl: /$ATLAS_NAME#" \
-  -e "s#^scout_repo:.*#scout_repo: $SCOUT_OWNER/$SCOUT_NAME#" \
-  -e "s#^skeleton:.*#skeleton: $SKEL#" \
-  -e "s#^palette:.*#palette: $PAL#" \
-  -e "s#^card:.*#card: $CARD#" \
-  "$STAGE/_config.yml"
+cat > "$STAGE/_config.yml" <<EOF
+title: Atlas
+description: Research compiled on demand by Scout.
 
-step "Seeding Atlas (skeleton=$SKEL palette=$PAL card=$CARD)..."
+# baseurl must match your Atlas repo name for project Pages
+# (e.g. /$ATLAS_NAME serves at https://$ATLAS_OWNER.github.io/$ATLAS_NAME/).
+baseurl: /$ATLAS_NAME
+scout_repo: $SCOUT_OWNER/$SCOUT_NAME
+
+# --- Theme variables (edit any of these, push, GitHub Pages rebuilds) ---
+# Skeletons:  s1 s2 s3 s4 s5 s6   (site layout)
+# Palettes:   rust paper cartography midnight minimal fieldnotes solarized nord
+# Cards:      v1 v2 v3 v4 v5 v6 v7
+skeleton: $SKEL
+palette:  $PAL
+card:     $CARD
+
+# Research folders under /research/ get layout=research + type=research automatically.
+defaults:
+  - scope:
+      path: research
+    values:
+      layout: research
+      type: research
+
+# Compass theme (git submodule at compass/). Update with:
+#   git submodule update --remote compass && git commit -am "bump compass"
+layouts_dir: compass/_layouts
+includes_dir: compass/_includes
+assets_base: /compass/assets
+
+exclude:
+  - README.md
+  - .gitignore
+  - compass/_config.yml
+  - compass/serve.ps1
+  - compass/research
+  - compass/index.html
+  - compass/Gemfile
+  - compass/Gemfile.lock
+
+markdown: kramdown
+highlighter: rouge
+EOF
+
+cat > "$STAGE/index.html" <<'EOF'
+---
+layout: default
+---
+EOF
+
+step "Scaffolding Atlas (skeleton=$SKEL palette=$PAL card=$CARD) with compass submodule..."
 (
   cd "$STAGE"
   git init -q -b main
+  git submodule add -q https://github.com/Laoujin/Compass.git compass
   git add -A
   git -c user.name="$AUTHED_USER" -c user.email="${AUTHED_USER}@users.noreply.github.com" \
-      commit -qm "Initial Atlas seed (skeleton=$SKEL palette=$PAL card=$CARD)"
+      commit -qm "Scaffold Atlas with compass submodule (skeleton=$SKEL palette=$PAL card=$CARD)"
   git remote add origin "https://github.com/$ATLAS_OWNER/$ATLAS_NAME.git"
   for attempt in 1 2 3 4 5; do
     if git push -q -u origin main 2>/dev/null; then break; fi
