@@ -253,13 +253,13 @@ Open both `*.expected.md` files. Verify:
 
 If either snapshot is wrong, edit `sharpen.md` and re-run with `UPDATE_SNAPSHOTS=1` until both look right. Commit only the version you've reviewed.
 
-- [ ] **Step 2.4: Run the harness against the committed snapshots.**
+- [ ] **Step 2.4: Validate snapshots structurally.**
 
 ```bash
 bash tests/test_sharpen_snapshots.sh
 ```
 
-Expected: two PASS lines. Exit 0.
+Expected: a series of `PASS:` lines (~10 of them, depending on snapshot content), summary `Results: N passed, 0 failed`, exit 0. The harness validates the *shape* of the captured snapshots — it does NOT byte-diff against a fresh Claude invocation, so it will not false-fail on Claude's normal output drift. To re-capture after an intentional prompt change, use `UPDATE_SNAPSHOTS=1 bash tests/test_sharpen_snapshots.sh` and review the resulting `git diff` manually.
 
 ### Stage 1 commit checkpoint
 
