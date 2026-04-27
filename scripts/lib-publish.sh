@@ -69,3 +69,46 @@ pr_fallback() {
       "Atlas \`main\` moved during this run. Branch pushed: \`$branch\`. Open PR: $url"
   fi
 }
+
+# publish_path <commit-msg> <stage-target> <fallback-branch>
+# Stages <stage-target> (a path or "."), commits, pushes to origin/main with
+# rebase+retry; on rebase conflict or 3 exhausted retries, falls back to
+# pushing to <fallback-branch> and prints a compare URL.
+# Preconditions: cwd is the atlas-checkout git repo. ATLAS_REPO env may be set
+# (used in PR-fallback compare URL). GIT_AUTHOR_{NAME,EMAIL} envs control the
+# commit identity (Scout fallback if unset).
+# Returns: 0 on success (main or PR-fallback branch),
+#          2 nothing staged (caller decides whether that's an error),
+#          3 hard failure (auth/network/etc).
+publish_path() {
+  local msg="$1" target="$2" branch="$3"
+
+  git add -- "$target"
+  if git diff --cached --quiet; then
+    return 2
+  fi
+
+  git -c user.name="${GIT_AUTHOR_NAME:-Scout}" \
+      -c user.email="${GIT_AUTHOR_EMAIL:-scout@users.noreply.github.com}" \
+    commit -m "$msg"
+
+  local rc=0
+  rc=0; try_push || rc=$?
+  if [ "$rc" -eq 2 ]; then return 3; fi
+  if [ "$rc" -eq 1 ]; then
+    local i
+    for i in 1 2 3; do
+      if ! rebase_onto_remote; then
+        pr_fallback "$branch" "${ATLAS_REPO:-}"
+        return 0
+      fi
+      rc=0; try_push || rc=$?
+      [ "$rc" -eq 0 ] && return 0
+      [ "$rc" -eq 2 ] && return 3
+      sleep $((2 ** (i - 1)))
+    done
+    pr_fallback "$branch" "${ATLAS_REPO:-}"
+    return 0
+  fi
+  return 0
+}
