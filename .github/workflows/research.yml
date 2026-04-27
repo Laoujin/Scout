@@ -136,7 +136,7 @@ jobs:
        contains(github.event.comment.body, '- [x] **Research as one expedition instead**') ||
        contains(github.event.comment.body, '- [X] **Research as one expedition instead**'))
     runs-on: [self-hosted, scout]
-    timeout-minutes: 45
+    timeout-minutes: 270
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}
@@ -164,7 +164,7 @@ jobs:
   research-dispatch:
     if: github.event_name == 'workflow_dispatch'
     runs-on: [self-hosted, scout]
-    timeout-minutes: 45
+    timeout-minutes: 270
     env:
       TOPIC: ${{ inputs.topic }}
       DEPTH: ${{ inputs.depth }}
