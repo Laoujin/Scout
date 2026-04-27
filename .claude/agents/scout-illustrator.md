@@ -25,12 +25,15 @@ If you skipped, the parent omits `cover:` from frontmatter and Atlas renders a t
 
 ## Hard rules
 
-- `viewBox="0 0 800 800"` (square). Nothing else. The cover is consumed at two scales: as a small 3:2 card thumbnail (`object-fit: cover` crops top/bottom) AND as a tall right-side hero on the detail page (`background: ... contain` letterboxes). A square viewBox is the only shape that survives both — keep the hero element centered in the middle band so it stays visible after the card crop.
-- Add `preserveAspectRatio="xMidYMid slice"` so the full-bleed background fills the card with no letterbox; the hero stays centered on the detail page.
+- `viewBox="0 0 1600 900"` (16:9). Nothing else. The same SVG is consumed at two scales — both with `background-size: cover` (or `object-fit: cover`):
+  - **Card thumbnail** (3:2 aspect): crops ~8% off each horizontal edge. Visible source x-range: ~125–1475.
+  - **Detail-page hero** (~2.22:1 aspect on a typical desktop): crops ~10% off each vertical edge. Visible source y-range: ~90–810.
+  - **Hero safe zone** (visible on both surfaces): roughly **x: 125–1475, y: 90–810**. Keep the hero element inside this rectangle.
+- Add `preserveAspectRatio="xMidYMid slice"` so the full-bleed background fills both surfaces with no letterbox.
 - Compose in three layers:
-  1. Full-bleed background (gradient rect spanning the full 800×800) so neither card crop nor detail letterbox shows raw page color.
-  2. **Hero element centered roughly in the middle 60% (y ≈ 160–640)** — this is the band that survives the card's 3:2 crop. Make it large and confident; on the detail page it should fill ~half the hero area.
-  3. Optional decoration in the corners/edges (gets cropped on cards, frames the hero on the detail page).
+  1. Full-bleed background (gradient rect spanning the full 1600×900) so neither card crop nor detail crop shows raw page color.
+  2. **Hero element centered roughly at (800, 450)**, sized to fit comfortably within the safe zone above (typical hero bounding box: 600–1000 wide, 400–600 tall).
+  3. Optional decoration outside the hero safe zone (corners, full-bleed edges) — these get cropped variably on card vs detail and should never carry meaning that's lost when clipped.
 - No `<text>`, letters, numbers, human faces, or recognisable logos. Ever. The Jekyll layout wraps the title as real HTML text next to the image. (Exception: full-bleed monospace "code rain" or similar atmospheric typography that reads as decoration, not as a label, is fine — but it must be at low opacity and never compete with the hero.)
 - 2–4 main shapes; one clear hero element. No micro-shape grids.
 - Opacity layered 0.6–0.95. Use `<linearGradient>` / `<radialGradient>` for depth.
@@ -78,7 +81,7 @@ Skip when:
 - You'd need more than ~60 elements to express it.
 - You're second-guessing the composition mid-draft.
 
-Confidence test before committing: *"Would I be proud of this rendered at both 200 px wide on a card grid AND ~600×700 px contained on the detail-page hero?"* The card crop will lose the top/bottom of the viewBox; the detail letterbox will leave space around the sides. If neither view holds up, skip. Return `skipped: <reason>`.
+Confidence test before committing: *"Is the hero entirely inside the safe zone (x: 125–1475, y: 90–810)? Would I be proud of this rendered at both ~280×186 px on a card AND full-bleed across the detail-page hero?"* If the hero gets clipped on either surface, the composition needs to move. If neither view holds up, skip. Return `skipped: <reason>`.
 
 ## Procedure
 
