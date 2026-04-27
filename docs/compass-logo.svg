@@ -1,0 +1,9 @@
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Compass">
+  <rect width="64" height="64" rx="14" fill="#c2410c"/>
+  <path d="M 19 51 A 18 9 0 0 0 45 51" fill="none" stroke="#fef3ec" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 32 14 L 19 51" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M 32 14 L 45 51" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <circle cx="32" cy="14" r="3.6" fill="#fef3ec"/>
+  <circle cx="32" cy="14" r="1.6" fill="#c2410c"/>
+  <circle cx="45" cy="51" r="2.4" fill="#fef3ec"/>
+</svg>
