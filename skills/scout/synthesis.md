@@ -32,11 +32,15 @@ SUCCESS_COUNT: <int — children with non-placeholder index.md>
 
 5. **No conclusion paragraph.** End on the sharpest open question or the strongest recommendation, not "in conclusion."
 
+## Procedure
+
+1. **Dispatch `scout-illustrator` for the cover.** Call `Agent(subagent_type="scout-illustrator", ...)` with a brief that contains `TOPIC=PARENT_TOPIC`, the final `tags` list (3–5 tags spanning the expedition), and `RESEARCH_DIR=PARENT_DIR`. It returns `wrote cover.svg` or `skipped: <reason>`. Record which — you will reference it in step 2's frontmatter.
+
+   This is **required**, not optional. Skipping it leaves the expedition card on Atlas's homepage without a cover image. The agent itself decides whether to draft or skip; your job is to call it.
+
+2. **Write the parent index.** Drop the file at `PARENT_DIR/index.md` (or `PARENT_DIR/index.html` if FORMAT=html). Do NOT print to stdout. If step 1 returned `wrote cover.svg`, include `cover: cover.svg` in the frontmatter; otherwise omit the field.
+
 ## Output
-
-Before writing the parent index, dispatch the `scout-illustrator` sub-agent to draft a cover SVG for the expedition. Pass `TOPIC=PARENT_TOPIC`, `TAGS=<3–5 tags inferred from PARENT_TOPIC and child titles>`, `RESEARCH_DIR=PARENT_DIR`. If it returns `wrote cover.svg`, add `cover: cover.svg` to the frontmatter; otherwise omit the field.
-
-Write the parent `index.md` (or `index.html` if FORMAT=html) directly to `PARENT_DIR/index.md`. Do NOT print to stdout.
 
 The file structure must be:
 
