@@ -129,9 +129,12 @@ jobs:
       github.event.action == 'edited' &&
       (github.event.issue.author_association == 'OWNER' || github.event.issue.author_association == 'MEMBER') &&
       github.event.comment.user.type == 'Bot' &&
-      contains(github.event.changes.body.from, '- [ ] **Start research**') &&
+      (contains(github.event.changes.body.from, '- [ ] **Start research**') ||
+       contains(github.event.changes.body.from, '- [ ] **Research as one expedition instead**')) &&
       (contains(github.event.comment.body, '- [x] **Start research**') ||
-       contains(github.event.comment.body, '- [X] **Start research**'))
+       contains(github.event.comment.body, '- [X] **Start research**') ||
+       contains(github.event.comment.body, '- [x] **Research as one expedition instead**') ||
+       contains(github.event.comment.body, '- [X] **Research as one expedition instead**'))
     runs-on: [self-hosted, scout]
     timeout-minutes: 45
     env:
