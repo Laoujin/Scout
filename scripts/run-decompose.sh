@@ -3,9 +3,10 @@
 # sub-topics, invoking scripts/run.sh per child. Writes parent index.md via
 # a synthesis pass when ≥2 children succeed.
 #
-# Required env: PARENT_DIR, PARENT_TOPIC, PARENT_FORMAT, DATE, SUB_TOPICS_TSV
-# Optional env: SCOUT_DIR (defaults to script's parent), SCOUT_MAX_CHILDREN
-#               (default 8), SCOUT_DECOMPOSE_SOFT_TIMEOUT (4h),
+# Required env: PARENT_DIR, PARENT_TOPIC, DATE, SUB_TOPICS_TSV
+# Optional env: PARENT_FORMAT (default auto), SCOUT_DIR (defaults to script's
+#               parent), SCOUT_MAX_CHILDREN (default 8),
+#               SCOUT_DECOMPOSE_SOFT_TIMEOUT (4h),
 #               SCOUT_DECOMPOSE_HARD_TIMEOUT (4h20m), SCOUT_SKIP_SYNTHESIS
 #               (test hook), RUN_LOG (test hook to record invocations).
 #
@@ -51,15 +52,17 @@ _frontmatter_field() {
 }
 
 # Returns 0 if child has a successful (non-placeholder) index.{md,html}.
+# A child is considered successful if ANY of its index files lacks a
+# `status: failed` frontmatter field — so a stray failure placeholder in
+# index.md doesn't override a real artifact in index.html (or vice-versa).
 _child_is_success() {
-  local dir="$1"
-  local file
+  local dir="$1" file any_found=0
   for file in "$dir/index.md" "$dir/index.html"; do
     [ -f "$file" ] || continue
+    any_found=1
     local status
     status="$(_frontmatter_field "$file" status)"
-    [ "$status" = "failed" ] && return 1
-    return 0
+    [ "$status" = "failed" ] || return 0
   done
   return 1
 }
