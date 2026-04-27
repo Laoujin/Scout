@@ -128,6 +128,7 @@ for entry in "${CHILDREN[@]}"; do
       env TOPIC="$ctitle" RAW_TOPIC="$ctitle" DEPTH="$cdepth" \
           FORMAT="$PARENT_FORMAT_INTERNAL" RESEARCH_DIR="$child_dir" \
           ATLAS_REPO="${ATLAS_REPO:-}" \
+          SCOUT_NO_PUBLISH=1 SCOUT_DECOMPOSE_CHILD=1 \
           ${RUN_LOG:+RUN_LOG="$RUN_LOG"} \
           timeout "${remaining}s" bash "$SCOUT_DIR/scripts/run.sh"
       rc=$?
@@ -211,11 +212,9 @@ children: $CHILDREN_JSON
 
 Synthesis skipped — only $SUCCESS_COUNT sub-topic(s) produced output. See child page(s) below.
 MD
-  exit 0
-fi
-
-SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout/synthesis.md")"
-PROMPT="$(cat <<EOF
+else
+  SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout/synthesis.md")"
+  PROMPT="$(cat <<EOF
 PARENT_TOPIC: ${PARENT_TOPIC}
 PARENT_DIR: ${PARENT_DIR}
 DATE: ${DATE}
@@ -227,10 +226,46 @@ Use the synthesis skill. Write the parent index.md to PARENT_DIR/index.md.
 EOF
 )"
 
-claude --dangerously-skip-permissions \
-       --print \
-       --output-format json \
-       --append-system-prompt "$SKILL_CONTENT" \
-       "$PROMPT" > "$PARENT_DIR/.synthesis-result.json" || true
+  claude --dangerously-skip-permissions \
+         --print \
+         --output-format json \
+         --append-system-prompt "$SKILL_CONTENT" \
+         "$PROMPT" > "$PARENT_DIR/.synthesis-result.json" || true
 
-rm -f "$PARENT_DIR/.synthesis-result.json"
+  rm -f "$PARENT_DIR/.synthesis-result.json"
+fi
+
+# Synthesis fallback: if claude didn't write index.{md,html}, emit a minimal
+# placeholder so the Atlas expedition layout still renders the children grid.
+if [ ! -f "$PARENT_DIR/index.md" ] && [ ! -f "$PARENT_DIR/index.html" ]; then
+  cat > "$PARENT_DIR/index.md" <<MD
+---
+layout: expedition
+title: $(basename "$PARENT_DIR")
+date: $DATE
+topic: $PARENT_TOPIC
+format: $PARENT_FORMAT
+synthesis: false
+children: $CHILDREN_JSON
+---
+
+Synthesis pass produced no output during this run. See child page(s) below.
+MD
+fi
+
+# --- Publish: one commit covers parent synthesis + every child subfolder. ---
+SOFT_LOG="$(mktemp -t scout-decompose-softfail.XXXXXX.log)"
+PARENT_BASE="$(basename "$PARENT_DIR")"
+PARENT_SLUG="${PARENT_BASE#"$DATE"-}"
+
+(
+  cd "$SCOUT_DIR"
+  env TOPIC="$PARENT_TOPIC" SLUG="$PARENT_SLUG" DATE="$DATE" \
+      ATLAS_REPO="${ATLAS_REPO:-}" \
+      ISSUE_NUMBER="${ISSUE_NUMBER:-}" \
+      GH_TOKEN="${GH_TOKEN:-}" GH_REPO="${GH_REPO:-}" \
+      RESEARCH_DIR="$PARENT_DIR" \
+      SOFT_FAIL_LOG="$SOFT_LOG" \
+      bash "$SCOUT_DIR/scripts/publish.sh"
+)
+rm -f "$SOFT_LOG"

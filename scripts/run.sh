@@ -36,6 +36,12 @@ export SOFT_FAIL_LOG
 on_error() {
   local code=$?
   local cmd="${BASH_COMMAND:-unknown}"
+  # Decompose children must not comment on the parent issue — the parent
+  # orchestrator writes a placeholder index.md and surfaces failure via the
+  # final summary comment.
+  if [ "${SCOUT_DECOMPOSE_CHILD:-0}" = "1" ]; then
+    exit "$code"
+  fi
   if [ -n "${ISSUE_NUMBER:-}" ] && [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ]; then
     local tail_log
     tail_log="$(tail -n 30 "$RUN_LOG" 2>/dev/null | sed 's/`/\\`/g')"
@@ -53,20 +59,27 @@ if [ -z "$SLUG" ]; then
   exit 1
 fi
 
-ATLAS_DIR="$SCOUT_DIR/atlas-checkout"
-rm -rf "$ATLAS_DIR"
-git clone --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
+# Two modes:
+#  - Standalone: clone Atlas, derive a unique slug, write to atlas-checkout.
+#  - Decompose-child: parent (run-decompose.sh) has already cloned Atlas and
+#    pre-chosen RESEARCH_DIR inside the parent expedition tree. Children must
+#    not re-clone (would wipe siblings) or relocate to a top-level folder.
+if [ -n "${RESEARCH_DIR:-}" ]; then
+  FINAL_SLUG="$SLUG"
+else
+  ATLAS_DIR="$SCOUT_DIR/atlas-checkout"
+  rm -rf "$ATLAS_DIR"
+  git clone --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
 
-# Collision guard against the per-research folder
-FINAL_SLUG="$SLUG"
-n=2
-while [ -d "$ATLAS_DIR/research/${DATE}-${FINAL_SLUG}" ]; do
-  FINAL_SLUG="${SLUG}-${n}"
-  n=$((n+1))
-done
+  FINAL_SLUG="$SLUG"
+  n=2
+  while [ -d "$ATLAS_DIR/research/${DATE}-${FINAL_SLUG}" ]; do
+    FINAL_SLUG="${SLUG}-${n}"
+    n=$((n+1))
+  done
 
-# Pre-create the per-research folder so Claude can drop index.{md,html} + assets inside.
-RESEARCH_DIR="$ATLAS_DIR/research/${DATE}-${FINAL_SLUG}"
+  RESEARCH_DIR="$ATLAS_DIR/research/${DATE}-${FINAL_SLUG}"
+fi
 mkdir -p "$RESEARCH_DIR"
 
 PROMPT="$(cat <<EOF
@@ -128,6 +141,12 @@ if ! inject_claude_cost 2>>"$SOFT_FAIL_LOG"; then
 fi
 
 rm -f "$RESULT_JSON"
+
+# Decompose children defer publishing to the parent orchestrator so the entire
+# expedition lands as one commit / one Atlas card.
+if [ "${SCOUT_NO_PUBLISH:-0}" = "1" ]; then
+  exit 0
+fi
 
 TOPIC="$TOPIC" SLUG="$FINAL_SLUG" DATE="$DATE" ATLAS_REPO="$ATLAS_REPO" \
   ISSUE_NUMBER="${ISSUE_NUMBER:-}" \
