@@ -57,8 +57,8 @@ If multi-angled and `Depth: deep` (expedition), append a fenced `scout-subtopics
 
 ````
 ```scout-subtopics
-- [ ] (depth) **Title** — one-line rationale.
-- [ ] (depth) **Title** — one-line rationale.
+- [x] (depth) **Title** — one-line rationale.
+- [x] (depth) **Title** — one-line rationale.
 ```
 ````
 
@@ -66,7 +66,7 @@ If multi-angled and `Depth: deep` (expedition), append a fenced `scout-subtopics
 - Default each child to `survey`; downgrade to `recon` for narrow angles; upgrade to `expedition` only when the sub-topic is itself multi-angled.
 - Avoid `expedition` for more than one or two children — each `expedition` child internally spawns 3–8 parallel sub-agents, so stacking them runs hot.
 - Cap at 8 sub-topics.
-- Every sub-topic must start with `- [ ]` (unticked checkbox), then `(depth)`, then `**Title**`, then `— rationale`.
+- Every sub-topic must start with `- [x]` (ticked checkbox — selected by default), then `(depth)`, then `**Title**`, then `— rationale`.
 - Don't propose sub-topics that are mere sub-questions of one angle — those belong to the angle's own deep dive.
 
 ### Examples
@@ -97,9 +97,9 @@ Output:
 Design and implement an end-to-end workflow that lets the user chat with Claude Code on Slack to spec, build, and review a feature, then auto-deploy each branch to a per-feature subdomain on Synology. Cover the wiring, state, and failure modes that tie the pieces together; favor production-ready open-source components in 2026.
 ```
 ```scout-subtopics
-- [ ] (expedition) **Slack ↔ Claude Code remote control** — Per-project channels, message → agent invocation, approval/handoff, mobile UX. Needs survey of GitHub App vs Agent SDK vs self-hosted bot.
-- [ ] (survey) **Branch and PR automation from a remote trigger** — How a "go" message produces a branch + commits + PR without a local checkout in the loop.
-- [ ] (survey) **Synology preview deployments** — Container Manager / Docker Compose lifecycle per branch, build pipeline, teardown on branch delete.
-- [ ] (expedition) **Per-feature subdomain routing** — Wildcard `*.sangu.be` reverse proxy (Traefik/Caddy/nginx), wildcard TLS via Let's Encrypt DNS-01, dynamic config from branch metadata.
-- [ ] (recon) **Orchestration and state** — Glue tying the four pieces above; where state lives; failure modes and recovery.
+- [x] (expedition) **Slack ↔ Claude Code remote control** — Per-project channels, message → agent invocation, approval/handoff, mobile UX. Needs survey of GitHub App vs Agent SDK vs self-hosted bot.
+- [x] (survey) **Branch and PR automation from a remote trigger** — How a "go" message produces a branch + commits + PR without a local checkout in the loop.
+- [x] (survey) **Synology preview deployments** — Container Manager / Docker Compose lifecycle per branch, build pipeline, teardown on branch delete.
+- [x] (expedition) **Per-feature subdomain routing** — Wildcard `*.sangu.be` reverse proxy (Traefik/Caddy/nginx), wildcard TLS via Let's Encrypt DNS-01, dynamic config from branch metadata.
+- [x] (recon) **Orchestration and state** — Glue tying the four pieces above; where state lives; failure modes and recovery.
 ```

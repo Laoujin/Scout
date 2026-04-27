@@ -17,7 +17,7 @@
 #         - narrow: no fenced blocks, no bullet lines
 #         - wide: paragraph + scout-subtopics fenced block + 2-8 sub-topic
 #           lines matching the canonical regex, all depths in
-#           {recon, survey, expedition}, every line carries a [ ] checkbox.
+#           {recon, survey, expedition}, every line carries a [x] checkbox.
 #       This catches real prompt regressions without false-failing on
 #       Claude's normal output drift.
 
@@ -91,7 +91,7 @@ if [ -s "$WIDE" ]; then
   [ "$total_fences" -eq 2 ] && pass "wide: exactly two total fences (open + close)" \
                             || fail "wide: $total_fences total fence(s), expected 2"
 
-  canonical=$(grep -cE '^- \[ \] \([a-z]+\) \*\*.+\*\* — .+$' "$WIDE" || true)
+  canonical=$(grep -cE '^- \[x\] \([a-z]+\) \*\*.+\*\* — .+$' "$WIDE" || true)
   if [ "$canonical" -ge 2 ] && [ "$canonical" -le 8 ]; then
     pass "wide: $canonical sub-topic line(s) matching canonical regex (2-8)"
   else
@@ -99,11 +99,11 @@ if [ -s "$WIDE" ]; then
   fi
 
   bare=$(grep -cE '^- \([a-z]+\) \*\*.+\*\* — .+$' "$WIDE" || true)
-  [ "$bare" -eq 0 ] && pass "wide: every sub-topic carries a [ ] checkbox" \
+  [ "$bare" -eq 0 ] && pass "wide: every sub-topic carries a [x] checkbox" \
                     || fail "wide: $bare sub-topic line(s) missing checkbox prefix"
 
   # Every (depth) token must be in {recon, survey, expedition}.
-  bad_depths=$(grep -oE '^- \[ \] \(([a-z]+)\)' "$WIDE" | sed -E 's/.*\((.*)\)/\1/' | grep -vE '^(recon|survey|expedition)$' | wc -l | tr -d ' ')
+  bad_depths=$(grep -oE '^- \[x\] \(([a-z]+)\)' "$WIDE" | sed -E 's/.*\((.*)\)/\1/' | grep -vE '^(recon|survey|expedition)$' | wc -l | tr -d ' ')
   [ "$bad_depths" -eq 0 ] && pass "wide: all (depth) tokens in {recon, survey, expedition}" \
                           || fail "wide: $bad_depths sub-topic(s) with unrecognized depth token"
 fi
