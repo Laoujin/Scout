@@ -47,6 +47,8 @@ title: <inferred title>
 date: <DATE>
 topic: <PARENT_TOPIC>
 format: <FORMAT>
+tags: [tag1, tag2, tag3]              # 3–5 tags spanning the expedition's scope
+summary: One sentence shown on the Atlas index card.
 cover: cover.svg          # only if scout-illustrator returned wrote cover.svg
 synthesis: true
 citations: <sum of CHILDREN[i].citations across status:success>
@@ -63,6 +65,8 @@ children:
 
 <synthesis prose, 200-600 words, with inline `[[n]](url)` citations>
 ```
+
+**`tags` and `summary` are required.** Atlas's homepage card uses `summary` as the description and `tags` as the chip row; without them the card is title-only. Pick `tags` that span the expedition (not duplicates of any single child's tags). Write `summary` to read as the expedition's elevator pitch, distinct from any child's summary.
 
 The Atlas `expedition` layout renders the `children` frontmatter as a card grid below the synthesis — you do NOT need to list children in the body. Only write the synthesis prose.
 
