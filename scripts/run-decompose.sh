@@ -34,6 +34,40 @@ mkdir -p "$PARENT_DIR"
 if [ -f "$SCOUT_DIR/scripts/slug.sh" ]; then
   source "$SCOUT_DIR/scripts/slug.sh"
 fi
+
+# Push helpers — used to commit+push each successful child immediately so a
+# mid-expedition crash doesn't lose the work of children that already finished.
+# Sourced defensively (matches slug.sh pattern): tests that stub SCOUT_DIR
+# without copying lib-publish.sh fall back to a no-op _publish_child.
+if [ -f "$SCOUT_DIR/scripts/lib-publish.sh" ]; then
+  # shellcheck source=scripts/lib-publish.sh
+  source "$SCOUT_DIR/scripts/lib-publish.sh"
+fi
+
+PARENT_BASE="$(basename "$PARENT_DIR")"
+PARENT_SLUG="${PARENT_BASE#"$DATE"-}"
+PARENT_BRANCH="scout/${DATE}-${PARENT_SLUG}"
+
+# Push a single child's folder to Atlas main. No-op if publish_path isn't
+# available (test environments) or atlas-checkout isn't a git repo (standalone
+# decompose runs without a real Atlas). Per-child push failure is non-fatal:
+# the parent's final publish.sh sweep will retry with everything still on disk.
+_publish_child() {
+  local child_dir="$1" cslug="$2"
+  declare -F publish_path >/dev/null || return 0
+  local atlas_root rel_path rc=0
+  atlas_root="$(cd "$child_dir" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null)" || return 0
+  [ -n "$atlas_root" ] || return 0
+  rel_path="${child_dir#"$atlas_root"/}"
+  (
+    cd "$atlas_root"
+    publish_path "research: ${DATE} ${PARENT_SLUG}/${cslug}" "$rel_path" "$PARENT_BRANCH"
+  ) || rc=$?
+  if [ "$rc" -ne 0 ] && [ "$rc" -ne 2 ]; then
+    echo "[run-decompose] per-child push failed for $cslug (rc=$rc); deferring to final publish" >&2
+  fi
+  return 0
+}
 _simple_slug() {
   printf '%s' "$1" | tr '[:upper:]' '[:lower:]' \
     | sed -e 's/[^a-z0-9]/-/g' -e 's/--*/-/g' -e 's/^-//' -e 's/-$//' \
@@ -155,6 +189,7 @@ for entry in "${CHILDREN[@]}"; do
       set -e
       if [ "$rc" -eq 0 ] && _child_is_success "$child_dir"; then
         child_status="success"
+        _publish_child "$child_dir" "$cslug"
       elif [ "$rc" -eq 124 ]; then
         _write_placeholder "$child_dir" "$cdepth" "hard timeout"
         child_status="failed_hard_timeout"
@@ -314,10 +349,11 @@ if [ -n "$PARENT_FILE" ]; then
   _set_field "$PARENT_FILE" reading_time_min "$TOT_READING"
 fi
 
-# --- Publish: one commit covers parent synthesis + every child subfolder. ---
+# --- Publish: parent synthesis + manifest + any failure placeholders. ---
+# Children that succeeded were already pushed individually inside the loop; this
+# final publish picks up whatever's left (synthesis index.md, manifest.json,
+# placeholders for failed/skipped children).
 SOFT_LOG="$(mktemp -t scout-decompose-softfail.XXXXXX.log)"
-PARENT_BASE="$(basename "$PARENT_DIR")"
-PARENT_SLUG="${PARENT_BASE#"$DATE"-}"
 
 (
   cd "$SCOUT_DIR"
