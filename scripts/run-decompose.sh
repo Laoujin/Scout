@@ -162,6 +162,75 @@ if [ "${SCOUT_SKIP_SYNTHESIS:-0}" = "1" ]; then
   exit 0
 fi
 
-# Synthesis is wired in Task 8. For now exit cleanly so the resumability
-# test passes (it sets SCOUT_SKIP_SYNTHESIS=1 explicitly).
-exit 0
+# Count successful (non-placeholder) children and build a CHILDREN JSON array.
+SUCCESS_COUNT=0
+CHILDREN_JSON='['
+first=1
+for entry in "${CHILDREN[@]}"; do
+  [ -n "$entry" ] || continue
+  IFS='|' read -r ctitle cdepth crationale cchecked <<< "$entry"
+  cslug="$(_slugify_or_simple "$ctitle")"
+  child_dir="$PARENT_DIR/$cslug"
+  status="failed"
+  summary=""
+  citations=0
+  reading=0
+  if _child_is_success "$child_dir"; then
+    status="success"
+    SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+    summary="$(_frontmatter_field "$child_dir/index.md" summary)"
+    [ -z "$summary" ] && summary="$(_frontmatter_field "$child_dir/index.md" title)"
+    citations="$(_frontmatter_field "$child_dir/index.md" citations)"
+    reading="$(_frontmatter_field "$child_dir/index.md" reading_time_min)"
+    [ -z "$citations" ] && citations=0
+    [ -z "$reading" ] && reading=0
+  elif [ -f "$child_dir/index.md" ]; then
+    summary="$(_frontmatter_field "$child_dir/index.md" failure_reason)"
+  fi
+  [ "$first" -eq 1 ] && first=0 || CHILDREN_JSON+=","
+  CHILDREN_JSON+=$(printf '\n  {"slug":"%s","title":"%s","depth":"%s","status":"%s","summary":"%s","citations":%s,"reading_time_min":%s}' \
+    "$cslug" \
+    "$(printf '%s' "$ctitle" | sed 's/"/\\"/g')" \
+    "$cdepth" "$status" \
+    "$(printf '%s' "$summary" | sed 's/"/\\"/g')" \
+    "$citations" "$reading")
+done
+CHILDREN_JSON+=$'\n]'
+
+if [ "$SUCCESS_COUNT" -lt 2 ]; then
+  cat > "$PARENT_DIR/index.md" <<MD
+---
+layout: expedition
+title: $(basename "$PARENT_DIR")
+date: $DATE
+topic: $PARENT_TOPIC
+format: $PARENT_FORMAT
+synthesis: false
+children: $CHILDREN_JSON
+---
+
+Synthesis skipped — only $SUCCESS_COUNT sub-topic(s) produced output. See child page(s) below.
+MD
+  exit 0
+fi
+
+SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout/synthesis.md")"
+PROMPT="$(cat <<EOF
+PARENT_TOPIC: ${PARENT_TOPIC}
+PARENT_DIR: ${PARENT_DIR}
+DATE: ${DATE}
+FORMAT: ${PARENT_FORMAT}
+SUCCESS_COUNT: ${SUCCESS_COUNT}
+CHILDREN: ${CHILDREN_JSON}
+
+Use the synthesis skill. Write the parent index.md to PARENT_DIR/index.md.
+EOF
+)"
+
+claude --dangerously-skip-permissions \
+       --print \
+       --output-format json \
+       --append-system-prompt "$SKILL_CONTENT" \
+       "$PROMPT" > "$PARENT_DIR/.synthesis-result.json" || true
+
+rm -f "$PARENT_DIR/.synthesis-result.json"
