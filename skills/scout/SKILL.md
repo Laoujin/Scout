@@ -109,15 +109,26 @@ Depth selects both the target length and the process shape. The tiers are distin
    - A comparison-table row synthesising three sources shows all three URLs in that row.
 3. **Comparisons → tables** when the axes are measurable (specs, numbers, features). When the comparison is philosophy or fit-for-context, use short labeled sections per option instead — but keep it scannable, not prose blobs.
 4. **Terse.** No "in conclusion", no filler, no "it is worth noting that".
-5. **No emojis.**
+5. **No emojis** — except `⭐` next to a GitHub-stars count (see rule 7). That one is required, everywhere github.com appears.
 6. **Label opinions by source, using the source_type taxonomy for credibility signals.** Prose form: "r/homelab consensus:", "Wirecutter top pick:", "arXiv 2025 paper claims:". Tabular form: `source_type` tag in the ledger entry; optionally inline next to the citation when relevant.
-7. **GitHub repos → link + star count.** When the research mentions a tool, library, framework, or project that has a public GitHub repo, the first mention hyperlinks the name to the repo and includes the current star count with the month you looked. Example: `[Astro](https://github.com/withastro/astro) (52 k stars, Apr 2026)`. Stars decay fast; the month keeps it honest.
+7. **GitHub stars on every GitHub link.** Any URL on `github.com` — whether prose, comparison-table cell, or citation — must carry the parent repo's current star count using the `⭐ N` format (the only place emojis are allowed in Scout output). This includes deep links: `/blob/...`, `/tree/...`, `/issues/...`, `/pull/...`, `/discussions/...` — extract the parent `owner/repo` from the URL and show that repo's stars.
+
+   **Star-count format:** `⭐ 52k` (≥10k, no decimal), `⭐ 1.2k` (1k–10k, one decimal), `⭐ 320` (<1k, raw). For prose mentions where the number is part of the recommendation, also append the month: `⭐ 52k (Apr 2026)`. Citation rows can omit the month — the date the research ran is already in frontmatter.
+
+   **Where to put them:**
+   - **Prose:** `[Astro](https://github.com/withastro/astro) ⭐ 52k (Apr 2026)`
+   - **Comparison tables:** every row whose project has a GitHub repo gets the stars inline next to the project name, or as a dedicated `⭐ Stars` column for tables comparing 4+ tools.
+   - **Citations (in-body markers):** when a `[[n]]` cites a github.com URL, append the stars to the ledger entry (see schema below) — Atlas renders the citation list with stars surfaced.
+
+   **Fetch:** one `GET https://api.github.com/repos/{owner}/{repo}` per distinct repo, cache by `owner/repo` so a repo cited five times costs one API call. Read `stargazers_count` from the response. No auth needed for public repos at typical Scout volumes (60 req/h unauthenticated; with `GH_TOKEN` set in env, 5000/h — the workflow already provides it).
+
+   **Why:** stars are how the user triages tools at a glance — a 50k-star and a 50-star repo carry very different weight even when the linked content is identical. Surfacing stars in the artifact saves a round-trip to github.com.
 8. **If a claim has no URL, do not make the claim.**
 9. **Citation ledger on disk (depth=standard and depth=deep).** Write a JSON Lines file at `RESEARCH_DIR/citations.jsonl`. One line per distinct source URL cited, in order of first citation. Schema:
    ```json
-   {"n": 1, "url": "https://example.com", "claim": "what this source supports, one sentence", "source_type": "official|peer-reviewed|vendor-blog|forum|news|wiki", "quote": "verbatim snippet from the source, ≤300 chars"}
+   {"n": 1, "url": "https://example.com", "claim": "what this source supports, one sentence", "source_type": "official|peer-reviewed|vendor-blog|forum|news|wiki", "quote": "verbatim snippet from the source, ≤300 chars", "github_stars": 52000}
    ```
-   The `n` field matches the `[[n]]` marker in the body exactly. Every `[[n]]` in the artifact has a corresponding ledger entry. Every ledger entry has a non-empty `url`. The ledger ships with the published folder — it is an evidence audit trail and the input to future "extend this research" runs. For `depth=ceo`, the ledger is optional and a single-pass with inline cites is sufficient.
+   The `n` field matches the `[[n]]` marker in the body exactly. Every `[[n]]` in the artifact has a corresponding ledger entry. Every ledger entry has a non-empty `url`. **`github_stars`** is required when `url` matches `^https?://github\.com/[^/]+/[^/]+` (any depth) — the integer star count of the parent `owner/repo` (Atlas formats it as `⭐ 52k` in the citations panel). Omit the field for non-GitHub URLs. The ledger ships with the published folder — it is an evidence audit trail and the input to future "extend this research" runs. For `depth=ceo`, the ledger is optional and a single-pass with inline cites is sufficient.
 
 ## Frontmatter (required; identical for .md and .html)
 
