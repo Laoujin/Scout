@@ -202,6 +202,34 @@ else
 fi
 rm -rf "$tmp"
 
+# --- Case 8: gh issue close failure is soft (publish.sh exits 0) ---
+# Real-world: issue was already closed by an earlier per-child run, or the
+# token lacks permission. We must not fail the workflow over the close.
+tmp=$(setup_tmp)
+mkdir -p "$tmp/bin"
+cat > "$tmp/bin/gh" <<'STUB'
+#!/usr/bin/env bash
+if [ "$1" = "issue" ] && [ "$2" = "close" ]; then
+  echo "! Issue is already closed" >&2
+  exit 1
+fi
+exit 0
+STUB
+chmod +x "$tmp/bin/gh"
+( cd "$tmp" && env \
+    PATH="$tmp/bin:$PATH" \
+    ATLAS_REPO="git@github.com-atlas:test/atlas.git" \
+    DATE="2026-04-23" SLUG="test" TOPIC="test topic" \
+    GH_TOKEN="x" GH_REPO="test/atlas" ISSUE_NUMBER="1" \
+    bash "$SCRIPT" >"$tmp/publish.log" 2>&1 )
+RC=$?
+if [ "$RC" = "0" ] && grep -qF "non-fatal" "$tmp/publish.log"; then
+  pass "case 8: gh issue close failure is soft (publish.sh exits 0)"
+else
+  fail "case 8: rc=$RC, log: $(publish_log "$tmp")"
+fi
+rm -rf "$tmp"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] && exit 0 || exit 1

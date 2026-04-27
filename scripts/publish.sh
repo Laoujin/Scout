@@ -83,6 +83,7 @@ if [ -n "${ISSUE_NUMBER:-}" ] && [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ]
   if [ -n "${SOFT_FAIL_LOG:-}" ] && [ -s "$SOFT_FAIL_LOG" ]; then
     gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "$(printf 'Published, but some non-blocking steps failed. Review and close manually.\n\n```\n%s\n```' "$(cat "$SOFT_FAIL_LOG")")"
   else
-    gh issue close "$ISSUE_NUMBER" --repo "$GH_REPO" --reason completed
+    gh issue close "$ISSUE_NUMBER" --repo "$GH_REPO" --reason completed \
+      || echo "publish.sh: gh issue close failed (non-fatal); continuing." >&2
   fi
 fi
