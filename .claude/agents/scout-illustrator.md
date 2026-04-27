@@ -25,11 +25,16 @@ If you skipped, the parent omits `cover:` from frontmatter and Atlas renders a t
 
 ## Hard rules
 
-- `viewBox="0 0 600 400"`. Nothing else.
-- No `<text>`, letters, numbers, human faces, or recognisable logos. Ever. The Jekyll layout wraps the title as real HTML text next to the image.
+- `viewBox="0 0 800 800"` (square). Nothing else. The cover is consumed at two scales: as a small 3:2 card thumbnail (`object-fit: cover` crops top/bottom) AND as a tall right-side hero on the detail page (`background: ... contain` letterboxes). A square viewBox is the only shape that survives both — keep the hero element centered in the middle band so it stays visible after the card crop.
+- Add `preserveAspectRatio="xMidYMid slice"` so the full-bleed background fills the card with no letterbox; the hero stays centered on the detail page.
+- Compose in three layers:
+  1. Full-bleed background (gradient rect spanning the full 800×800) so neither card crop nor detail letterbox shows raw page color.
+  2. **Hero element centered roughly in the middle 60% (y ≈ 160–640)** — this is the band that survives the card's 3:2 crop. Make it large and confident; on the detail page it should fill ~half the hero area.
+  3. Optional decoration in the corners/edges (gets cropped on cards, frames the hero on the detail page).
+- No `<text>`, letters, numbers, human faces, or recognisable logos. Ever. The Jekyll layout wraps the title as real HTML text next to the image. (Exception: full-bleed monospace "code rain" or similar atmospheric typography that reads as decoration, not as a label, is fine — but it must be at low opacity and never compete with the hero.)
 - 2–4 main shapes; one clear hero element. No micro-shape grids.
 - Opacity layered 0.6–0.95. Use `<linearGradient>` / `<radialGradient>` for depth.
-- Under 4 kB and under 60 elements total. Exceeding either means you're overworking it.
+- Under 6 kB and under 80 elements total. Exceeding either means you're overworking it.
 - No external references: no `<image>` hrefs, no external fonts, no filter libraries.
 - No unmotivated ornament (dashed arcs that connect nothing, stray sparkles that don't belong to the hero). Every shape earns its place.
 
@@ -73,7 +78,7 @@ Skip when:
 - You'd need more than ~60 elements to express it.
 - You're second-guessing the composition mid-draft.
 
-Confidence test before committing: *"Would I be proud of this rendered at 200 px wide on a card grid?"* If not, skip. Return `skipped: <reason>`.
+Confidence test before committing: *"Would I be proud of this rendered at both 200 px wide on a card grid AND ~600×700 px contained on the detail-page hero?"* The card crop will lose the top/bottom of the viewBox; the detail letterbox will leave space around the sides. If neither view holds up, skip. Return `skipped: <reason>`.
 
 ## Procedure
 
