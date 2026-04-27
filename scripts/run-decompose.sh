@@ -54,6 +54,26 @@ _frontmatter_field() {
   ' "$file"
 }
 
+# Idempotent frontmatter setter: replaces <key> if present, inserts before
+# closing `---` otherwise. Operates on the YAML frontmatter only.
+_set_field() {
+  local file="$1" key="$2" value="$3"
+  local end
+  end=$(awk '/^---$/{n++; if(n==2){print NR; exit}}' "$file") || return 1
+  [ -n "$end" ] || return 1
+  if awk -v k="$key" -v end="$end" 'NR<end && $0 ~ "^"k":" {f=1} END{exit !f}' "$file"; then
+    awk -v k="$key" -v v="$value" -v end="$end" '
+      NR < end && $0 ~ "^"k":" { printf "%s: %s\n", k, v; next }
+      { print }
+    ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+  else
+    awk -v k="$key" -v v="$value" -v end="$end" '
+      NR == end { printf "%s: %s\n", k, v }
+      { print }
+    ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+  fi
+}
+
 # Returns 0 if child has a successful (non-placeholder) index.{md,html}.
 # A child is considered successful if ANY of its index files lacks a
 # `status: failed` frontmatter field — so a stray failure placeholder in
@@ -231,8 +251,6 @@ EOF
          --output-format json \
          --append-system-prompt "$SKILL_CONTENT" \
          "$PROMPT" > "$PARENT_DIR/.synthesis-result.json" || true
-
-  rm -f "$PARENT_DIR/.synthesis-result.json"
 fi
 
 # Synthesis fallback: if claude didn't write index.{md,html}, emit a minimal
@@ -251,6 +269,49 @@ children: $CHILDREN_JSON
 
 Synthesis pass produced no output during this run. See child page(s) below.
 MD
+fi
+
+# --- Aggregate metrics: parent synthesis + sum of successful children ---
+SYNTH_COST=0
+SYNTH_DUR=0
+if [ -f "$PARENT_DIR/.synthesis-result.json" ]; then
+  SYNTH_COST=$(jq -r '.total_cost_usd // 0' "$PARENT_DIR/.synthesis-result.json" 2>/dev/null || echo 0)
+  SYNTH_DUR_MS=$(jq -r '.duration_ms // 0' "$PARENT_DIR/.synthesis-result.json" 2>/dev/null || echo 0)
+  SYNTH_DUR=$(( SYNTH_DUR_MS / 1000 ))
+fi
+rm -f "$PARENT_DIR/.synthesis-result.json"
+
+TOT_COST="$SYNTH_COST"
+TOT_DUR="$SYNTH_DUR"
+TOT_CITES=0
+TOT_READING=0
+for entry in "${CHILDREN[@]}"; do
+  [ -n "$entry" ] || continue
+  IFS='|' read -r ctitle cdepth crationale cchecked <<< "$entry"
+  cslug="$(_slugify_or_simple "$ctitle")"
+  child_dir="$PARENT_DIR/$cslug"
+  _child_is_success "$child_dir" || continue
+  c_idx="$child_dir/index.md"
+  [ -f "$c_idx" ] || continue
+  c_cost="$(_frontmatter_field "$c_idx" cost_usd)"
+  c_dur="$(_frontmatter_field "$c_idx" duration_sec)"
+  c_cite="$(_frontmatter_field "$c_idx" citations)"
+  c_read="$(_frontmatter_field "$c_idx" reading_time_min)"
+  TOT_COST=$(awk -v a="$TOT_COST" -v b="${c_cost:-0}" 'BEGIN{print a+b}')
+  TOT_DUR=$(( TOT_DUR + ${c_dur:-0} ))
+  TOT_CITES=$(( TOT_CITES + ${c_cite:-0} ))
+  TOT_READING=$(( TOT_READING + ${c_read:-0} ))
+done
+TOT_COST_2DP=$(awk -v c="$TOT_COST" 'BEGIN{printf "%.2f", c}')
+
+PARENT_FILE=""
+[ -f "$PARENT_DIR/index.md"   ] && PARENT_FILE="$PARENT_DIR/index.md"
+[ -z "$PARENT_FILE" ] && [ -f "$PARENT_DIR/index.html" ] && PARENT_FILE="$PARENT_DIR/index.html"
+if [ -n "$PARENT_FILE" ]; then
+  _set_field "$PARENT_FILE" cost_usd         "$TOT_COST_2DP"
+  _set_field "$PARENT_FILE" duration_sec     "$TOT_DUR"
+  _set_field "$PARENT_FILE" citations        "$TOT_CITES"
+  _set_field "$PARENT_FILE" reading_time_min "$TOT_READING"
 fi
 
 # --- Publish: one commit covers parent synthesis + every child subfolder. ---

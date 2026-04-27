@@ -16,7 +16,9 @@ TMP=$(mktemp -d)
 PARENT_DIR="$TMP/atlas-checkout/research/2026-04-26-test"
 mkdir -p "$TMP/scout/scripts" "$TMP/scout/skills/scout" "$PARENT_DIR" "$TMP/bin"
 
-# Stub run.sh — writes a successful child index.md at $RESEARCH_DIR.
+# Stub run.sh — writes a successful child index.md at $RESEARCH_DIR with all
+# four metric fields (cost_usd, duration_sec, citations, reading_time_min)
+# so the parent's aggregation has something to sum.
 cat > "$TMP/scout/scripts/run.sh" <<'STUB'
 #!/usr/bin/env bash
 mkdir -p "$RESEARCH_DIR"
@@ -26,6 +28,8 @@ title: $TOPIC
 status: success
 citations: 5
 reading_time_min: 2
+cost_usd: 1.50
+duration_sec: 600
 summary: Stubbed.
 ---
 stub child body
@@ -66,7 +70,8 @@ synthesis: true
 ---
 synthesis prose
 EOF
-echo '{"result":"ok"}'
+# Emit cost + duration so the orchestrator has parent synthesis numbers to add.
+echo '{"result":"ok","total_cost_usd":0.42,"duration_ms":15000}'
 STUB
 chmod +x "$TMP/bin/claude"
 
@@ -129,6 +134,23 @@ grep -qF "ISSUE_NUMBER=42" "$PUBLISH_LOG" \
 # Parent index.md exists (synthesis output)
 [ -f "$PARENT_DIR/index.md" ] && pass "parent expedition index.md present" \
                               || fail "parent index.md missing"
+
+# Aggregated metrics: synthesis (0.42, 15s) + 2 children (1.50, 600s, cites=5, read=2 each)
+grep -q '^cost_usd: 3\.42$' "$PARENT_DIR/index.md" \
+  && pass "parent cost_usd = synthesis + sum(children)" \
+  || fail "wrong cost_usd: $(grep ^cost_usd "$PARENT_DIR/index.md")"
+
+grep -q '^duration_sec: 1215$' "$PARENT_DIR/index.md" \
+  && pass "parent duration_sec = synthesis + sum(children)" \
+  || fail "wrong duration_sec: $(grep ^duration_sec "$PARENT_DIR/index.md")"
+
+grep -q '^citations: 10$' "$PARENT_DIR/index.md" \
+  && pass "parent citations = sum(children)" \
+  || fail "wrong citations: $(grep ^citations "$PARENT_DIR/index.md")"
+
+grep -q '^reading_time_min: 4$' "$PARENT_DIR/index.md" \
+  && pass "parent reading_time_min = sum(children)" \
+  || fail "wrong reading_time_min: $(grep ^reading_time "$PARENT_DIR/index.md")"
 
 rm -rf "$TMP"
 
