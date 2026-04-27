@@ -167,6 +167,41 @@ else
 fi
 rm -rf "$tmp"
 
+# --- Case 7: mixed-success expedition surfaces failed children in SOFT_FAIL_LOG ---
+tmp=$(setup_tmp)
+PARENT="$tmp/atlas-checkout/_research/2026-04-23-test"
+mkdir -p "$PARENT/a" "$PARENT/b"
+cat > "$PARENT/a/index.md" <<MD
+---
+status: success
+title: A
+---
+ok
+MD
+cat > "$PARENT/b/index.md" <<MD
+---
+status: failed
+failure_reason: hard timeout
+title: B
+---
+placeholder
+MD
+SOFT_LOG="$tmp/soft.log"
+( cd "$tmp" && env \
+    ATLAS_REPO="git@github.com-atlas:test/atlas.git" \
+    DATE="2026-04-23" SLUG="test" TOPIC="test topic" \
+    GH_TOKEN="" GH_REPO="" ISSUE_NUMBER="" \
+    SOFT_FAIL_LOG="$SOFT_LOG" \
+    RESEARCH_DIR="$PARENT" \
+    bash "$SCRIPT" >"$tmp/publish.log" 2>&1 )
+RC=$?
+if [ "$RC" = "0" ] && [ -s "$SOFT_LOG" ] && grep -q '^- `b`: hard timeout' "$SOFT_LOG"; then
+  pass "case 7: failed child surfaced in SOFT_FAIL_LOG"
+else
+  fail "case 7: rc=$RC, soft.log: $(cat "$SOFT_LOG" 2>/dev/null), publish.log: $(publish_log "$tmp")"
+fi
+rm -rf "$tmp"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] && exit 0 || exit 1

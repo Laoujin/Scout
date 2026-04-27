@@ -59,6 +59,21 @@ owner="${atlas_slug%%/*}"; repo="${atlas_slug##*/}"
 ATLAS_URL="https://${owner,,}.github.io/${repo}/research/${DATE}-${SLUG}/"
 echo "Published: ${ATLAS_URL}"
 
+# Decompose runs leave failed-child placeholders inside the parent expedition
+# folder. Surface them via SOFT_FAIL_LOG so the comment block below keeps the
+# issue open and lists which sub-topics failed.
+if [ -n "${SOFT_FAIL_LOG:-}" ] && [ -n "${RESEARCH_DIR:-}" ] && [ -d "$RESEARCH_DIR" ]; then
+  while IFS= read -r child_index; do
+    child_dir="$(dirname "$child_index")"
+    [ "$child_dir" = "$RESEARCH_DIR" ] && continue
+    if grep -q '^status: failed' "$child_index"; then
+      reason="$(awk -F': ' '/^failure_reason:/ { sub(/^failure_reason:[[:space:]]*/, ""); print; exit }' "$child_index")"
+      cslug="$(basename "$child_dir")"
+      echo "- \`$cslug\`: $reason" >> "$SOFT_FAIL_LOG"
+    fi
+  done < <(find "$RESEARCH_DIR" -mindepth 2 -maxdepth 2 \( -name 'index.md' -o -name 'index.html' \))
+fi
+
 # If this run came from an issue, comment the artifact link. Close the issue
 # only when no soft failures were recorded — otherwise leave it open with a
 # second comment so the user can decide how to handle the partial success.
