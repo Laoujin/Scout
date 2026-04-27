@@ -7,8 +7,11 @@
 # Optional env: PARENT_FORMAT (default auto), SCOUT_DIR (defaults to script's
 #               parent), SCOUT_MAX_CHILDREN (default 8),
 #               SCOUT_DECOMPOSE_SOFT_TIMEOUT (4h),
-#               SCOUT_DECOMPOSE_HARD_TIMEOUT (4h20m), SCOUT_SKIP_SYNTHESIS
-#               (test hook), RUN_LOG (test hook to record invocations).
+#               SCOUT_DECOMPOSE_HARD_TIMEOUT (4h20m),
+#               SCOUT_DECOMPOSE_MIN_REMAINING (default 60s — minimum
+#               per-child budget once a child starts; lower in tests),
+#               SCOUT_SKIP_SYNTHESIS (test hook), RUN_LOG (test hook to
+#               record invocations).
 #
 # SUB_TOPICS_TSV is a newline-separated list of `title|depth|rationale|checked`
 # entries (the same shape parse_sub_topics writes to the SUB_TOPICS array).
@@ -116,7 +119,8 @@ for entry in "${CHILDREN[@]}"; do
       child_status="skipped_soft_timeout"
     else
       remaining=$(( SCOUT_DECOMPOSE_HARD_TIMEOUT - elapsed ))
-      [ "$remaining" -lt 60 ] && remaining=60
+      [ "$remaining" -lt "${SCOUT_DECOMPOSE_MIN_REMAINING:-60}" ] && \
+        remaining="${SCOUT_DECOMPOSE_MIN_REMAINING:-60}"
       echo "[run-decompose] running child $cslug (depth=$cdepth, remaining=${remaining}s)" >&2
       rm -rf "$child_dir"
       mkdir -p "$child_dir"
