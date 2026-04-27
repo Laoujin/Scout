@@ -34,6 +34,8 @@ SUCCESS_COUNT: <int — children with non-placeholder index.md>
 
 ## Output
 
+Before writing the parent index, dispatch the `scout-illustrator` sub-agent to draft a cover SVG for the expedition. Pass `TOPIC=PARENT_TOPIC`, `TAGS=<3–5 tags inferred from PARENT_TOPIC and child titles>`, `RESEARCH_DIR=PARENT_DIR`. If it returns `wrote cover.svg`, add `cover: cover.svg` to the frontmatter; otherwise omit the field.
+
 Write the parent `index.md` (or `index.html` if FORMAT=html) directly to `PARENT_DIR/index.md`. Do NOT print to stdout.
 
 The file structure must be:
@@ -45,6 +47,7 @@ title: <inferred title>
 date: <DATE>
 topic: <PARENT_TOPIC>
 format: <FORMAT>
+cover: cover.svg          # only if scout-illustrator returned wrote cover.svg
 synthesis: true
 citations: <sum of CHILDREN[i].citations across status:success>
 reading_time_min: <sum across status:success>
