@@ -30,7 +30,7 @@ Categories that always block:
 - **Orphan claim:** factual assertion in the body with no `[[n]]` marker.
 - **Broken numbering:** `[[n]]` in the body with no corresponding ledger entry.
 - **Empty ledger field:** any ledger entry with empty `url` or missing `source_type`.
-- **Skill-rule violation:** trailing References section, `<!doctype>`/`<head>` wrappers in HTML body, emojis, "← Atlas" back-link.
+- **Skill-rule violation:** trailing References section, `<!doctype>`/`<head>` wrappers in HTML body, decorative emojis (informational glyphs `⭐` `✓` `✗` `⚠` `→` are allowed per SKILL.md rule 5), "← Atlas" back-link.
 
 ### 2. Coverage gaps (fix if cheap, else note in frontmatter)
 
@@ -52,7 +52,7 @@ Terseness violations, weak labels, missing star counts on GitHub repos, table vs
 3. Scan the body for factual assertions (numbers, versions, names, dates, comparative claims) with no `[[n]]` attached. Flag each as orphan.
 4. Cross-check ledger well-formedness (no empty fields, no duplicate URLs, every entry has `source_type`).
 5. Assess coverage by sub-question (if outline provided) or by section heading. Identify sections backed by a single source or a single `source_type`. Flag as gap.
-6. Scan for skill-rule violations (emojis, References dump, `<!doctype>` wrappers).
+6. Scan for skill-rule violations (decorative emojis only — `⭐` `✓` `✗` `⚠` `→` are fine in tables/citations; References dump; `<!doctype>` wrappers).
 7. Emit the three sections. Be precise, not exhaustive. A clean artifact can return "no blocking issues" in section 1.
 
 ## Stop conditions

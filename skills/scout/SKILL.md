@@ -109,9 +109,15 @@ Depth selects both the target length and the process shape. The tiers are distin
    - A comparison-table row synthesising three sources shows all three URLs in that row.
 3. **Comparisons → tables** when the axes are measurable (specs, numbers, features). When the comparison is philosophy or fit-for-context, use short labeled sections per option instead — but keep it scannable, not prose blobs.
 4. **Terse.** No "in conclusion", no filler, no "it is worth noting that".
-5. **No emojis** — except `⭐` next to a GitHub-stars count (see rule 7). That one is required, everywhere github.com appears.
+5. **Emojis: only when they carry information no shorter text can.** The default is no emojis, but a small set of glyphs earn their place by being denser than the words they'd replace:
+   - `⭐` — GitHub-stars count (required, see rule 7).
+   - `✓` / `✗` — yes/no cells in comparison tables (cleaner than "yes"/"no", and the Atlas layout already styles them via `td.win` / `td.lose`).
+   - `⚠` — caution flag on a row, claim, or recommendation (e.g. "Works, ⚠ requires manual config reload").
+   - `→` — causality / derivation in a tight phrase (e.g. "AVX2 missing → llama.cpp falls back to scalar, 4× slower").
+
+   Banned: decorative emojis, faces, hands, animals, anything chosen for vibe rather than meaning. The test: if the emoji could be deleted without losing information, delete it.
 6. **Label opinions by source, using the source_type taxonomy for credibility signals.** Prose form: "r/homelab consensus:", "Wirecutter top pick:", "arXiv 2025 paper claims:". Tabular form: `source_type` tag in the ledger entry; optionally inline next to the citation when relevant.
-7. **GitHub stars on every GitHub link.** Any URL on `github.com` — whether prose, comparison-table cell, or citation — must carry the parent repo's current star count using the `⭐ N` format (the only place emojis are allowed in Scout output). This includes deep links: `/blob/...`, `/tree/...`, `/issues/...`, `/pull/...`, `/discussions/...` — extract the parent `owner/repo` from the URL and show that repo's stars.
+7. **GitHub stars on every GitHub link.** Any URL on `github.com` — whether prose, comparison-table cell, or citation — must carry the parent repo's current star count using the `⭐ N` format. This includes deep links: `/blob/...`, `/tree/...`, `/issues/...`, `/pull/...`, `/discussions/...` — extract the parent `owner/repo` from the URL and show that repo's stars.
 
    **Star-count format:** `⭐ 52k` (≥10k, no decimal), `⭐ 1.2k` (1k–10k, one decimal), `⭐ 320` (<1k, raw). For prose mentions where the number is part of the recommendation, also append the month: `⭐ 52k (Apr 2026)`. Citation rows can omit the month — the date the research ran is already in frontmatter.
 
@@ -186,7 +192,7 @@ Example body structures (not prescriptive):
    - Every claim has ≥1 URL?
    - Comparisons in tables (not prose)?
    - Terse?
-   - No emojis?
+   - No decorative emojis? (Informational glyphs — `⭐`, `✓`, `✗`, `⚠`, `→` — are fine where they replace longer text; see rule 5.)
    - No trailing "References" dump?
    - Frontmatter present with all required fields? `format` matches the extension; `citations` equals number of distinct URLs cited; `reading_time_min` reflects length.
    - For HTML: no `<!doctype>`, `<head>`, `<body>`, `<link>`, or "← Atlas" back-link (layout provides them).
