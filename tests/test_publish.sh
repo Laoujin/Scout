@@ -15,12 +15,12 @@ declare -a FAIL_MSGS
 pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL_MSGS+=("$1"); FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 
-# setup_tmp: tmpdir with bare atlas-remote.git (1 initial commit on master)
+# setup_tmp: tmpdir with bare atlas-remote.git (1 initial commit on main)
 # and a working clone at atlas-checkout/ with a staged artifact.
 # Echoes the tmpdir path.
 setup_tmp() {
   local tmp; tmp=$(mktemp -d)
-  git -c init.defaultBranch=master init -q "$tmp/seed"
+  git -c init.defaultBranch=main init -q "$tmp/seed"
   git -C "$tmp/seed" -c user.name=seed -c user.email=s@s commit --allow-empty -q -m "init"
   git clone -q --bare "$tmp/seed" "$tmp/atlas-remote.git" 2>/dev/null
   rm -rf "$tmp/seed"
@@ -55,13 +55,13 @@ remote_has_branch() {
   git --git-dir="$1" show-ref --verify --quiet "refs/heads/$2"
 }
 
-# remote_master_has_msg <remote.git> <grep-pattern>
-remote_master_has_msg() {
-  git --git-dir="$1" log master --format=%s 2>/dev/null | grep -q "$2"
+# remote_main_has_msg <remote.git> <grep-pattern>
+remote_main_has_msg() {
+  git --git-dir="$1" log main --format=%s 2>/dev/null | grep -q "$2"
 }
 
 # add_remote_commit <tmp> <path> <content> <msg>
-# Pushes a new commit onto bare atlas-remote.git's master via a side clone.
+# Pushes a new commit onto bare atlas-remote.git's main via a side clone.
 add_remote_commit() {
   local tmp="$1" path="$2" content="$3" msg="$4"
   local side; side=$(mktemp -d)
@@ -70,18 +70,18 @@ add_remote_commit() {
   printf '%s\n' "$content" > "$side/clone/$path"
   git -C "$side/clone" add .
   git -C "$side/clone" -c user.name=other -c user.email=o@o commit -q -m "$msg"
-  git -C "$side/clone" push -q origin master
+  git -C "$side/clone" push -q origin main
   rm -rf "$side"
 }
 
 echo "Testing publish.sh..."
 
-# --- Case 1: clean master, first push wins ---
+# --- Case 1: clean main, first push wins ---
 tmp=$(setup_tmp)
 run_publish "$tmp"
-if [ "$RC" = "0" ] && remote_master_has_msg "$tmp/atlas-remote.git" "research: 2026-04-23 test" \
+if [ "$RC" = "0" ] && remote_main_has_msg "$tmp/atlas-remote.git" "research: 2026-04-23 test" \
    && ! remote_has_branch "$tmp/atlas-remote.git" "scout/2026-04-23-test"; then
-  pass "case 1: clean push lands on master"
+  pass "case 1: clean push lands on main"
 else
   fail "case 1: rc=$RC, log: $(publish_log "$tmp")"
 fi
@@ -92,10 +92,10 @@ tmp=$(setup_tmp)
 add_remote_commit "$tmp" "unrelated.md" "hi" "unrelated: side commit"
 run_publish "$tmp"
 if [ "$RC" = "0" ] \
-   && remote_master_has_msg "$tmp/atlas-remote.git" "research: 2026-04-23 test" \
-   && remote_master_has_msg "$tmp/atlas-remote.git" "unrelated: side commit" \
+   && remote_main_has_msg "$tmp/atlas-remote.git" "research: 2026-04-23 test" \
+   && remote_main_has_msg "$tmp/atlas-remote.git" "unrelated: side commit" \
    && ! remote_has_branch "$tmp/atlas-remote.git" "scout/2026-04-23-test"; then
-  pass "case 2: rebase + retry lands both commits on master"
+  pass "case 2: rebase + retry lands both commits on main"
 else
   fail "case 2: rc=$RC, log: $(publish_log "$tmp")"
 fi
@@ -105,9 +105,9 @@ rm -rf "$tmp"
 tmp=$(setup_tmp)
 add_remote_commit "$tmp" "_research/2026-04-23-test/index.md" "# conflicting" "conflict: same path"
 run_publish "$tmp"
-expected_url="https://github.com/test/atlas/compare/master...scout/2026-04-23-test?expand=1"
+expected_url="https://github.com/test/atlas/compare/main...scout/2026-04-23-test?expand=1"
 if [ "$RC" = "0" ] \
-   && ! remote_master_has_msg "$tmp/atlas-remote.git" "research: 2026-04-23 test" \
+   && ! remote_main_has_msg "$tmp/atlas-remote.git" "research: 2026-04-23 test" \
    && remote_has_branch "$tmp/atlas-remote.git" "scout/2026-04-23-test" \
    && grep -qF "$expected_url" "$tmp/publish.log"; then
   pass "case 3: rebase conflict falls back to branch + compare URL"
@@ -116,14 +116,14 @@ else
 fi
 rm -rf "$tmp"
 
-# --- Case 4: all pushes to master rejected → fallback to branch ---
+# --- Case 4: all pushes to main rejected → fallback to branch ---
 tmp=$(setup_tmp)
-# pre-receive hook rejects every push to master with non-ff-looking text,
+# pre-receive hook rejects every push to main with non-ff-looking text,
 # accepts everything else (so the scout/... branch push succeeds).
 cat > "$tmp/atlas-remote.git/hooks/pre-receive" <<'HOOK'
 #!/usr/bin/env bash
 while read _ _ ref; do
-  if [ "$ref" = "refs/heads/master" ]; then
+  if [ "$ref" = "refs/heads/main" ]; then
     echo "rejected (fetch first)" >&2
     exit 1
   fi
@@ -132,9 +132,9 @@ exit 0
 HOOK
 chmod +x "$tmp/atlas-remote.git/hooks/pre-receive"
 run_publish "$tmp"
-expected_url="https://github.com/test/atlas/compare/master...scout/2026-04-23-test?expand=1"
+expected_url="https://github.com/test/atlas/compare/main...scout/2026-04-23-test?expand=1"
 if [ "$RC" = "0" ] \
-   && ! remote_master_has_msg "$tmp/atlas-remote.git" "research: 2026-04-23 test" \
+   && ! remote_main_has_msg "$tmp/atlas-remote.git" "research: 2026-04-23 test" \
    && remote_has_branch "$tmp/atlas-remote.git" "scout/2026-04-23-test" \
    && grep -qF "$expected_url" "$tmp/publish.log"; then
   pass "case 4: 3 retries exhausted → branch pushed + compare URL"

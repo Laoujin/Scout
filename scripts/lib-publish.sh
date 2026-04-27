@@ -16,12 +16,12 @@ is_non_ff() {
 }
 
 # try_push
-# Pushes current HEAD to origin/master. Returns:
+# Pushes current HEAD to origin/main. Returns:
 #   0 on success, 1 on non-fast-forward rejection, 2 on any other failure.
 # Mirrors git's own stderr to stderr so CI logs are unchanged on real errors.
 try_push() {
   local err rc=0
-  err=$(git push origin master 2>&1) || rc=$?
+  err=$(git push origin main 2>&1) || rc=$?
   [ -n "$err" ] && printf '%s\n' "$err" >&2
   if [ "$rc" -eq 0 ]; then return 0; fi
   if is_non_ff "$err"; then return 1; fi
@@ -29,12 +29,12 @@ try_push() {
 }
 
 # rebase_onto_remote
-# Fetches origin/master and rebases current branch onto it. On conflict,
+# Fetches origin/main and rebases current branch onto it. On conflict,
 # aborts the rebase to leave a clean tree. Returns 0 on clean rebase, 1 on
 # conflict or fetch failure.
 rebase_onto_remote() {
-  git fetch origin master >&2 || return 1
-  if git rebase origin/master >&2; then
+  git fetch origin main >&2 || return 1
+  if git rebase origin/main >&2; then
     return 0
   fi
   git rebase --abort >&2 2>/dev/null || true
@@ -49,7 +49,7 @@ compare_url() {
   local repo="$1" branch="$2"
   [[ "$repo" == *":"* ]] || { echo ""; return; }
   local slug="${repo#*:}"; slug="${slug%.git}"
-  echo "https://github.com/${slug}/compare/master...${branch}?expand=1"
+  echo "https://github.com/${slug}/compare/main...${branch}?expand=1"
 }
 
 # pr_fallback <branch> <atlas-repo> [issue-comment-args...]
@@ -62,10 +62,10 @@ pr_fallback() {
   git push origin "HEAD:refs/heads/$branch" >&2
   local url; url=$(compare_url "$repo" "$branch")
   [ -z "$url" ] && url="(could not derive compare URL from ATLAS_REPO='$repo')"
-  echo "Atlas master moved during this run. Branch pushed: $branch"
+  echo "Atlas main moved during this run. Branch pushed: $branch"
   echo "Open PR: $url"
   if [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ] && [ -n "${ISSUE_NUMBER:-}" ]; then
     gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body \
-      "Atlas \`master\` moved during this run. Branch pushed: \`$branch\`. Open PR: $url"
+      "Atlas \`main\` moved during this run. Branch pushed: \`$branch\`. Open PR: $url"
   fi
 }
