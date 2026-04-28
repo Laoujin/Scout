@@ -67,6 +67,14 @@ COMMENT=$'### Go\n- [ ] **Start research**\n'
 parse_sub_topics "$COMMENT"
 assert_eq "absent section: empty"        "0"        "${#SUB_TOPICS[@]}"
 
+# --- Issue 24 regression: literal * inside bold title (e.g. *.domain) ---
+COMMENT=$'### Sub-topics\n- [x] (expedition) **Per-feature subdomain routing on `*.sangu.be`** \xe2\x80\x94 Wildcard reverse proxy on Synology.\n'
+parse_sub_topics "$COMMENT"
+assert_eq "asterisk-in-title: count"     "1"        "${#SUB_TOPICS[@]}"
+assert_eq "asterisk-in-title: title"     "Per-feature subdomain routing on \`*.sangu.be\`" "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f1)"
+assert_eq "asterisk-in-title: depth"     "deep"     "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f2)"
+assert_eq "asterisk-in-title: rationale" "Wildcard reverse proxy on Synology." "$(echo "${SUB_TOPICS[0]}" | cut -d'|' -f3)"
+
 # --- integration-shape: full real bot-comment body ---
 COMMENT="$(cat <<'BODY_EOF'
 ### Sharpened proposal

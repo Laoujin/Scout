@@ -157,11 +157,13 @@ parse_sub_topics() {
     # strip leading whitespace
     line="${line#"${line%%[![:space:]]*}"}"
     # match: bullet [ ]/[x] (optional (depth)) **title** (optional — rationale)
-    if [[ "$line" =~ ^[-*][[:space:]]+\[([\ xX])\][[:space:]]*(\(([a-zA-Z]+)\)[[:space:]]*)?\*\*([^*]+)\*\*([[:space:]]*[—-][[:space:]]*(.*))?$ ]]; then
+    # Title uses .+ (not [^*]+) because titles may contain literal * (e.g. *.domain)
+    # Em-dash/hyphen separator uses alternation because [—-] is an invalid range.
+    if [[ "$line" =~ ^[-*][[:space:]]+\[([\ xX])\][[:space:]]*(\(([a-zA-Z]+)\)[[:space:]]*)?\*\*(.+)\*\*([[:space:]]*(—|-)[[:space:]]*(.*))?$ ]]; then
       local checked_raw="${BASH_REMATCH[1]}"
       local depth_raw="${BASH_REMATCH[3]}"
       local title="${BASH_REMATCH[4]}"
-      local rationale="${BASH_REMATCH[6]:-}"
+      local rationale="${BASH_REMATCH[7]:-}"
       local checked="false"
       [[ "$checked_raw" =~ [xX] ]] && checked="true"
       local depth_internal
