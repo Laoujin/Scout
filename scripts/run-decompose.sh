@@ -283,6 +283,7 @@ for entry in "${CHILDREN[@]}"; do
   summary=""
   citations=0
   reading=0
+  val_error=""
   if _child_is_success "$child_dir"; then
     status="success"
     SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
@@ -291,6 +292,10 @@ for entry in "${CHILDREN[@]}"; do
     [ -z "$summary" ] && summary="$(_frontmatter_field "$src" title)"
     citations="$(_frontmatter_field "$src" citations)"
     reading="$(_frontmatter_field "$src" reading_time_min)"
+    val_error="$(_frontmatter_field "$src" validation_error)"
+    if [ -n "$val_error" ]; then
+      status="error_with_content"
+    fi
     # Fallback: count ledger lines for citations if not in frontmatter.
     if [ -z "$citations" ] || [ "$citations" = "0" ]; then
       [ -f "$child_dir/citations.jsonl" ] && citations=$(grep -c '.' "$child_dir/citations.jsonl" || true)
@@ -301,12 +306,17 @@ for entry in "${CHILDREN[@]}"; do
     summary="$(_frontmatter_field "$child_dir/index.md" failure_reason)"
   fi
   [ "$first" -eq 1 ] && first=0 || CHILDREN_JSON+=","
-  CHILDREN_JSON+=$(printf '\n  {"slug":"%s","title":"%s","depth":"%s","status":"%s","summary":"%s","citations":%s,"reading_time_min":%s}' \
+  local_json=$(printf '\n  {"slug":"%s","title":"%s","depth":"%s","status":"%s","summary":"%s","citations":%s,"reading_time_min":%s' \
     "$cslug" \
     "$(printf '%s' "$ctitle" | sed 's/"/\\"/g')" \
     "$cdepth" "$status" \
     "$(printf '%s' "$summary" | sed 's/"/\\"/g')" \
     "$citations" "$reading")
+  if [ -n "$val_error" ]; then
+    local_json+=$(printf ',"validation_error":"%s"' "$(printf '%s' "$val_error" | sed 's/"/\\"/g')")
+  fi
+  local_json+="}"
+  CHILDREN_JSON+="$local_json"
 done
 CHILDREN_JSON+=$'\n]'
 
