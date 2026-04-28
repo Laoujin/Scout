@@ -306,11 +306,25 @@ MD
 fi
 
 # --- Aggregate metrics: parent synthesis + sum of successful children ---
+
+# Extract a numeric field from a flat JSON file (jq if available, else grep+sed).
+_json_num() {
+  local file="$1" field="$2"
+  if command -v jq >/dev/null 2>&1; then
+    jq -r ".$field // 0" "$file" 2>/dev/null || echo 0
+  else
+    local val
+    val=$(grep -o "\"$field\"[[:space:]]*:[[:space:]]*[0-9.]*" "$file" 2>/dev/null \
+          | sed 's/.*:[[:space:]]*//' | head -1)
+    echo "${val:-0}"
+  fi
+}
+
 SYNTH_COST=0
 SYNTH_DUR=0
 if [ -f "$PARENT_DIR/.synthesis-result.json" ]; then
-  SYNTH_COST=$(jq -r '.total_cost_usd // 0' "$PARENT_DIR/.synthesis-result.json" 2>/dev/null || echo 0)
-  SYNTH_DUR_MS=$(jq -r '.duration_ms // 0' "$PARENT_DIR/.synthesis-result.json" 2>/dev/null || echo 0)
+  SYNTH_COST=$(_json_num "$PARENT_DIR/.synthesis-result.json" total_cost_usd)
+  SYNTH_DUR_MS=$(_json_num "$PARENT_DIR/.synthesis-result.json" duration_ms)
   SYNTH_DUR=$(( SYNTH_DUR_MS / 1000 ))
 fi
 # Keep .synthesis-result.json — it ships with the published research.
