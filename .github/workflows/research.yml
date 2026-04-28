@@ -148,6 +148,14 @@ jobs:
       GIT_COMMITTER_NAME: ${{ github.event.issue.user.login }}
       GIT_COMMITTER_EMAIL: ${{ github.event.issue.user.id }}+${{ github.event.issue.user.login }}@users.noreply.github.com
     steps:
+      - name: Post run-started comment
+        run: |
+          JOB_ID=$(gh api "repos/${GH_REPO}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}/jobs" \
+            --jq ".jobs[] | select(.name == \"${GITHUB_JOB}\") | .id")
+          RUN_URL="https://github.com/${GH_REPO}/actions/runs/${GITHUB_RUN_ID}/job/${JOB_ID}"
+          gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "Research started! :tada:
+
+          Details: $RUN_URL"
       - uses: actions/checkout@v5
       - name: Run research from issue
         run: bash scripts/research-from-issue.sh
