@@ -145,7 +145,7 @@ if ! inject_claude_cost 2>>"$SOFT_FAIL_LOG"; then
   echo "cost injection failed — see $SOFT_FAIL_LOG" | tee -a "$SOFT_FAIL_LOG" >&2
 fi
 
-rm -f "$RESULT_JSON"
+# Keep .scout-result.json — it ships with the published research.
 
 # --- Title-based slug rename -------------------------------------------------
 # After the artifact is written, derive a cleaner slug from the frontmatter

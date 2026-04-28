@@ -313,7 +313,7 @@ if [ -f "$PARENT_DIR/.synthesis-result.json" ]; then
   SYNTH_DUR_MS=$(jq -r '.duration_ms // 0' "$PARENT_DIR/.synthesis-result.json" 2>/dev/null || echo 0)
   SYNTH_DUR=$(( SYNTH_DUR_MS / 1000 ))
 fi
-rm -f "$PARENT_DIR/.synthesis-result.json"
+# Keep .synthesis-result.json — it ships with the published research.
 
 TOT_COST="$SYNTH_COST"
 TOT_DUR="$SYNTH_DUR"
