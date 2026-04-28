@@ -69,8 +69,19 @@ _publish_child() {
   return 0
 }
 _simple_slug() {
-  printf '%s' "$1" | tr '[:upper:]' '[:lower:]' \
-    | sed -e 's/[^a-z0-9]/-/g' -e 's/--*/-/g' -e 's/^-//' -e 's/-$//'
+  local max_len="${SLUG_MAX_LENGTH:-120}"
+  local s
+  s="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]' \
+    | sed -e 's/[^a-z0-9]/-/g' -e 's/--*/-/g' -e 's/^-//' -e 's/-$//')"
+  if [ "${#s}" -gt "$max_len" ]; then
+    s="${s:0:$max_len}"
+    local trimmed="${s%-*}"
+    if [ "${#trimmed}" -ge $(( max_len / 2 )) ]; then
+      s="$trimmed"
+    fi
+    s="${s%-}"
+  fi
+  printf '%s' "$s"
 }
 _slugify_or_simple() {
   if declare -F slugify >/dev/null 2>&1; then slugify "$1"
