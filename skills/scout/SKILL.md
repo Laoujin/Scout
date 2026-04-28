@@ -140,7 +140,7 @@ Depth selects both the target length and the process shape. The tiers are distin
 
 ```yaml
 ---
-title: One-line title
+title: "One-line title"
 date: YYYY-MM-DD
 depth: standard
 format: md        # or html — matches the file extension
@@ -148,15 +148,16 @@ topic: "<TOPIC from input — the sharpened version when sharpening was applied>
 topic_raw: "<RAW_TOPIC from input — original user phrasing; equal to topic when no sharpening>"
 issue: 42         # Scout issue number; omit the field entirely when ISSUE_NUMBER is empty
 tags: [tag1, tag2]
-summary: One sentence shown on the Atlas index card.
+summary: "One sentence shown on the Atlas index card."
 citations: 12
 reading_time_min: 3
 ---
 ```
 
 Field notes:
+- **YAML quoting rule**: `title`, `summary`, `topic`, and `topic_raw` MUST always be double-quoted (`"..."`). Escape internal double quotes as `\"`. This prevents YAML parse failures from colons, special characters, or embedded quotes that would silently break Jekyll frontmatter.
 - `format`: the actual format you wrote — `md` or `html`. Never the literal `auto`.
-- `topic`: the TOPIC input from the workflow (the sharpened version after sharpening; quote it if it contains colons).
+- `topic`: the TOPIC input from the workflow (the sharpened version after sharpening).
 - `topic_raw`: the RAW_TOPIC input — original user phrasing before sharpening. Equal to `topic` when sharpening was skipped.
 - `issue`: the Scout issue number that drove this run. Omit the field when ISSUE_NUMBER is empty (workflow_dispatch path).
 - `citations`: count of distinct source URLs you cited in the artifact.

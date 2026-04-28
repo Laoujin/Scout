@@ -47,20 +47,20 @@ The file structure must be:
 ```yaml
 ---
 layout: expedition
-title: <inferred title>
+title: "<inferred title>"
 date: <DATE>
-topic: <PARENT_TOPIC>
+topic: "<PARENT_TOPIC>"
 format: <FORMAT>
 tags: [tag1, tag2, tag3]              # 3–5 tags spanning the expedition's scope
-summary: One sentence shown on the Atlas index card.
+summary: "One sentence shown on the Atlas index card."
 cover: cover.svg          # only if scout-illustrator returned wrote cover.svg
 synthesis: true
 children:
   - slug: <child slug>
-    title: <child title>
+    title: "<child title>"
     depth: <recon|survey|expedition>
     status: <success|failed>
-    summary: <copied from child frontmatter or failure_reason>
+    summary: "<copied from child frontmatter or failure_reason>"
     citations: <int>           # only when success
     reading_time_min: <int>    # only when success
 ---

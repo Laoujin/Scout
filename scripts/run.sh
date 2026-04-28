@@ -122,6 +122,11 @@ elif [ "$DEPTH" != "ceo" ]; then
   exit 1
 fi
 
+# Frontmatter YAML validation — catch broken quoting before publish.
+if [ -n "$ARTIFACT" ]; then
+  bash "$SCOUT_DIR/scripts/validate_frontmatter.sh" "$ARTIFACT"
+fi
+
 # Inject cost/duration into the artifact frontmatter. Any failure here is
 # non-blocking: log to SOFT_FAIL_LOG so publish.sh surfaces it without losing
 # the research.
