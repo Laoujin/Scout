@@ -1,26 +1,6 @@
 Scout TODO List
 ===============
 
-- [x] RESEARCH: Agents that could be used for doing research for Scout
-- [ ] RESEARCH: Need an always on something instead of Synology which has problems: need more CPU/RAM, newer kernel, CPU with AVX2, no lock-in with custom DSM/Linux.
-- [ ] RESEARCH: Need to buy a birthday gift for my girlfriend, I know about flowers, a massage, a cooking workshop ... I need truly unique ideas here
-- [ ] RESEARCH: I need a listing of restaurants in Ghent. Everything romantic.
-- [ ] RESEARCH: Perplexity vs ChatGPT Deep Research vs Google Gemini Deep Research vs Scout
-
-## Scout functionality
-
-- [x] How to make this your own: how to set this up with your own Atlas
-    - [x] Make as frictionless as possible (rawgithubusercontent/install.sh | bash)
-    - [x] Maybe could be a multi step installation
-    - [x] Should not clone my Atlas but start with a bare repository
-- [x] Slash Claude command
-    - [x] The options should be the Claude menu, the user picks, then it creates the github issue
-- [ ] Generating an image for the research would be very cool (ie give a Nano Banana API key?)
-- [x] We prefer tables... but on mobile tables are not really handy... how do we handle that?
-- [x] Add Claude cost to frontmatter
-- [x] Cleanup README
-
-
 ## Security
 
 --> The GH token & the Claude Subscription
