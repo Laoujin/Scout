@@ -142,6 +142,33 @@ fi
 
 rm -f "$RESULT_JSON"
 
+# --- Title-based slug rename -------------------------------------------------
+# After the artifact is written, derive a cleaner slug from the frontmatter
+# title instead of the raw TOPIC. Decompose children skip this — the parent
+# orchestrator tracks them by their original slug.
+if [ "${SCOUT_DECOMPOSE_CHILD:-0}" != "1" ] && [ -n "$ARTIFACT" ]; then
+  FM_TITLE="$(awk '/^---[[:space:]]*$/{n++; next} n==1 && /^title:/{sub(/^title:[[:space:]]*/,""); print; exit}' "$ARTIFACT")"
+  if [ -n "$FM_TITLE" ]; then
+    TITLE_SLUG="$(slugify "$FM_TITLE")"
+    if [ -n "$TITLE_SLUG" ] && [ "$TITLE_SLUG" != "$FINAL_SLUG" ]; then
+      RESEARCH_PARENT="$(dirname "$RESEARCH_DIR")"
+      NEW_DIR="$RESEARCH_PARENT/${DATE}-${TITLE_SLUG}"
+      if [ -d "$NEW_DIR" ]; then
+        n=2
+        while [ -d "$RESEARCH_PARENT/${DATE}-${TITLE_SLUG}-${n}" ]; do
+          n=$((n+1))
+        done
+        TITLE_SLUG="${TITLE_SLUG}-${n}"
+        NEW_DIR="$RESEARCH_PARENT/${DATE}-${TITLE_SLUG}"
+      fi
+      mv "$RESEARCH_DIR" "$NEW_DIR"
+      RESEARCH_DIR="$NEW_DIR"
+      FINAL_SLUG="$TITLE_SLUG"
+      echo "Renamed research dir to: ${DATE}-${FINAL_SLUG}" >&2
+    fi
+  fi
+fi
+
 # Decompose children defer publishing to the parent orchestrator so the entire
 # expedition lands as one commit / one Atlas card.
 if [ "${SCOUT_NO_PUBLISH:-0}" = "1" ]; then

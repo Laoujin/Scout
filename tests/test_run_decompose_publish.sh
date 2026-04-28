@@ -94,6 +94,12 @@ RC=$?
 [ "$RC" = "0" ] && pass "run-decompose exits 0" \
                 || fail "run-decompose exit=$RC, log: $(cat "$TMP/run.log")"
 
+# The title-based slug rename may have moved the parent dir.
+# Find the actual location for subsequent assertions.
+ACTUAL_PARENT="$(find "$TMP/atlas-checkout/research" -maxdepth 1 -name "2026-04-26-*" -type d | head -1)"
+[ -n "$ACTUAL_PARENT" ] && PARENT_DIR="$ACTUAL_PARENT"
+ACTUAL_SLUG="$(basename "$PARENT_DIR")"; ACTUAL_SLUG="${ACTUAL_SLUG#2026-04-26-}"
+
 # publish.sh invoked exactly once
 count=$(grep -c '^---invocation---' "$PUBLISH_LOG" 2>/dev/null || true)
 [ "$count" = "1" ] && pass "publish.sh invoked exactly once" \
@@ -104,7 +110,7 @@ grep -qF "TOPIC=Parent topic" "$PUBLISH_LOG" \
   && pass "publish.sh got PARENT_TOPIC" \
   || fail "publish.sh wrong TOPIC: $(grep TOPIC "$PUBLISH_LOG")"
 
-grep -qF "SLUG=test" "$PUBLISH_LOG" \
+grep -qF "SLUG=$ACTUAL_SLUG" "$PUBLISH_LOG" \
   && pass "publish.sh got parent SLUG (date prefix stripped)" \
   || fail "publish.sh wrong SLUG: $(grep SLUG "$PUBLISH_LOG")"
 

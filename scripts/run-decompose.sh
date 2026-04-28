@@ -70,8 +70,7 @@ _publish_child() {
 }
 _simple_slug() {
   printf '%s' "$1" | tr '[:upper:]' '[:lower:]' \
-    | sed -e 's/[^a-z0-9]/-/g' -e 's/--*/-/g' -e 's/^-//' -e 's/-$//' \
-    | cut -c1-60
+    | sed -e 's/[^a-z0-9]/-/g' -e 's/--*/-/g' -e 's/^-//' -e 's/-$//'
 }
 _slugify_or_simple() {
   if declare -F slugify >/dev/null 2>&1; then slugify "$1"
@@ -347,6 +346,33 @@ if [ -n "$PARENT_FILE" ]; then
   _set_field "$PARENT_FILE" duration_sec     "$TOT_DUR"
   _set_field "$PARENT_FILE" citations        "$TOT_CITES"
   _set_field "$PARENT_FILE" reading_time_min "$TOT_READING"
+fi
+
+# --- Title-based slug rename for parent expedition ---------------------------
+# Derive a cleaner slug from the synthesis frontmatter title instead of the raw
+# topic. Children were already pushed under the old path; the final publish
+# stages the rename so the end state on main uses the new slug.
+if [ -n "$PARENT_FILE" ]; then
+  FM_TITLE="$(_frontmatter_field "$PARENT_FILE" title)"
+  if [ -n "$FM_TITLE" ]; then
+    TITLE_SLUG="$(_slugify_or_simple "$FM_TITLE")"
+    if [ -n "$TITLE_SLUG" ] && [ "$TITLE_SLUG" != "$PARENT_SLUG" ]; then
+      RESEARCH_PARENT="$(dirname "$PARENT_DIR")"
+      NEW_DIR="$RESEARCH_PARENT/${DATE}-${TITLE_SLUG}"
+      if [ -d "$NEW_DIR" ]; then
+        n=2
+        while [ -d "$RESEARCH_PARENT/${DATE}-${TITLE_SLUG}-${n}" ]; do
+          n=$((n+1))
+        done
+        TITLE_SLUG="${TITLE_SLUG}-${n}"
+        NEW_DIR="$RESEARCH_PARENT/${DATE}-${TITLE_SLUG}"
+      fi
+      mv "$PARENT_DIR" "$NEW_DIR"
+      PARENT_DIR="$NEW_DIR"
+      PARENT_SLUG="$TITLE_SLUG"
+      echo "[run-decompose] renamed parent dir to: ${DATE}-${PARENT_SLUG}" >&2
+    fi
+  fi
 fi
 
 # --- Publish: parent synthesis + manifest + any failure placeholders. ---

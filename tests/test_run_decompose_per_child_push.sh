@@ -88,6 +88,11 @@ RC=$?
 [ "$RC" = "0" ] && pass "run-decompose exits 0" \
                 || fail "run-decompose exit=$RC, log:\n$(cat "$TMP/run.log")"
 
+# The title-based slug rename may have moved the parent dir.
+ACTUAL_PARENT="$(find "$ATLAS_DIR/research" -maxdepth 1 -name "2026-04-26-*" -type d | head -1)"
+[ -n "$ACTUAL_PARENT" ] && PARENT_DIR="$ACTUAL_PARENT"
+ACTUAL_SLUG="$(basename "$PARENT_DIR")"; ACTUAL_SLUG="${ACTUAL_SLUG#2026-04-26-}"
+
 # --- Per-child push happens BEFORE next child runs ---
 # When A's stub ran, remote had only the init commit.
 [ -f "$TMP/remote-at-A.txt" ] \
@@ -108,8 +113,8 @@ mapfile -t MAIN_LOG < <(git --git-dir="$ATLAS_REMOTE" log main --format=%s)
   && pass "remote main has 4 commits (init + 2 children + parent)" \
   || fail "remote main commit count: ${#MAIN_LOG[@]} — log:\n$(printf '%s\n' "${MAIN_LOG[@]}")"
 
-# Top of log = parent synthesis commit
-[ "${MAIN_LOG[0]}" = "research: 2026-04-26 test" ] \
+# Top of log = parent synthesis commit (may use renamed slug)
+[ "${MAIN_LOG[0]}" = "research: 2026-04-26 $ACTUAL_SLUG" ] \
   && pass "top commit is parent synthesis" \
   || fail "top commit was '${MAIN_LOG[0]}'"
 
@@ -121,12 +126,12 @@ git --git-dir="$ATLAS_REMOTE" log main --format=%s | grep -qx 'research: 2026-04
   && pass "child B has its own commit on remote" \
   || fail "child B commit not found in:\n$(printf '%s\n' "${MAIN_LOG[@]}")"
 
-# --- All three artifacts present on remote main ---
-git --git-dir="$ATLAS_REMOTE" show "main:research/2026-04-26-test/a/index.md" >/dev/null 2>&1 \
+# --- All three artifacts present on remote main (under renamed path) ---
+git --git-dir="$ATLAS_REMOTE" show "main:research/2026-04-26-$ACTUAL_SLUG/a/index.md" >/dev/null 2>&1 \
   && pass "child A index.md is on remote main" || fail "child A index.md missing on remote"
-git --git-dir="$ATLAS_REMOTE" show "main:research/2026-04-26-test/b/index.md" >/dev/null 2>&1 \
+git --git-dir="$ATLAS_REMOTE" show "main:research/2026-04-26-$ACTUAL_SLUG/b/index.md" >/dev/null 2>&1 \
   && pass "child B index.md is on remote main" || fail "child B index.md missing on remote"
-git --git-dir="$ATLAS_REMOTE" show "main:research/2026-04-26-test/index.md" >/dev/null 2>&1 \
+git --git-dir="$ATLAS_REMOTE" show "main:research/2026-04-26-$ACTUAL_SLUG/index.md" >/dev/null 2>&1 \
   && pass "parent index.md is on remote main" || fail "parent index.md missing on remote"
 
 rm -rf "$TMP"
