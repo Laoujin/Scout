@@ -61,11 +61,15 @@ done < "$LEDGER"
 
 if [ -n "$ARTIFACT" ] && [ -f "$ARTIFACT" ]; then
   MAX_N=$(jq -s 'map(.n) | max' "$LEDGER")
-  UNRESOLVED=$(grep -oE '\[\[[0-9]+\]\]' "$ARTIFACT" | tr -d '[]' | sort -nu | awk -v max="$MAX_N" '$1 > max {print}')
-  if [ -n "$UNRESOLVED" ]; then
-    echo "validate_ledger: artifact references [[n]] markers beyond ledger size ($MAX_N):" >&2
-    echo "$UNRESOLVED" >&2
-    exit 1
+  # grep returns 1 when no matches found; don't let that crash under pipefail.
+  MARKERS=$(grep -oE '\[\[[0-9]+\]\]' "$ARTIFACT" || true)
+  if [ -n "$MARKERS" ]; then
+    UNRESOLVED=$(echo "$MARKERS" | tr -d '[]' | sort -nu | awk -v max="$MAX_N" '$1 > max {print}')
+    if [ -n "$UNRESOLVED" ]; then
+      echo "validate_ledger: artifact references [[n]] markers beyond ledger size ($MAX_N):" >&2
+      echo "$UNRESOLVED" >&2
+      exit 1
+    fi
   fi
 fi
 

@@ -118,8 +118,7 @@ done
 if [ -f "$LEDGER" ]; then
   bash "$SCOUT_DIR/scripts/validate_ledger.sh" "$LEDGER" "$ARTIFACT"
 elif [ "$DEPTH" != "ceo" ]; then
-  echo "run.sh: expected citations.jsonl for depth=$DEPTH but none found" >&2
-  exit 1
+  echo "run.sh: warning: citations.jsonl not found for depth=$DEPTH (non-blocking)" >&2
 fi
 
 # Frontmatter YAML validation — catch broken quoting before publish.

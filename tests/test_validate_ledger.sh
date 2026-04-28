@@ -13,11 +13,12 @@ run_test() {
   local name="$1"
   local expected_status="$2"
   local expected_stderr_sub="$3"
-  local ledger_arg="$4"
+  shift 3
+  # Remaining args are passed to the validator (ledger [artifact])
 
   local err_file
   err_file=$(mktemp)
-  "$VALIDATOR" "$ledger_arg" > /dev/null 2> "$err_file"
+  "$VALIDATOR" "$@" > /dev/null 2> "$err_file"
   local actual_status=$?
   local actual_stderr
   actual_stderr=$(cat "$err_file")
@@ -38,11 +39,47 @@ run_test() {
 }
 
 echo "Testing validate_ledger.sh..."
+
+# --- Ledger-only tests --------------------------------------------------------
 run_test "valid ledger passes"        0 ""              "$FIXTURES/valid.jsonl"
 run_test "empty url fails"            1 "empty url"     "$FIXTURES/invalid_empty_url.jsonl"
 run_test "duplicate url fails"        1 "duplicate"     "$FIXTURES/invalid_duplicate_url.jsonl"
 run_test "missing source_type fails"  1 "source_type"   "$FIXTURES/invalid_missing_source_type.jsonl"
 run_test "missing file fails loudly"  1 ""              "$FIXTURES/does_not_exist.jsonl"
+
+# --- Artifact resolution tests ------------------------------------------------
+TMPDIR_ART="$(mktemp -d)"
+trap 'rm -rf "$TMPDIR_ART"' EXIT
+
+# HTML artifact with NO [[n]] markers (e.g. inline citations) — must not crash.
+cat > "$TMPDIR_ART/html_no_markers.html" <<'HTML'
+---
+title: Test research
+---
+<html><body>
+<p>Some research with <a href="https://example.com">inline citations</a>.</p>
+</body></html>
+HTML
+
+# Markdown artifact with [[n]] markers in bounds.
+cat > "$TMPDIR_ART/md_in_bounds.md" <<'MD'
+---
+title: Test
+---
+This references [[1]] and [[2]] which are in the ledger.
+MD
+
+# Markdown artifact with [[n]] marker out of bounds.
+cat > "$TMPDIR_ART/md_out_of_bounds.md" <<'MD'
+---
+title: Test
+---
+This references [[1]] and [[99]] which exceeds the ledger.
+MD
+
+run_test "HTML with no markers passes"          0 ""       "$FIXTURES/valid.jsonl" "$TMPDIR_ART/html_no_markers.html"
+run_test "markers in bounds passes"             0 ""       "$FIXTURES/valid.jsonl" "$TMPDIR_ART/md_in_bounds.md"
+run_test "markers out of bounds fails"          1 "beyond" "$FIXTURES/valid.jsonl" "$TMPDIR_ART/md_out_of_bounds.md"
 
 echo
 echo "Results: $PASS passed, $FAIL failed"

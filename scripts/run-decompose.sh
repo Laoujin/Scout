@@ -141,6 +141,41 @@ Research failed: $reason
 MD
 }
 
+# Returns the path to the child's real artifact (index.html or non-placeholder
+# index.md). Prefers index.html when index.md is a failure placeholder.
+_child_artifact() {
+  local dir="$1"
+  local md="$dir/index.md" html="$dir/index.html"
+  if [ -f "$md" ] && [ "$(_frontmatter_field "$md" status)" != "failed" ]; then
+    echo "$md"; return 0
+  fi
+  if [ -f "$html" ]; then
+    echo "$html"; return 0
+  fi
+  [ -f "$md" ] && echo "$md" && return 0
+  return 1
+}
+
+# Returns 0 if the child directory contains a real (non-placeholder) artifact.
+_has_real_artifact() {
+  local dir="$1"
+  [ -f "$dir/index.html" ] && return 0
+  [ -f "$dir/index.md" ] && \
+    [ "$(_frontmatter_field "$dir/index.md" status)" != "failed" ] && return 0
+  return 1
+}
+
+# Annotate an existing artifact with a validation/runtime error.
+# Adds a validation_error field to YAML frontmatter so the website can show a
+# warning indicator while still serving the content.
+_annotate_error() {
+  local dir="$1" error="$2"
+  local file
+  file="$(_child_artifact "$dir")" || return 1
+  error="$(printf '%s' "$error" | sed 's/"/\\"/g')"
+  _set_field "$file" "validation_error" "\"$error\""
+}
+
 # --- Main loop ----------------------------------------------------------------
 
 START_TS=$(date +%s)
@@ -177,23 +212,41 @@ for entry in "${CHILDREN[@]}"; do
       echo "[run-decompose] running child $cslug (depth=$cdepth, remaining=${remaining}s)" >&2
       rm -rf "$child_dir"
       mkdir -p "$child_dir"
+      child_err_file="$(mktemp)"
       set +e
       env TOPIC="$ctitle" RAW_TOPIC="$ctitle" DEPTH="$cdepth" \
           FORMAT="$PARENT_FORMAT_INTERNAL" RESEARCH_DIR="$child_dir" \
           ATLAS_REPO="${ATLAS_REPO:-}" \
           SCOUT_NO_PUBLISH=1 SCOUT_DECOMPOSE_CHILD=1 \
           ${RUN_LOG:+RUN_LOG="$RUN_LOG"} \
-          timeout "${remaining}s" bash "$SCOUT_DIR/scripts/run.sh"
+          timeout "${remaining}s" bash "$SCOUT_DIR/scripts/run.sh" 2>"$child_err_file"
       rc=$?
       set -e
+      # Replay captured stderr so it's visible in workflow logs.
+      [ -s "$child_err_file" ] && cat "$child_err_file" >&2
+      # Extract last meaningful error lines for failure annotations.
+      child_err_msg=""
+      if [ "$rc" -ne 0 ] && [ -s "$child_err_file" ]; then
+        child_err_msg="$(grep -v '^[[:space:]]*$' "$child_err_file" | tail -3 | tr '\n' '; ')"
+        child_err_msg="${child_err_msg%%; }"
+      fi
+      rm -f "$child_err_file"
+
       if [ "$rc" -eq 0 ] && _child_is_success "$child_dir"; then
         child_status="success"
+        _publish_child "$child_dir" "$cslug"
+      elif _has_real_artifact "$child_dir"; then
+        # Content exists but run.sh failed (validation, timeout, etc.).
+        # Annotate the artifact with the error so the user sees a warning
+        # but can still view the research.
+        _annotate_error "$child_dir" "${child_err_msg:-run.sh exit $rc}"
+        child_status="error_with_content"
         _publish_child "$child_dir" "$cslug"
       elif [ "$rc" -eq 124 ]; then
         _write_placeholder "$child_dir" "$cdepth" "hard timeout"
         child_status="failed_hard_timeout"
       else
-        _write_placeholder "$child_dir" "$cdepth" "child run.sh exit $rc"
+        _write_placeholder "$child_dir" "$cdepth" "${child_err_msg:-child run.sh exit $rc}"
         child_status="failed"
       fi
     fi
@@ -233,10 +286,15 @@ for entry in "${CHILDREN[@]}"; do
   if _child_is_success "$child_dir"; then
     status="success"
     SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-    summary="$(_frontmatter_field "$child_dir/index.md" summary)"
-    [ -z "$summary" ] && summary="$(_frontmatter_field "$child_dir/index.md" title)"
-    citations="$(_frontmatter_field "$child_dir/index.md" citations)"
-    reading="$(_frontmatter_field "$child_dir/index.md" reading_time_min)"
+    src="$(_child_artifact "$child_dir")" || src="$child_dir/index.md"
+    summary="$(_frontmatter_field "$src" summary)"
+    [ -z "$summary" ] && summary="$(_frontmatter_field "$src" title)"
+    citations="$(_frontmatter_field "$src" citations)"
+    reading="$(_frontmatter_field "$src" reading_time_min)"
+    # Fallback: count ledger lines for citations if not in frontmatter.
+    if [ -z "$citations" ] || [ "$citations" = "0" ]; then
+      [ -f "$child_dir/citations.jsonl" ] && citations=$(grep -c '.' "$child_dir/citations.jsonl" || true)
+    fi
     [ -z "$citations" ] && citations=0
     [ -z "$reading" ] && reading=0
   elif [ -f "$child_dir/index.md" ]; then
@@ -339,12 +397,15 @@ for entry in "${CHILDREN[@]}"; do
   cslug="$(_slugify_or_simple "$ctitle")"
   child_dir="$PARENT_DIR/$cslug"
   _child_is_success "$child_dir" || continue
-  c_idx="$child_dir/index.md"
-  [ -f "$c_idx" ] || continue
+  c_idx="$(_child_artifact "$child_dir")" || continue
   c_cost="$(_frontmatter_field "$c_idx" cost_usd)"
   c_dur="$(_frontmatter_field "$c_idx" duration_sec)"
   c_cite="$(_frontmatter_field "$c_idx" citations)"
   c_read="$(_frontmatter_field "$c_idx" reading_time_min)"
+  # Fallback: count ledger lines for citations if not in frontmatter.
+  if [ -z "$c_cite" ] || [ "$c_cite" = "0" ]; then
+    [ -f "$child_dir/citations.jsonl" ] && c_cite=$(grep -c '.' "$child_dir/citations.jsonl" || true)
+  fi
   TOT_COST=$(awk -v a="$TOT_COST" -v b="${c_cost:-0}" 'BEGIN{print a+b}')
   TOT_DUR=$(( TOT_DUR + ${c_dur:-0} ))
   TOT_CITES=$(( TOT_CITES + ${c_cite:-0} ))
