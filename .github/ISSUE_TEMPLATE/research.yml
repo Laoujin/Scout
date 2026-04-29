@@ -28,18 +28,6 @@ body:
       default: 1
     validations:
       required: true
-  - type: dropdown
-    id: format
-    attributes:
-      label: Format
-      description: "auto = Scout picks · md = markdown body · html = bespoke HTML body"
-      options:
-        - auto
-        - md
-        - html
-      default: 0
-    validations:
-      required: true
   - type: checkboxes
     id: options
     attributes:

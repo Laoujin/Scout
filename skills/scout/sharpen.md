@@ -12,7 +12,6 @@ You receive a vague or under-specified topic and rewrite it as a precise researc
 ```
 Raw topic: <free text from the user>
 Depth: <ceo | standard | deep>
-Format: <md | html | auto>
 ```
 
 Optional, present on a re-sharpen:
@@ -92,7 +91,6 @@ If multi-angled and `Depth: deep` (expedition), append a fenced `scout-subtopics
 ```
 Raw topic: Compare ripgrep, ag, ack, and grep for searching a 50k-file repo. Decision-only.
 Depth: standard
-Format: auto
 ```
 
 Output:
@@ -106,7 +104,6 @@ Decision framework comparing ripgrep, ag, ack, and grep for repository-scale cod
 ```
 Raw topic: I want to chat with Claude Code on Slack about a project, give a go, have a feature branch built, deployed to my Synology, and exposed via ProjectName-FeatureX.sangu.be. I need a workflow for this.
 Depth: deep
-Format: auto
 ```
 
 Output:

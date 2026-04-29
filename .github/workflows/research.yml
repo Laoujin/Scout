@@ -17,13 +17,6 @@ on:
         default: survey
         type: choice
         options: [recon, survey, expedition]
-      format:
-        description: "Output format"
-        required: true
-        default: auto
-        type: choice
-        options: [md, html, auto]
-
 permissions:
   issues: write
   contents: read
@@ -64,12 +57,12 @@ jobs:
             SHARPENED_TOPIC="$RAW_TOPIC"
             COMMENT_HEADER="Confirm research"
           else
-            SHARPENED_TOPIC="$(RAW_TOPIC="$RAW_TOPIC" DEPTH="$DEPTH" FORMAT="$FORMAT" \
+            SHARPENED_TOPIC="$(RAW_TOPIC="$RAW_TOPIC" DEPTH="$DEPTH" \
                                  bash scripts/sharpen.sh)"
             COMMENT_HEADER="Sharpened proposal"
           fi
           ISSUE_NUMBER="$ISSUE_NUMBER" SHARPENED_TOPIC="$SHARPENED_TOPIC" \
-            DEPTH="$DEPTH" FORMAT="$FORMAT" COMMENT_HEADER="$COMMENT_HEADER" \
+            DEPTH="$DEPTH" COMMENT_HEADER="$COMMENT_HEADER" \
             bash scripts/issue-comment.sh
 
   resharpen-on-comment:
@@ -113,13 +106,13 @@ jobs:
             in_section { print }
           ' | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')"
 
-          SHARPENED_TOPIC="$(RAW_TOPIC="$RAW_TOPIC" DEPTH="$DEPTH" FORMAT="$FORMAT" \
+          SHARPENED_TOPIC="$(RAW_TOPIC="$RAW_TOPIC" DEPTH="$DEPTH" \
                              PREVIOUS_SHARPENED="$PREVIOUS_SHARPENED" \
                              PREVIOUS_SUB_TOPICS="$PREVIOUS_SUB_TOPICS" \
                              USER_FEEDBACK="$USER_FEEDBACK" \
                              bash scripts/sharpen.sh)"
           ISSUE_NUMBER="$ISSUE_NUMBER" SHARPENED_TOPIC="$SHARPENED_TOPIC" \
-            DEPTH="$DEPTH" FORMAT="$FORMAT" \
+            DEPTH="$DEPTH" \
             COMMENT_HEADER="Sharpened proposal (revised)" \
             bash scripts/issue-comment.sh
 
@@ -176,7 +169,6 @@ jobs:
     env:
       TOPIC: ${{ inputs.topic }}
       DEPTH: ${{ inputs.depth }}
-      FORMAT: ${{ inputs.format }}
       ATLAS_REPO: git@github.com-atlas:${{ github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
       GIT_AUTHOR_NAME: ${{ github.actor }}
       GIT_AUTHOR_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
@@ -194,5 +186,4 @@ jobs:
             echo ""
             echo "- **Topic:** ${TOPIC}"
             echo "- **Depth:** ${DEPTH}"
-            echo "- **Format:** ${FORMAT}"
           } >> "$GITHUB_STEP_SUMMARY"

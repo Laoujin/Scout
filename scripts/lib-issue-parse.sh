@@ -16,10 +16,6 @@
 #
 #   standard
 #
-#   ### Format
-#
-#   auto
-#
 #   ### Options
 #
 #   - [X] Skip sharpening (use my topic verbatim)
@@ -58,7 +54,6 @@ parse_issue_body() {
   local body="$1"
   RAW_TOPIC="$(_extract_section "$body" Topic | _trim_blanks)"
   DEPTH="$(_extract_section "$body" Depth | _trim_blanks | head -n 1)"
-  FORMAT="$(_extract_section "$body" Format | _trim_blanks | head -n 1)"
   local options_block
   options_block="$(_extract_section "$body" Options)"
   if printf '%s' "$options_block" | grep -qiE '^\- \[[xX]\] Skip sharpening'; then
@@ -66,8 +61,8 @@ parse_issue_body() {
   else
     SKIP_SHARPEN=false
   fi
-  [ -n "$DEPTH" ]  || DEPTH=survey
-  [ -n "$FORMAT" ] || FORMAT=auto
+  [ -n "$DEPTH" ] || DEPTH=survey
+  FORMAT=auto
   DEPTH_LABEL="$DEPTH"
   DEPTH="$(_normalize_depth "$DEPTH")"
   export RAW_TOPIC DEPTH DEPTH_LABEL FORMAT SKIP_SHARPEN

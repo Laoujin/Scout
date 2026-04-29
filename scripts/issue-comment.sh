@@ -6,7 +6,7 @@
 # a `### Sub-topics` markdown section, a `### Go` header, and a second
 # `Research as one expedition instead` checkbox alongside Start research.
 #
-# Required env: ISSUE_NUMBER, SHARPENED_TOPIC, DEPTH, FORMAT, GH_TOKEN, GH_REPO.
+# Required env: ISSUE_NUMBER, SHARPENED_TOPIC, DEPTH, GH_TOKEN, GH_REPO.
 # Optional env: COMMENT_HEADER (defaults to "Sharpened proposal").
 
 set -euo pipefail
@@ -14,7 +14,6 @@ set -euo pipefail
 : "${ISSUE_NUMBER:?ISSUE_NUMBER is required}"
 : "${SHARPENED_TOPIC:?SHARPENED_TOPIC is required}"
 : "${DEPTH:=standard}"
-: "${FORMAT:=auto}"
 : "${DEPTH_LABEL:=$DEPTH}"
 : "${GH_TOKEN:?GH_TOKEN is required}"
 : "${GH_REPO:?GH_REPO is required (e.g. owner/repo)}"
@@ -61,7 +60,7 @@ ${SUB_TOPICS_BLOCK}
 
 ### Go
 
-- [ ] **Start research** (runs every ticked sub-topic in parallel and generates an overview page; depth: \`${DEPTH_LABEL}\`, format: \`${FORMAT}\`)
+- [ ] **Start research** (runs every ticked sub-topic in parallel and generates an overview page; depth: \`${DEPTH_LABEL}\`)
 - [ ] **Research as one expedition instead** (skip decomposition)
 
 Not what you wanted? Reply with feedback (e.g. "merge angles 2 and 3", "drop the routing one") and I'll propose a new sharpened version.
@@ -79,7 +78,7 @@ ${TOPIC_ONLY}
 \`\`\`
 <!-- scout-topic-end -->
 
-- [ ] **Start research** — tick this to publish to Atlas (depth: \`${DEPTH_LABEL}\`, format: \`${FORMAT}\`).
+- [ ] **Start research** — tick this to publish to Atlas (depth: \`${DEPTH_LABEL}\`).
 
 Not what you wanted? Reply with feedback (e.g. "focus on open-source", "shorter, decision-only") and I'll propose a new sharpened version.
 EOF

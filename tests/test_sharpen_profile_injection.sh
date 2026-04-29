@@ -78,14 +78,14 @@ echo "$out" | grep -q "currency: EUR" \
   && pass "case 4 (populated): currency field passed through" \
   || fail "case 4 (populated): currency field missing from input"
 
-# --- Case 5: ordering — User profile: comes after Format: line ---
+# --- Case 5: ordering — User profile: comes after Depth: line ---
 if echo "$out" | grep -q "User profile:"; then
-  format_line=$(echo "$out" | grep -n "^Format:" | cut -d: -f1)
+  depth_line=$(echo "$out" | grep -n "^Depth:" | cut -d: -f1)
   profile_line=$(echo "$out" | grep -n "^User profile:" | cut -d: -f1)
-  if [ -n "$format_line" ] && [ -n "$profile_line" ] && [ "$profile_line" -gt "$format_line" ]; then
-    pass "case 5 (ordering): 'User profile:' appears after 'Format:'"
+  if [ -n "$depth_line" ] && [ -n "$profile_line" ] && [ "$profile_line" -gt "$depth_line" ]; then
+    pass "case 5 (ordering): 'User profile:' appears after 'Depth:'"
   else
-    fail "case 5 (ordering): expected User profile: line ($profile_line) > Format: line ($format_line)"
+    fail "case 5 (ordering): expected User profile: line ($profile_line) > Depth: line ($depth_line)"
   fi
 fi
 
