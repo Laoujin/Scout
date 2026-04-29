@@ -1,0 +1,14 @@
+# Scout identity profile. Copied by install.sh to ~/scout-config/profile.yml
+# (as an empty skeleton — no values). Edit that file on the host; the runner
+# reads it read-only from /home/runner/.scout/profile.yml.
+#
+# Any field can be omitted. Empty file = no profile injection.
+
+location: Ghent, Belgium       # city + country, used for "near me" / local rules / availability
+languages: [en, nl]             # ISO-639-1, ordered by preference. Used for source-language hints.
+currency: EUR                   # ISO-4217. Used for any pricing comparison.
+
+interests:                      # free-text strings. Sharpen only references an item when the topic touches it.
+  - programming (expert)        # convention: optional " (expert | proficient | learning)" suffix recognized by sharpen
+  - AI (proficient)             # not enforced — any free text is allowed; unknown suffixes are read as plain text
+  - table tennis

@@ -7,3 +7,4 @@ atlas-checkout/
 .env
 .env.local
 .superpowers/
+profile.yml
