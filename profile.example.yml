@@ -1,6 +1,6 @@
-# Scout identity profile. Copied by install.sh to ~/scout-config/profile.yml
-# (as an empty skeleton — no values). Edit that file on the host; the runner
-# reads it read-only from /home/runner/.scout/profile.yml.
+# Scout identity profile. Copied by install.sh to profile.yml in this same dir
+# (as an empty skeleton — no values). Edit that file; the runner reads it
+# read-only from /home/runner/.scout/profile.yml inside the container.
 #
 # Any field can be omitted. Empty file = no profile injection.
 

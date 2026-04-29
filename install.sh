@@ -167,14 +167,14 @@ docker run --rm -it \
   -e GITHUB_TOKEN \
   scout-installer
 
-# Create the host-side identity profile skeleton (idempotent — never overwrites).
-mkdir -p "$HOME/scout-config"
-if [ ! -f "$HOME/scout-config/profile.yml" ]; then
-  cat > "$HOME/scout-config/profile.yml" <<'EOF'
-# Scout identity profile. See profile.example.yml in your Scout fork for fields and examples.
+# Create the identity profile skeleton next to profile.example.yml (idempotent — never overwrites).
+# The runner bind-mounts this file read-only into the container.
+if [ ! -f "$CLONE_PATH/profile.yml" ]; then
+  cat > "$CLONE_PATH/profile.yml" <<'EOF'
+# Scout identity profile. See profile.example.yml for fields and examples.
 # Until you add fields below, sharpening behaves with no profile context.
 EOF
-  echo "Created $HOME/scout-config/profile.yml — edit it to set your identity, or leave empty to disable."
+  echo "Created $CLONE_PATH/profile.yml — edit it to set your identity, or leave empty to disable."
 fi
 
 # Post-install next steps — installer wrote SCOUT_OWNER/NAME + ATLAS_OWNER/NAME to /work/.next

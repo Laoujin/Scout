@@ -16,7 +16,7 @@ services:
       - claude-auth:/home/runner/.claude
       - runner-config:/home/runner/actions-runner
       - atlas-ssh:/home/runner/.ssh
-      - ${SCOUT_PROFILE_DIR:-$HOME/scout-config}:/home/runner/.scout:ro
+      - ${SCOUT_PROFILE_HOST:-../profile.yml}:/home/runner/.scout/profile.yml:ro
 
 volumes:
   claude-auth:

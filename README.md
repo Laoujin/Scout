@@ -86,7 +86,7 @@ Don't want to pipe strangers into `bash`? See [INSTALL.md](INSTALL.md) for the m
 
 ### Identity profile (optional)
 
-Scout can localize and contextualize sharpening using a small YAML file at `~/scout-config/profile.yml`. The installer creates an empty skeleton. Set `location`, `languages`, `currency`, and `interests` to steer "best ramen" → "best ramen in Ghent, EUR" automatically. See [`profile.example.yml`](profile.example.yml) for the full field list. Leaving the file empty disables profile injection — Scout behaves identically to no-profile mode.
+Scout can localize and contextualize sharpening using a small YAML file at `profile.yml` in your Scout fork (gitignored, alongside `profile.example.yml`). The installer creates an empty skeleton. Set `location`, `languages`, `currency`, and `interests` to steer "best ramen" → "best ramen in Ghent, EUR" automatically. See [`profile.example.yml`](profile.example.yml) for the full field list. Leaving the file empty disables profile injection — Scout behaves identically to no-profile mode.
 
 ## Usage
 

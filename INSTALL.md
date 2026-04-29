@@ -167,15 +167,3 @@ docker exec -it scout-runner runuser -u runner -- claude
 ```
 
 Done. Open a research Issue on Scout to verify the flow.
-
-## Note: identity profile under non-interactive process managers
-
-The `docker/docker-compose.yml` mount entry expands `$HOME` from the shell that runs `docker-compose up`. Under systemd, supervisord, or other service managers, `$HOME` may be unset and the mount source resolves to a literal `/scout-config`, which causes the bind mount to fail silently (the runner sees an empty `/home/runner/.scout` directory).
-
-**Fix:** set `SCOUT_PROFILE_DIR` explicitly in `docker/.env`:
-
-```
-SCOUT_PROFILE_DIR=/home/youruser/scout-config
-```
-
-Or, in the unit file: `Environment="HOME=/home/youruser"`.
