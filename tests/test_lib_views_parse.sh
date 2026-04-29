@@ -49,6 +49,27 @@ assert_eq "start unticked: false" "false" "$VIEWS_START"
 parse_view_targets "no block here"
 assert_eq "no block: empty" "" "${VIEW_TARGETS_JSON:-}"
 
+# I1 regression: regex-special chars in slug must not produce false wildcard matches
+BODY_DOTS=$'<!-- scout-view-targets-start -->\n```scout-view-targets\n{"items":[{"slug":"node.js-tools","path":"foo","view_name":null,"title_suffix":null,"vibe_hint":null,"row":"leaf"}]}\n```\n<!-- scout-view-targets-end -->\n- [x] something else <!-- slug:nodeXjs-tools -->\n'
+parse_view_ticks "$BODY_DOTS"
+# Slug is in the JSON so it resolves to "false", not a match against the wildcard tick nodeXjs-tools
+assert_eq "I1: dot-slug not matched against wildcard" "false" "${VIEW_TICKS[node.js-tools]:-}"
+
+# I2 regression: malformed JSON causes parse_view_ticks to return non-zero
+BODY_BAD=$'<!-- scout-view-targets-start -->\n```scout-view-targets\n{"items":[malformed]}\n```\n<!-- scout-view-targets-end -->\n'
+if parse_view_ticks "$BODY_BAD" 2>/dev/null; then
+  fail "I2: malformed JSON: parse_view_ticks should return non-zero"
+else
+  pass "I2: malformed JSON: parse_view_ticks returns non-zero"
+fi
+
+# I3 regression: leading whitespace and asterisk-bullet variants tolerated
+BODY_WS=$'<!-- scout-view-targets-start -->\n```scout-view-targets\n{"items":[{"slug":"foo","path":"x","view_name":null,"title_suffix":null,"vibe_hint":null,"row":"leaf"}]}\n```\n<!-- scout-view-targets-end -->\n  - [x] foo <!-- slug:foo -->\n   * [x] **Start creating the HTML pages**\n'
+parse_view_ticks "$BODY_WS"
+assert_eq "I3: leading whitespace: tick recognized" "true" "${VIEW_TICKS[foo]:-}"
+parse_views_start "$BODY_WS"
+assert_eq "I3: leading whitespace + asterisk bullet: start recognized" "true" "$VIEWS_START"
+
 echo
 echo "Results: $PASS pass, $FAIL fail"
 if [ "$FAIL" -gt 0 ]; then

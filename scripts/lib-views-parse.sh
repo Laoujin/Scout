@@ -39,10 +39,12 @@ parse_view_ticks() {
   parse_view_targets "$body"
   [ -n "$VIEW_TARGETS_JSON" ] || return 0
   local slugs
-  slugs="$(printf '%s' "$VIEW_TARGETS_JSON" | jq -r '.items[].slug')"
+  slugs="$(printf '%s' "$VIEW_TARGETS_JSON" | jq -r '.items[].slug')" || return 1
   while IFS= read -r slug; do
-    [ -n "$slug" ] || continue
-    if printf '%s' "$body" | grep -qE "^\-[[:space:]]+\[[xX]\][[:space:]].*<!-- slug:${slug} -->"; then
+    [ -n "$slug" ] && [ "$slug" != "null" ] || continue
+    local escaped_slug
+    escaped_slug="$(printf '%s' "$slug" | sed 's/[.[\*^${}\\|+?()]/\\&/g')"
+    if printf '%s' "$body" | grep -qE "^\s*[-*][[:space:]]+\[[xX]\][[:space:]].*<!-- slug:${escaped_slug} -->"; then
       VIEW_TICKS[$slug]="true"
     else
       VIEW_TICKS[$slug]="false"
@@ -53,7 +55,7 @@ parse_view_ticks() {
 # Detects whether `- [x] **Start creating the HTML pages**` is ticked.
 parse_views_start() {
   local body="$1"
-  if printf '%s' "$body" | grep -qE '^\-[[:space:]]+\[[xX]\][[:space:]]+\*\*Start creating the HTML pages\*\*'; then
+  if printf '%s' "$body" | grep -qiE '^\s*[-*][[:space:]]+\[[xX]\][[:space:]]+\*\*Start creating the HTML pages\*\*'; then
     VIEWS_START=true
   else
     VIEWS_START=false
