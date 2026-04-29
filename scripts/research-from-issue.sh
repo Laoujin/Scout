@@ -27,7 +27,7 @@ if [ -z "$TOPIC" ]; then
   exit 1
 fi
 
-# Original issue body for raw topic + depth + format.
+# Original issue body for raw topic + depth.
 issue_body="$(gh issue view "$ISSUE_NUMBER" --repo "$GH_REPO" --json body --jq .body)"
 parse_issue_body "$issue_body"
 
@@ -54,7 +54,7 @@ if [ "$START_CHOICE" = "decompose" ] && [ "${#SUB_TOPICS[@]}" -gt 0 ]; then
   PARENT_DIR="$ATLAS_DIR/research/${DATE}-${PARENT_SLUG}"
   mkdir -p "$PARENT_DIR"
 
-  export PARENT_DIR PARENT_TOPIC="$TOPIC" PARENT_FORMAT="$FORMAT" DATE
+  export PARENT_DIR PARENT_TOPIC="$TOPIC" DATE
   export SUB_TOPICS_TSV ATLAS_REPO ISSUE_NUMBER GH_TOKEN GH_REPO
   exec bash "$SCOUT_DIR/scripts/run-decompose.sh"
 fi
@@ -63,5 +63,5 @@ fi
 # present" case from before this feature shipped).
 echo "[research-from-issue] routing: single-pass" >&2
 [ -n "$RAW_TOPIC" ] || RAW_TOPIC="$TOPIC"
-export TOPIC RAW_TOPIC DEPTH FORMAT ISSUE_NUMBER
+export TOPIC RAW_TOPIC DEPTH ISSUE_NUMBER
 exec bash "$SCOUT_DIR/scripts/run.sh"

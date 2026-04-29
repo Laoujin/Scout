@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Parse the body of a Scout research-request Issue (rendered from the Issue Form
-# at .github/ISSUE_TEMPLATE/research.yml) and export RAW_TOPIC, DEPTH, FORMAT,
-# SKIP_SHARPEN.
+# at .github/ISSUE_TEMPLATE/research.yml) and export RAW_TOPIC, DEPTH,
+# SKIP_SHARPEN. FORMAT is not parsed from the body; it is hardcoded to `auto`
+# and exported for downstream-script compatibility.
 #
 # Usage (source this file, then call parse_issue_body):
 #   source scripts/lib-issue-parse.sh

@@ -31,12 +31,12 @@ run_sharpen() {
   local profile_file="$1" raw="$2"
   if [ -n "$profile_file" ]; then
     PATH="$STUB_DIR:$PATH" \
-      RAW_TOPIC="$raw" DEPTH=standard FORMAT=auto \
+      RAW_TOPIC="$raw" DEPTH=standard \
       SCOUT_PROFILE_FILE="$profile_file" \
       bash "$REPO_ROOT/scripts/sharpen.sh"
   else
     PATH="$STUB_DIR:$PATH" \
-      RAW_TOPIC="$raw" DEPTH=standard FORMAT=auto \
+      RAW_TOPIC="$raw" DEPTH=standard \
       SCOUT_PROFILE_FILE=/nonexistent/path/to/profile.yml \
       bash "$REPO_ROOT/scripts/sharpen.sh"
   fi
