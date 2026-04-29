@@ -192,6 +192,8 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
   overflow-x: auto;
 }
 .how-diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.how-diagram-detail { margin-top: 24px; padding-top: 32px; padding-bottom: 32px; }
+.how-detail-label { margin: 0 0 18px; text-align: center; font: 600 11px ui-monospace, Menlo, monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
 
 /* ---------- Install command block ---------- */
 .install-cmd {
@@ -239,6 +241,10 @@ section > .container > p.lede { font-size: 17px; color: var(--fg-muted); margin:
 .faq details[open] summary::after { content: "−"; color: var(--accent); }
 .faq summary:hover { color: var(--accent); }
 .faq details p { margin: 0 0 12px; color: var(--fg-muted); font-size: 15px; }
+.faq details pre { margin: 0 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font: 13px ui-monospace, Menlo, monospace; color: var(--fg); overflow-x: auto; line-height: 1.55; }
+.faq details pre .k { color: var(--accent); font-weight: 600; }
+.faq details pre .s { color: #1f6feb; }
+.faq details pre .c { color: #1a7f37; font-style: italic; }
 .faq details p:last-child { margin-bottom: 16px; }
 .faq details ul { margin: 0 0 12px; padding-left: 20px; color: var(--fg-muted); font-size: 15px; }
 .faq details ul li { margin: 0 0 6px; }
@@ -1066,6 +1072,24 @@ section.ya-group { padding: 15px 0; }
       <details>
         <summary>Can I keep research private?</summary>
         <p>Yes. Make your Atlas repo private (GitHub Pro enables private Pages), or keep Pages off entirely — you still get a themed, git-versioned archive.</p>
+      </details>
+      <details>
+        <summary>What does a profile look like?</summary>
+        <p>The optional <code>profile.yml</code> sits next to <code>profile.example.yml</code> in your Scout fork (gitignored). Every field is optional; sharpening only references a field when the topic naturally intersects it.</p>
+<pre><span class="c"># used for "near me" and local rules</span>
+<span class="k">location</span>: <span class="s">Ghent, Belgium</span>
+
+<span class="c"># ISO-639-1, ordered by preference</span>
+<span class="k">languages</span>: <span class="s">[en, nl]</span>
+
+<span class="c"># ISO-4217 for any pricing</span>
+<span class="k">currency</span>: <span class="s">EUR</span>
+
+<span class="c"># optional "(expert | proficient | learning)" hint</span>
+<span class="k">interests</span>:
+  - <span class="s">programming (expert)</span>
+  - <span class="s">AI (proficient)</span>
+  - <span class="s">table tennis</span></pre>
       </details>
       <details>
         <summary>Does it work on GitHub-hosted runners?</summary>
