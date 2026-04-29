@@ -22,6 +22,12 @@ Previous sharpened proposal: <last sharpened version>
 User feedback to incorporate: <user's reply asking for changes>
 ```
 
+Optional, present when the operator has configured an identity profile:
+
+```
+User profile: <YAML body of the operator's profile.yml>
+```
+
 ## Rules
 
 1. **Reframe as a verb-led research deliverable.** "Survey of …", "Compare …", "Build a list of …", "Decision framework for …". Not a noun phrase.
@@ -39,9 +45,20 @@ User feedback to incorporate: <user's reply asking for changes>
 
 5. **Match scope to depth.** `ceo` → one-page decision. `standard` → 2-4 pages with comparison tables. `deep` → all angles. The sharpened brief should mention the expected output shape if that helps Scout (e.g. "produce a comparison table of N candidates" for `standard`).
 
-6. **Don't invent constraints.** If the user didn't say "open-source only", don't add "focus on open-source". If unsure, leave out.
+6. **Profile is an explicit input, not an invented constraint.** When a `User profile:` block is present, you may use its fields *only when the raw topic naturally intersects them*.
 
-7. **On a re-sharpen:** treat `User feedback to incorporate` as a hard constraint. Take the previous sharpened proposal, apply the feedback as a delta, output the revised version. Don't drift away from the user's original intent.
+   - "Best ramen" → use `location`.
+   - "Best mobile plan" → use `location` + `currency`.
+   - "Recommended pingpong paddle under €100" → use `currency` + (already-listed) interest level.
+   - "Explain the CAP theorem" → ignore the profile entirely.
+
+   Never inject all fields blindly. Profile fields are *facts about the operator*, not preferences about the output style.
+
+   Expertise hints (e.g. `programming (expert)`) shift the implied register of the sharpened brief: skip 101 framing for expert-level interests. Don't translate this into output-style instructions — the sharpened topic is still a research brief, not a writing-style memo.
+
+7. **Don't invent constraints.** If the user didn't say "open-source only", don't add "focus on open-source". If unsure, leave out.
+
+8. **On a re-sharpen:** treat `User feedback to incorporate` as a hard constraint. Take the previous sharpened proposal, apply the feedback as a delta, output the revised version. Don't drift away from the user's original intent.
 
    **Sub-topic continuity on re-sharpen.** When `Previous sub-topics:` is present in the input, treat the listed sub-topics as the working set. Apply the user's feedback as a delta to that set: merge, drop, reorder, retitle, or change `(depth)` per the feedback's intent. If the feedback is paragraph-only (no sub-topic guidance), preserve the prior sub-topic list unchanged in your output's `scout-subtopics` block — *unless the re-sharpened topic is no longer multi-angled*, in which case omit the block entirely per the Output section's rules. Only re-decide the multi-angled judgment from scratch if the user explicitly asks ("decompose differently", "treat as one topic", etc.) or if the feedback narrows the topic enough that decomposition no longer fits.
 
