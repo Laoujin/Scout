@@ -151,7 +151,23 @@ ATLAS_REPO=git@github.com-atlas:<you>/Atlas.git    # note the -atlas host alias
 RUNNER_TOKEN=<paste token from step 4>
 ```
 
-## 8. Start the runner
+## 8. Create `profile.yml`
+
+The runner bind-mounts `profile.yml` (gitignored) from your Scout fork. The file must exist before the next step — otherwise Docker creates a *directory* at the mount source instead.
+
+From your Scout fork root:
+
+```bash
+cat > profile.yml <<'EOF'
+# Scout identity profile. See profile.example.yml for fields and examples.
+# Until you add fields below, sharpening behaves with no profile context.
+EOF
+chmod 644 profile.yml   # required: umask 077 (default on Synology, etc.) makes it 600 → unreadable by container's runner UID
+```
+
+Edit `profile.yml` to set your identity (location, languages, currency, interests), or leave it as the empty skeleton if you don't want profile injection. See `profile.example.yml` for the full field list.
+
+## 9. Start the runner
 
 ```bash
 docker-compose up -d --build
@@ -159,7 +175,7 @@ docker-compose up -d --build
 
 Check **Settings → Actions → Runners** on Scout — `nas-scout` should appear **Idle** within ~30 s.
 
-## 9. Authenticate Claude (one-time)
+## 10. Authenticate Claude (one-time)
 
 ```bash
 docker exec -it scout-runner runuser -u runner -- claude
