@@ -471,6 +471,11 @@ if [ -n "$PARENT_FILE" ]; then
   fi
 fi
 
+# View-candidacy judgement — writes PARENT_DIR/.view-candidacy.json.
+RESEARCH_DIR="$PARENT_DIR" SCOUT_DIR="$SCOUT_DIR" \
+  bash "$SCOUT_DIR/scripts/view-candidacy.sh" \
+  || echo "[run-decompose] view-candidacy.sh failed (non-blocking)" >&2
+
 # --- Publish: parent synthesis + manifest + any failure placeholders. ---
 # Children that succeeded were already pushed individually inside the loop; this
 # final publish picks up whatever's left (synthesis index.md, manifest.json,

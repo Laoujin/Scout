@@ -173,6 +173,13 @@ if [ "${SCOUT_DECOMPOSE_CHILD:-0}" != "1" ] && [ -n "$ARTIFACT" ]; then
   fi
 fi
 
+# View-candidacy judgement — writes RESEARCH_DIR/.view-candidacy.json (post-rename).
+if [ "${SCOUT_DECOMPOSE_CHILD:-0}" != "1" ]; then
+  RESEARCH_DIR="$RESEARCH_DIR" SCOUT_DIR="$SCOUT_DIR" \
+    bash "$SCOUT_DIR/scripts/view-candidacy.sh" \
+    || echo "run.sh: view-candidacy.sh failed (non-blocking)" >> "$SOFT_FAIL_LOG"
+fi
+
 # Decompose children defer publishing to the parent orchestrator so the entire
 # expedition lands as one commit / one Atlas card.
 if [ "${SCOUT_NO_PUBLISH:-0}" = "1" ]; then
