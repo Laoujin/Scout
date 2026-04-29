@@ -170,6 +170,7 @@ A view fails when:
     - All `<a href>` URLs come from `links.json` or are inline citation URLs from the ledger.
     - No `ceo` / `standard` / `deep` strings anywhere.
     - Source-card favicons (when used) use `s2/favicons` URLs.
+    - **No negative `margin` on the outer wrapper.** The layout already gives you full-bleed (`html, body { margin: 0; padding: 0; }`); patterns like `margin: -2rem -2rem 0` to "break out of gutters" pull content above the viewport and clip the top. Use `margin: 0` and lay out within the wrapper.
     - The view doesn't look like it could be the magazine layout for a different topic. It inhabits THIS topic.
 12. **Report.** One line: `wrote views/<VIEW_NAME>.html (register=<your-chosen-register>, images: <N> downloaded, <M> favicons, <K> gradients)`.
 
@@ -182,4 +183,5 @@ A view fails when:
 - **Pulling a 50KB OG image without bounds.** Honor the 10-second timeout + filesystem checks.
 - **Skipping the `links.json` write.** It's the audit trail and the URL whitelist.
 - **Treating gradient placeholders as the goal.** They're the last fallback. Try real images first when the topic is photogenic.
+- **Breaking out of layout gutters that don't exist.** `_layouts/view.html` zeros body margin/padding — there is nothing to escape. Negative top margin on the outer wrapper clips the first ~24–32px above the viewport. This bug was recurring across multiple views; the fix is to never reach for the breakout pattern.
 - **Producing template-shaped output.** If your view could be palette-swapped onto a different research topic and still make sense, you've built a template, not a commission. Pull harder for topic-specific identity.
