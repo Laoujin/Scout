@@ -1,0 +1,9 @@
+{
+  "items": [
+    {"row":"parent","slug":"high-signal-ai","path":"research/2026-04-28-high-signal-ai","title":"High-signal AI software creators","should_offer_view":true,"view_name":"masthead","title_suffix":"Masthead","vibe_hint":"print-newsletter masthead, broadsheet typography"},
+    {"row":"leaf","slug":"long-form-bloggers","path":"research/2026-04-28-high-signal-ai/long-form-bloggers","title":"Long-form bloggers & newsletter authors","should_offer_view":true,"view_name":"bookshelf","title_suffix":"Bookshelf","vibe_hint":"rare-book dealer's spine catalogue"},
+    {"row":"leaf","slug":"youtube-channels","path":"research/2026-04-28-high-signal-ai/youtube-channels","title":"YouTube channels","should_offer_view":true,"view_name":"storyboard","title_suffix":"Storyboard","vibe_hint":"shot-list storyboard with thumbnails"},
+    {"row":"leaf","slug":"x-twitter-accounts","path":"research/2026-04-28-high-signal-ai/x-twitter-accounts","title":"X / Twitter accounts","should_offer_view":false,"view_name":null,"title_suffix":null,"vibe_hint":null},
+    {"row":"leaf","slug":"podcasts","path":"research/2026-04-28-high-signal-ai/podcasts","title":"Podcasts","should_offer_view":false,"view_name":null,"title_suffix":null,"vibe_hint":null}
+  ]
+}
