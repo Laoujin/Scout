@@ -920,7 +920,7 @@ section.ya-group { padding: 15px 0; }
       <div class="what-card">
         <div class="role">Depth tiers</div>
         <h3>Recon / Survey / Expedition</h3>
-        <p>Pick scope per Issue. <code>recon</code> for a quick one-pager, <code>expedition</code> for a thorough multi-angle deep dive with sub-topic decomposition.</p>
+        <p>Pick scope per Issue. <code>recon</code> for a quick one-pager, <code>expedition</code> for a thorough multi-angle deep dive.</p>
       </div>
       <div class="what-card">
         <div class="role">Decomposition</div>
@@ -1018,6 +1018,9 @@ section.ya-group { padding: 15px 0; }
         <g transform="translate(320, 70)">
           <rect width="360" height="76" rx="10" fill="url(#cardGrad2)" stroke="#c2410c" stroke-width="1.5"/>
           <text x="20" y="24" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">01 · SHARPEN</text>
+          <!-- (optional) label sitting on the top border line -->
+          <rect x="278" y="-6" width="68" height="12" fill="#ffffff" stroke="none"/>
+          <text x="312" y="3" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="9" fill="#8a8a8a">(optional)</text>
           <text x="20" y="46" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">Bot proposes a sharpened topic</text>
           <text x="20" y="64" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#5c5c5c">tick ✓ · reply to revise · uses your profile</text>
           <path d="M 288 22 A 16 16 0 1 0 288 54" stroke="#c2410c" stroke-width="1.3" fill="none" stroke-dasharray="3 3" marker-end="url(#arr2)"/>
@@ -1049,18 +1052,19 @@ section.ya-group { padding: 15px 0; }
 
         <!-- RIGHT: decompose -->
         <g transform="translate(640, 240)">
-          <rect width="280" height="60" rx="10" fill="url(#cardGrad2)" stroke="#e8e6e0" stroke-width="1"/>
+          <rect width="280" height="74" rx="10" fill="url(#cardGrad2)" stroke="#e8e6e0" stroke-width="1"/>
           <text x="20" y="22" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">02a · DECOMPOSE</text>
-          <text x="20" y="42" font-family="system-ui" font-size="12" fill="#1a1a1a" font-weight="600">2–8 subtopics, you edit before launch</text>
+          <text x="20" y="44" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">Bot proposes 2–8 subtopics</text>
+          <text x="20" y="62" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#5c5c5c">tick/untick · edit text · pick depth per topic</text>
         </g>
-        <line x1="780" y1="300" x2="780" y2="324" stroke="#c2410c" stroke-width="1.5" marker-end="url(#arr2)"/>
+        <line x1="780" y1="314" x2="780" y2="324" stroke="#c2410c" stroke-width="1.5" marker-end="url(#arr2)"/>
 
         <!-- RIGHT: parallel research -->
         <g transform="translate(640, 332)">
           <rect width="280" height="74" rx="10" fill="url(#cardGrad2)" stroke="#e8e6e0" stroke-width="1"/>
           <text x="20" y="22" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#c2410c" font-weight="700" letter-spacing="1.2">02b · RESEARCH × N</text>
-          <text x="20" y="44" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">Parallel sub-investigations</text>
-          <text x="20" y="62" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#5c5c5c">each cited · runs sequentially per host</text>
+          <text x="20" y="44" font-family="system-ui" font-size="13" fill="#1a1a1a" font-weight="600">One research run per subtopic</text>
+          <text x="20" y="62" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#5c5c5c">each fully cited · queued on your runner</text>
         </g>
         <line x1="780" y1="406" x2="780" y2="430" stroke="#c2410c" stroke-width="1.5" marker-end="url(#arr2)"/>
 
@@ -1121,12 +1125,13 @@ section.ya-group { padding: 15px 0; }
         </g>
         <line x1="780" y1="958" x2="780" y2="986" stroke="#c2410c" stroke-width="1.5" marker-end="url(#arr2)"/>
 
-        <!-- 05b · orange execute box (text vertically centered) -->
+        <!-- 05b · orange deploy box (mirrors 04 PUBLISH style) -->
         <g transform="translate(640, 994)">
-          <rect width="280" height="46" rx="10" fill="#c2410c" stroke="#c2410c"/>
-          <text x="20" y="23" dominant-baseline="middle" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#fef3ec" font-weight="700" letter-spacing="1.2">05b · Create + Build + Publish</text>
+          <rect width="280" height="56" rx="10" fill="#c2410c" stroke="#c2410c"/>
+          <text x="20" y="22" font-family="ui-monospace, Menlo, monospace" font-size="10" fill="#fef3ec" font-weight="700" letter-spacing="1.2">05b · DEPLOY</text>
+          <text x="20" y="42" font-family="system-ui" font-size="12" fill="#fff" font-weight="700">Create + publish HTML views</text>
         </g>
-        <line x1="780" y1="1040" x2="780" y2="1062" stroke="#c2410c" stroke-width="1.5"/>
+        <line x1="780" y1="1050" x2="780" y2="1062" stroke="#c2410c" stroke-width="1.5"/>
 
         <!-- merge to ISSUE CLOSED -->
         <line x1="220" y1="1062" x2="780" y2="1062" stroke="#c2410c" stroke-width="1.5"/>
