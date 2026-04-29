@@ -202,15 +202,16 @@ else
 fi
 rm -rf "$tmp"
 
-# --- Case 8: gh issue close failure is soft (publish.sh exits 0) ---
-# Real-world: issue was already closed by an earlier per-child run, or the
-# token lacks permission. We must not fail the workflow over the close.
+# --- Case 8: gh issue close is never called after publish ---
+# Issue lifecycle moved: issue stays open after publish, closes only after
+# views ship (Task 8). Verify gh issue close is not invoked even when
+# ISSUE_NUMBER / GH_TOKEN / GH_REPO are all set.
 tmp=$(setup_tmp)
 mkdir -p "$tmp/bin"
 cat > "$tmp/bin/gh" <<'STUB'
 #!/usr/bin/env bash
 if [ "$1" = "issue" ] && [ "$2" = "close" ]; then
-  echo "! Issue is already closed" >&2
+  echo "UNEXPECTED: gh issue close was called" >&2
   exit 1
 fi
 exit 0
@@ -223,8 +224,8 @@ chmod +x "$tmp/bin/gh"
     GH_TOKEN="x" GH_REPO="test/atlas" ISSUE_NUMBER="1" \
     bash "$SCRIPT" >"$tmp/publish.log" 2>&1 )
 RC=$?
-if [ "$RC" = "0" ] && grep -qF "non-fatal" "$tmp/publish.log"; then
-  pass "case 8: gh issue close failure is soft (publish.sh exits 0)"
+if [ "$RC" = "0" ] && ! grep -qF "UNEXPECTED" "$tmp/publish.log"; then
+  pass "case 8: gh issue close is not called after publish"
 else
   fail "case 8: rc=$RC, log: $(publish_log "$tmp")"
 fi

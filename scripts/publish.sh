@@ -51,16 +51,23 @@ if [ -n "${SOFT_FAIL_LOG:-}" ] && [ -n "${RESEARCH_DIR:-}" ] && [ -d "$RESEARCH_
   done < <(find "$RESEARCH_DIR" -mindepth 2 -maxdepth 2 \( -name 'index.md' -o -name 'index.html' \))
 fi
 
-# If this run came from an issue, comment the artifact link. Close the issue
-# only when no soft failures were recorded — otherwise leave it open with a
-# second comment so the user can decide how to handle the partial success.
+# If this run came from an issue, comment the artifact link. The issue stays
+# open after publish; it auto-closes after the views job finishes (Task 8),
+# or the user closes it manually if they don't want views.
 if [ -n "${ISSUE_NUMBER:-}" ] && [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ]; then
   gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" \
     --body "Published: ${ATLAS_URL}"
   if [ -n "${SOFT_FAIL_LOG:-}" ] && [ -s "$SOFT_FAIL_LOG" ]; then
     gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "$(printf 'Published, but some non-blocking steps failed. Review and close manually.\n\n```\n%s\n```' "$(cat "$SOFT_FAIL_LOG")")"
-  else
-    gh issue close "$ISSUE_NUMBER" --repo "$GH_REPO" --reason completed \
-      || echo "publish.sh: gh issue close failed (non-fatal); continuing." >&2
+  fi
+  # Post the candidacy comment if a candidacy file was produced. The issue
+  # stays open after publish; it auto-closes after the views job finishes
+  # (or the user closes it manually if they don't want views).
+  if [ -n "${RESEARCH_DIR:-}" ] && [ -f "${RESEARCH_DIR}/.view-candidacy.json" ]; then
+    SCOUT_DIR_RESOLVED="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    ISSUE_NUMBER="$ISSUE_NUMBER" GH_TOKEN="$GH_TOKEN" GH_REPO="$GH_REPO" \
+      RESEARCH_DIR="$RESEARCH_DIR" \
+      bash "$SCOUT_DIR_RESOLVED/scripts/views-comment.sh" \
+      || echo "publish.sh: views-comment.sh failed (non-fatal)" >&2
   fi
 fi
