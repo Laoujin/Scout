@@ -2,7 +2,6 @@
 # Run the LLM judgement step over a research dir. Writes <RESEARCH_DIR>/.view-candidacy.json.
 #
 # Required env: RESEARCH_DIR
-# Optional env: PARENT_DIR (decompose mode — parent expedition dir; same as RESEARCH_DIR)
 #               SCOUT_NO_VIEW_CANDIDACY=1 to skip entirely (test hook)
 #               SCOUT_DIR (defaults to script's parent)
 
@@ -31,7 +30,11 @@ fi
 _fm() {
   local file="$1" field="$2"
   awk -v f="$field" '
-    /^---[[:space:]]*$/ { in_fm = !in_fm; next }
+    /^---[[:space:]]*$/ {
+      if (++fm_count == 2) exit
+      in_fm = 1
+      next
+    }
     in_fm && $0 ~ "^"f":" { sub("^"f":[[:space:]]*", ""); print; exit }
   ' "$file" 2>/dev/null
 }
@@ -59,6 +62,7 @@ add_page() {
   summary="$(_fm "$file" summary)"
   depth="$(_fm "$file" depth)"
   citations="$(_fm "$file" citations)"
+  citations="${citations%%[^0-9]*}"
   [ -z "$citations" ] && citations=0
   case "$file" in *.html) format=html ;; *) format=md ;; esac
   local slug
