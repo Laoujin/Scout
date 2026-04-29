@@ -54,6 +54,24 @@ else
   fail "singlepass render diverged"
 fi
 
+# Regression: parent hint must appear even if should_offer_view is false.
+mkdir -p "$TMP/parent-fallback"
+cat > "$TMP/parent-fallback/.view-candidacy.json" <<'EOF'
+{
+  "items": [
+    {"row":"parent","slug":"x","path":"research/x","title":"X","should_offer_view":false,"view_name":"dashboard","title_suffix":"Dashboard","vibe_hint":"foo"}
+  ]
+}
+EOF
+export CAPTURE_FILE="$TMP/parent-fallback-body.md"
+ISSUE_NUMBER=44 GH_TOKEN=x GH_REPO=x/y RESEARCH_DIR="$TMP/parent-fallback" \
+  bash "$REPO_ROOT/scripts/views-comment.sh"
+if grep -q '^- \[x\] \*\*X\*\* — register: dashboard' "$CAPTURE_FILE"; then
+  pass "parent shows hint regardless of should_offer_view"
+else
+  fail "parent missed hint when should_offer_view=false"
+fi
+
 echo
 echo "Results: $PASS pass, $FAIL fail"
 if [ "$FAIL" -gt 0 ]; then

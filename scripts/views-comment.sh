@@ -28,12 +28,19 @@ build_row() {
   if [ "$row" = "parent" ]; then
     checkbox="[x]"
     label="**${title}**"
+    if [ -n "$view_name" ] && [ "$view_name" != "null" ]; then
+      hint=" — register: ${view_name}"
+    fi
   else
     label="$slug"
-    if [ "$should_offer" = "true" ]; then checkbox="[x]"; else checkbox="[ ]"; fi
-  fi
-  if [ "$should_offer" = "true" ] && [ -n "$view_name" ] && [ "$view_name" != "null" ]; then
-    hint=" — register: ${view_name}"
+    if [ "$should_offer" = "true" ]; then
+      checkbox="[x]"
+      if [ -n "$view_name" ] && [ "$view_name" != "null" ]; then
+        hint=" — register: ${view_name}"
+      fi
+    else
+      checkbox="[ ]"
+    fi
   fi
   printf -- '- %s %s%s <!-- slug:%s -->\n' "$checkbox" "$label" "$hint" "$slug"
 }
@@ -78,5 +85,4 @@ ${EMBEDDED_JSON}
 EOF
 )"
 
-gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "$BODY
-"
+gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "$BODY"$'\n'
