@@ -174,6 +174,7 @@ if [ ! -f "$CLONE_PATH/profile.yml" ]; then
 # Scout identity profile. See profile.example.yml for fields and examples.
 # Until you add fields below, sharpening behaves with no profile context.
 EOF
+  chmod 644 "$CLONE_PATH/profile.yml"   # umask on some hosts (Synology) defaults to 077 → unreadable inside container
   echo "Created $CLONE_PATH/profile.yml — edit it to set your identity, or leave empty to disable."
 fi
 
