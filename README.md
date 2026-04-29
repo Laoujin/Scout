@@ -26,7 +26,7 @@ a URL you own.
 Three repos, one flow:
 
 - <img src="docs/scout-logo.svg" alt="" width="18" align="top"> **Scout** — this repo. Self-hosted GitHub Actions runner + research workflow + skill pack. Forked to your account.
-- <img src="docs/atlas-logo.svg" alt="" width="18" align="top"> **Atlas** — your publishing target. Jekyll site, themed via three config values (`skeleton` / `palette` / `card`). Built by GitHub Pages.
+- <img src="docs/atlas-logo.svg" alt="" width="18" align="top"> **[Atlas](https://github.com/Laoujin/Atlas)** — your publishing target. Jekyll site, themed via three config values (`skeleton` / `palette` / `card`). Built by GitHub Pages.
 - <img src="docs/compass-logo.svg" alt="" width="18" align="top"> **[Compass](https://github.com/Laoujin/Compass)** — the Jekyll theme. Lives as a submodule of Atlas at `compass/`; supplies layouts, CSS, and the `skeleton` / `palette` / `card` knobs. You only touch this if you want to tune the look.
 
 **Requires:** Claude Code subscription, Docker, a GitHub account, an always-on
