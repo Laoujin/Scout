@@ -119,6 +119,48 @@ else
   fail "results comment did not flag long-form-bloggers as skipped"
 fi
 
+# Issue 1 regression: when publish_path returns 2 (nothing staged), no SHIPPED flag,
+# no gh issue close.
+if [ ! -f "$CAPTURE_FILE.events" ] || ! grep -q "close" "$CAPTURE_FILE.events"; then
+  pass "rc=2 from publish_path: gh issue close NOT invoked"
+else
+  fail "rc=2 from publish_path: gh issue close invoked (should be skipped)"
+fi
+
+rm -rf "$ATLAS"
+
+# Issue 2 regression: pipe in vibe_hint should not corrupt field-split.
+: > "$CLAUDE_LOG"
+: > "$CAPTURE_FILE"
+mkdir -p "$ATLAS/research/2026-04-29-pipe-test"
+cat > "$ATLAS/research/2026-04-29-pipe-test/index.md" <<'EOF'
+---
+title: Pipe Test
+---
+EOF
+BODY_PIPE="$(cat <<'BODYEOF'
+- [x] **Pipe Test** — register: dashboard <!-- slug:pipe-test -->
+
+- [x] **Start creating the HTML pages**
+
+<!-- scout-view-targets-start -->
+```scout-view-targets
+{"items":[{"row":"parent","slug":"pipe-test","path":"research/2026-04-29-pipe-test","view_name":"dashboard","title_suffix":"Dashboard","vibe_hint":"foo | bar | baz","row":"parent"}]}
+```
+<!-- scout-view-targets-end -->
+BODYEOF
+)"
+ISSUE_NUMBER=99 GH_TOKEN=x GH_REPO=x/y BOT_COMMENT_BODY="$BODY_PIPE" BOT_COMMENT_ID=23456 \
+  ATLAS_REPO="file://$ATLAS" SCOUT_TEST_KEEP_ATLAS=1 \
+  bash "$REPO_ROOT/scripts/views-dispatch.sh" >/dev/null 2>&1 || true
+
+CLAUDE_COUNT=$(grep -c '^claude-invoked:' "$CLAUDE_LOG" || echo 0)
+if [ "$CLAUDE_COUNT" = "1" ]; then
+  pass "pipe in vibe_hint: claude still invoked once"
+else
+  fail "pipe in vibe_hint: claude invoked $CLAUDE_COUNT times (expected 1)"
+fi
+
 rm -rf "$ATLAS"
 
 echo

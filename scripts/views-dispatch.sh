@@ -110,6 +110,8 @@ for i in $(seq 0 $((ITEMS_COUNT - 1))); do
     fi
   done
 
+  vibe_hint="${vibe_hint//|/}"
+  title="${title//|/}"
   DISPATCH_ITEMS+=("$slug|$path|$view_name|$title_suffix|$vibe_hint|$title")
 done
 
@@ -191,13 +193,14 @@ if [ "${#SUCCESS_ITEMS[@]}" -gt 0 ]; then
   DATE_TAG="$(date +%F)"
   SLUG_LIST="$(printf '%s\n' "${SUCCESS_ITEMS[@]}" | cut -d'|' -f1 | tr '\n' ',' | sed 's/,$//')"
   rc=0; publish_path "views: ${DATE_TAG} ${SLUG_LIST}" "." "scout-views/${DATE_TAG}-${ISSUE_NUMBER}" || rc=$?
-  if [ "$rc" -eq 0 ] || [ "$rc" -eq 2 ]; then
+  if [ "$rc" -eq 0 ]; then
     SHIPPED=1
   else
-    # Push failed; fold successes into failures.
+    local_reason="atlas push failed"
+    [ "$rc" -eq 2 ] && local_reason="nothing staged"
     for entry in "${SUCCESS_ITEMS[@]}"; do
       IFS='|' read -r slug _ _ _ <<< "$entry"
-      FAILED_ITEMS+=("$slug|atlas push failed")
+      FAILED_ITEMS+=("$slug|$local_reason")
     done
     SUCCESS_ITEMS=()
   fi
@@ -206,11 +209,14 @@ fi
 # Step 6: post results comment.
 ATLAS_BASE_URL=""
 case "$ATLAS_REPO" in
-  *":"*)
+  git@*:*)
     atlas_slug="${ATLAS_REPO#*:}"; atlas_slug="${atlas_slug%.git}"
     owner="${atlas_slug%%/*}"; repo="${atlas_slug##*/}"
-    ATLAS_BASE_URL="https://${owner,,}.github.io/${repo}"
-    ;;
+    ATLAS_BASE_URL="https://${owner,,}.github.io/${repo}" ;;
+  https://github.com/*)
+    atlas_slug="${ATLAS_REPO#https://github.com/}"; atlas_slug="${atlas_slug%.git}"
+    owner="${atlas_slug%%/*}"; repo="${atlas_slug##*/}"
+    ATLAS_BASE_URL="https://${owner,,}.github.io/${repo}" ;;
 esac
 
 LINES=()
