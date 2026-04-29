@@ -84,6 +84,10 @@ docker exec -it scout-runner runuser -u runner -- claude
 
 Don't want to pipe strangers into `bash`? See [INSTALL.md](INSTALL.md) for the manual step-by-step.
 
+### Identity profile (optional)
+
+Scout can localize and contextualize sharpening using a small YAML file at `~/scout-config/profile.yml`. The installer creates an empty skeleton. Set `location`, `languages`, `currency`, and `interests` to steer "best ramen" → "best ramen in Ghent, EUR" automatically. See [`profile.example.yml`](profile.example.yml) for the full field list. Leaving the file empty disables profile injection — Scout behaves identically to no-profile mode.
+
 ## Usage
 
 ### Open a research Issue
