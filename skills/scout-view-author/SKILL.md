@@ -78,11 +78,17 @@ Real images dramatically change how a view feels. Try hard. Cap: **8 download at
 
 For each image slot in your design (hero, card thumbnails, etc.):
 
-1. **OG image extraction.** `WebFetch` the source URL associated with that slot. Look for `<meta property="og:image" content="...">` or `<meta name="twitter:image" content="...">`. If found:
+1. **OG image extraction.** `WebFetch` strips `<head>`, so it won't surface OG tags. Use `curl` directly:
+   ```bash
+   curl -sL --max-time 10 -A "Mozilla/5.0" "<source-url>" | \
+     grep -oiE '<meta[^>]+(property|name)="(og:image|twitter:image)"[^>]*content="[^"]+"' | \
+     head -1 | grep -oE 'content="[^"]+"' | sed 's/content="//;s/"$//'
+   ```
+   If a URL comes back, download it:
    ```bash
    curl -L --max-time 10 -o "<RESEARCH_DIR>/views/<VIEW_NAME>/images/<slug>.jpg" "<og-url>"
    ```
-   Verify: file exists, >2KB, valid image (`file <path>` returns `JPEG image data` / `PNG image data` / etc.). If valid, reference as `<img src="images/<slug>.jpg" alt="...">`.
+   Verify: file exists, >2KB, valid image (`file <path>` returns `JPEG image data` / `PNG image data` / etc.). If valid, reference as `<img src="<VIEW_NAME>/images/<slug>.jpg" alt="...">`.
 
 2. **Existing assets in the canonical's directory.** If `RESEARCH_DIR/cover.svg` exists, you can use it as `<img src="../cover.svg">` for hero or accent.
 
@@ -94,7 +100,7 @@ For each image slot in your design (hero, card thumbnails, etc.):
 
 A view with 1 OG image + 2 favicons + 3 gradient placeholders is fine. A view with 6 gradient placeholders and zero real images is a sign the topic is image-poor — consider whether the visual register should lean *typographic* (manifesto, poster) instead of *photographic* (magazine).
 
-Place all downloads at `<RESEARCH_DIR>/views/<VIEW_NAME>/images/`. Reference relatively as `images/<filename>`.
+Place all downloads at `<RESEARCH_DIR>/views/<VIEW_NAME>/images/`. The HTML lives at `views/<VIEW_NAME>.html`, so the correct relative reference is **`<VIEW_NAME>/images/<filename>`** — NOT `images/<filename>` (that resolves to `views/images/...` and 404s).
 
 ### 5. Display labels — translate at authoring time
 
@@ -145,15 +151,27 @@ A view fails when:
 7. **Decide the visual register.** What does this topic want to feel like? Reach for an inspiration if one fits. Invent if none fits.
 8. **Plan images.** Identify visual slots (hero / card-photos / accent images). For each, run the image strategy chain. Cap 8 download attempts.
 9. **Author the view.** Single `Write` to `<RESEARCH_DIR>/views/<VIEW_NAME>.html`. Frontmatter + inline `<style>` + body sections. No `<!doctype>`, `<html>`, `<head>`, `<body>` — the layout provides them. No `← Default view` link — the layout provides that too.
-10. **Self-check before finishing:**
+10. **Verify image paths — MANDATORY, not optional.** Every previous batch shipped with broken `<img src>` paths because the author "checked" by reading instead of running. Run this exact command after writing the view:
+
+    ```bash
+    grep -oE 'src="[^"]+\.(jpg|jpeg|png|gif|svg|webp)"' "<RESEARCH_DIR>/views/<VIEW_NAME>.html" \
+      | sed -E 's/src="//;s/"$//' \
+      | grep -vE '^(https?:|//|data:)' \
+      | while read p; do
+          [ -f "<RESEARCH_DIR>/views/$p" ] || echo "BROKEN: $p"
+        done
+    ```
+
+    Empty output = pass. Any `BROKEN:` line = fix the `src` attribute (almost always: missing `<VIEW_NAME>/` prefix) and re-run until clean. Do not proceed to step 11 with broken paths.
+
+11. **Self-check the rest:**
     - Frontmatter has `layout: view`, `view_name`, `view_of: ../`, `title`. No other fields.
     - No `<!doctype>` / `<html>` / `<head>` / `<body>` / `<script>` tags.
     - All `<a href>` URLs come from `links.json` or are inline citation URLs from the ledger.
     - No `ceo` / `standard` / `deep` strings anywhere.
-    - All `<img src="images/...">` references point to files that exist (run `ls` to verify).
     - Source-card favicons (when used) use `s2/favicons` URLs.
     - The view doesn't look like it could be the magazine layout for a different topic. It inhabits THIS topic.
-11. **Report.** One line: `wrote views/<VIEW_NAME>.html (register=<your-chosen-register>, images: <N> downloaded, <M> favicons, <K> gradients)`.
+12. **Report.** One line: `wrote views/<VIEW_NAME>.html (register=<your-chosen-register>, images: <N> downloaded, <M> favicons, <K> gradients)`.
 
 ## Failure modes to avoid
 
