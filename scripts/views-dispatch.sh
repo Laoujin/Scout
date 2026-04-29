@@ -224,7 +224,7 @@ for entry in "${SUCCESS_ITEMS[@]}"; do
   IFS='|' read -r slug vn ts_e tt <<< "$entry"
   path=$(printf '%s' "$VIEW_TARGETS_JSON" | jq -r ".items[] | select(.slug==\"$slug\") | .path")
   url_path="${path#research/}"
-  LINES+=("- ✓ [${tt} — ${ts_e}](${ATLAS_BASE_URL}/research/${url_path}/views/${vn}/)")
+  LINES+=("- ✓ [${tt} — ${ts_e}](${ATLAS_BASE_URL}/research/${url_path}/views/${vn}.html)")
 done
 for entry in "${FAILED_ITEMS[@]}"; do
   IFS='|' read -r slug reason <<< "$entry"
