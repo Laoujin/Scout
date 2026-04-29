@@ -74,7 +74,7 @@ Views are fixed HTML+CSS. **No `<script>` tags.** No filter chips that don't fil
 
 ### 4. Image strategy — best effort, real images first
 
-Real images dramatically change how a view feels. Try hard. Cap: **8 download attempts per view.**
+Real images dramatically change how a view feels. Try hard. There is no cap — fetch as many as the topic earns. Each download still has a 10-second timeout and the >2KB / valid-magic file checks; abandon a single fetch if it stalls or returns junk, but keep going for the next slot.
 
 For each image slot in your design (hero, card thumbnails, etc.):
 
@@ -149,7 +149,7 @@ A view fails when:
 5. **Build `links.json`** and write it to `<RESEARCH_DIR>/views/<VIEW_NAME>.links.json`.
 6. **Read `inspirations.md`** in this skill directory. Study the eight case studies for breadth.
 7. **Decide the visual register.** What does this topic want to feel like? Reach for an inspiration if one fits. Invent if none fits.
-8. **Plan images.** Identify visual slots (hero / card-photos / accent images). For each, run the image strategy chain. Cap 8 download attempts.
+8. **Plan images.** Identify visual slots (hero / card-photos / accent images). For each, run the image strategy chain. No cap on download attempts — pull as many as the topic earns. Per-download timeout (10s) and validity checks still apply.
 9. **Author the view.** Single `Write` to `<RESEARCH_DIR>/views/<VIEW_NAME>.html`. Frontmatter + inline `<style>` + body sections. No `<!doctype>`, `<html>`, `<head>`, `<body>` — the layout provides them. No `← Default view` link — the layout provides that too.
 10. **Verify image paths — MANDATORY, not optional.** Every previous batch shipped with broken `<img src>` paths because the author "checked" by reading instead of running. Run this exact command after writing the view:
 
