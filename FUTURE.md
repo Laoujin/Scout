@@ -78,3 +78,19 @@ Tracked elsewhere or deferred:
 - Security hardening (egress allowlist, read-only root, output validator) — see `TODO.md`.
 - Multimodal output (charts, maps, timelines in body) — orthogonal axis.
 - Operational hardening (budget caps, cancellation, retries, cost dashboard) — surfaces once capture lifts volume.
+
+
+## Security
+
+Claude has access the GH token & the Claude Subscription.
+
+| Effort | Mitigation                                                                                                 | Stops      |
+|--------|------------------------------------------------------------------------------------------------------------|------------|
+| Low    | Docker network without route to LAN (network_mode: bridge + firewall rule dropping RFC1918 egress)         | #1         |
+| Low    | GH_TOKEN minimum scope — already contents: read, issues: write, which is good; double-check no broader PAT | limits #2  |
+| Low    | Never mount ~/.claude/ read-write; read-only bind if at all                                                | limits #2  |
+| Low    | Read-only root filesystem, writable tmpfs for scratch                                                      | #3         |
+| Medium | Require human approval before Scout commits & pushes to Atlas (manual gh pr merge or workflow_dispatch)    | #3, #4     |
+| Medium | Output validator: reject published content containing `<script>`, off-topic URLs, secrets-like strings     | #4         |
+| Medium | Egress allowlist (only anthropic.com, github.com, approved search domains) via squid/envoy sidecar         | #1, #2     |
+| High   | Seccomp + AppArmor profile, drop all caps, non-root user                                                   | #6         |
