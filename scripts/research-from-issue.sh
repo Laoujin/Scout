@@ -42,7 +42,7 @@ if [ "$START_CHOICE" = "decompose" ] && [ "${#SUB_TOPICS[@]}" -gt 0 ]; then
   ATLAS_REPO="${ATLAS_REPO:-git@github.com:Laoujin/atlas.git}"
   ATLAS_DIR="$SCOUT_DIR/atlas-checkout"
   rm -rf "$ATLAS_DIR"
-  git clone --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
+  git clone --filter=blob:none --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
   source "$SCOUT_DIR/scripts/slug.sh"
   DATE="$(date +%F)"
   PARENT_SLUG="$(slugify "$TOPIC")"

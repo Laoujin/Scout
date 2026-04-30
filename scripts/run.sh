@@ -69,7 +69,7 @@ if [ -n "${RESEARCH_DIR:-}" ]; then
 else
   ATLAS_DIR="$SCOUT_DIR/atlas-checkout"
   rm -rf "$ATLAS_DIR"
-  git clone --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
+  git clone --filter=blob:none --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
 
   FINAL_SLUG="$SLUG"
   n=2

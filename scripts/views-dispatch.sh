@@ -66,7 +66,7 @@ fi
 ATLAS_DIR="$SCOUT_DIR/atlas-checkout"
 if [ "${SCOUT_TEST_KEEP_ATLAS:-0}" != "1" ]; then
   rm -rf "$ATLAS_DIR"
-  git clone --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
+  git clone --filter=blob:none --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
 fi
 
 # Step 4b: build dispatch set.
