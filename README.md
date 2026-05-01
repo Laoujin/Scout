@@ -30,9 +30,8 @@ Three repos, one flow:
 - <img src="docs/atlas-logo.svg" alt="" width="18" align="top"> **[Atlas](https://github.com/Laoujin/Atlas)** — your publishing target. Jekyll site, themed via three config values (`skeleton` / `palette` / `card`). Built by GitHub Pages.
 - <img src="docs/compass-logo.svg" alt="" width="18" align="top"> **[Compass](https://github.com/Laoujin/Compass)** — the Jekyll theme. Lives as a submodule of Atlas at `compass/`; supplies layouts, CSS, and the `skeleton` / `palette` / `card` knobs. You only touch this if you want to tune the look.
 
-**Requires:** Claude Code subscription, Docker, a GitHub account, an always-on
-Linux host (a mini-PC, NAS, or spare laptop). No API key — Scout runs inside
-your Claude subscription.
+**Requires:** Claude Code auth (subscription or API key), Docker, a GitHub account, an always-on Linux
+host (a mini-PC, NAS, or spare laptop).
 
 ## Install
 
@@ -64,7 +63,7 @@ Then two manual steps:
 # Start the GitHub action workflow runner
 cd Scout/docker && docker-compose up -d --build
 
-# one-time login with your Claude Code subscription
+# one-time login (subscription or API key — pick in the prompt)
 docker exec -it scout-runner runuser -u runner -- claude
 ```
 

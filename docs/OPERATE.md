@@ -16,7 +16,7 @@ Named Docker volumes preserve the Claude login, runner registration, and Atlas d
 
 ## Re-authenticate Claude
 
-If the subscription auth expires:
+If the auth expires (subscription tokens age out, API keys can be rotated):
 
 ```bash
 docker exec -it scout-runner runuser -u runner -- claude
