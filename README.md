@@ -18,6 +18,12 @@
 
 ## What it is
 
+<p align="center">
+  <img src="docs/scout-flow.svg" alt="Scout flow: Issue → sharpen → research → publish">
+  <br>
+  <sub>or see the <a href="https://laoujin.github.io/Scout/#how">full branched flow</a></sub>
+</p>
+
 Three repos, one flow:
 
 - <img src="docs/scout-logo.svg" alt="" width="18" align="top"> **Scout** — this repo. Self-hosted GitHub Actions runner + research workflow + skill pack. Forked to your account.
