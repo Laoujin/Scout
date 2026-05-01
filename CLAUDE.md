@@ -6,6 +6,7 @@ These rules apply to every research run inside this repo.
 
 - Terse. No filler, no "in conclusion" paragraphs, no prose bloat.
 - Prefer tables for comparisons over measurable axes (specs, numbers, features). When a comparison is about philosophy or fit-for-context rather than attributes, short labeled sections per option are fine — just keep it scannable.
+- Markdown tables: pad cells so columns line up in monospace. Use reference-style links **only inside tables** (`[label][0]` with `[0]: url` definitions placed *immediately below that table*, not at the bottom of the file). Outside tables, always use inline links `[label](url)`.
 
 ## Citations (hard rule)
 
