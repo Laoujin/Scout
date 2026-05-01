@@ -326,6 +326,17 @@ RUNNER_TOKEN=$RUNNER_TOKEN
 EOF
 chmod 600 "$SCOUT_DIR/docker/.env"
 
+# Tell the Scout workflow where Atlas lives, when it isn't at the default
+# (<scout-owner>/Atlas). Without these the workflow constructs the wrong URL.
+step "Setting workflow vars on $SCOUT_OWNER/$SCOUT_NAME..."
+if [[ "$ATLAS_OWNER" != "$SCOUT_OWNER" ]]; then
+  gh variable set ATLAS_REPO_OWNER --body "$ATLAS_OWNER" -R "$SCOUT_OWNER/$SCOUT_NAME" >/dev/null
+fi
+if [[ "$ATLAS_NAME" != "Atlas" ]]; then
+  gh variable set ATLAS_REPO_NAME --body "$ATLAS_NAME" -R "$SCOUT_OWNER/$SCOUT_NAME" >/dev/null
+fi
+ok
+
 # ---------- Step 11: Hand off post-install summary to host install.sh ----------
 cat > /work/.next <<EOF
 SCOUT_OWNER=$SCOUT_OWNER

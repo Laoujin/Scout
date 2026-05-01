@@ -135,7 +135,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
       ISSUE_NUMBER: ${{ github.event.issue.number }}
       BOT_COMMENT_BODY: ${{ github.event.comment.body }}
-      ATLAS_REPO: git@github.com-atlas:${{ github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
+      ATLAS_REPO: git@github.com-atlas:${{ vars.ATLAS_REPO_OWNER || github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
       GIT_AUTHOR_NAME: ${{ github.event.issue.user.login }}
       GIT_AUTHOR_EMAIL: ${{ github.event.issue.user.id }}+${{ github.event.issue.user.login }}@users.noreply.github.com
       GIT_COMMITTER_NAME: ${{ github.event.issue.user.login }}
@@ -180,7 +180,7 @@ jobs:
       ISSUE_NUMBER: ${{ github.event.issue.number }}
       BOT_COMMENT_BODY: ${{ github.event.comment.body }}
       BOT_COMMENT_ID: ${{ github.event.comment.id }}
-      ATLAS_REPO: git@github.com-atlas:${{ github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
+      ATLAS_REPO: git@github.com-atlas:${{ vars.ATLAS_REPO_OWNER || github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
       GIT_AUTHOR_NAME: ${{ github.event.issue.user.login }}
       GIT_AUTHOR_EMAIL: ${{ github.event.issue.user.id }}+${{ github.event.issue.user.login }}@users.noreply.github.com
       GIT_COMMITTER_NAME: ${{ github.event.issue.user.login }}
@@ -205,7 +205,7 @@ jobs:
     env:
       TOPIC: ${{ inputs.topic }}
       DEPTH: ${{ inputs.depth }}
-      ATLAS_REPO: git@github.com-atlas:${{ github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
+      ATLAS_REPO: git@github.com-atlas:${{ vars.ATLAS_REPO_OWNER || github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
       GIT_AUTHOR_NAME: ${{ github.actor }}
       GIT_AUTHOR_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
       GIT_COMMITTER_NAME: ${{ github.actor }}
