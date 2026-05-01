@@ -12,17 +12,13 @@ If `$ARGUMENTS` is non-empty, use it verbatim as the topic. Otherwise ask the us
 
 ## Step 2 — Options
 
-Call `AskUserQuestion` once with these three questions:
+Call `AskUserQuestion` once with these two questions:
 
 1. **Depth** (header `Depth`, single-select):
    - `survey` — 2-4 pages, balanced overview (Recommended)
    - `recon` — one-page decision brief
    - `expedition` — all angles, long-form
-2. **Format** (header `Format`, single-select):
-   - `auto` — Scout picks md or html (Recommended)
-   - `md` — markdown body
-   - `html` — bespoke HTML body
-3. **Do a sharpening round-trip** (header `Sharpen`, single-select):
+2. **Do a sharpening round-trip** (header `Sharpen`, single-select):
    - `Yes` — let Scout propose a sharpened prompt before researching (Recommended)
    - `No` — use my topic verbatim and start research
 
