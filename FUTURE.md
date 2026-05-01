@@ -27,15 +27,15 @@ Today: flat list of `research/<date>-<slug>/` cards. Every run is an island.
 
 Today: only path is browser → github.com → New Issue → fill template. Desk-only, ~60s. Most questions arrive on a phone.
 
-| Surface | Trigger | Notes |
-|---|---|---|
-| iOS share-sheet | Share URL/text from any app | Highest leverage. iOS Shortcut → GitHub API. |
-| Email-to-Issue | Forward to `scout@<domain>` | Subject = topic, body = steering. Cloudflare Email Routing → webhook → `gh issue create`. |
-| Voice / Siri | Spoken topic | Same plumbing as share-sheet, dictation input. |
-| Telegram/Slack bot | DM a topic | Reuse Slack remote-control plumbing. |
-| Backlog drain | `scout-backlog.md` or `backlog` label | Decouples having an idea from running it. Scout pulls when idle. |
-| Bookmarklet | One click on any page | Desk-version of share-sheet. |
-| Atlas follow-up button | Bottom of every artifact | Pre-fills `extends: <prior-artifact>`. |
+| Surface                | Trigger                               | Notes                                                                                     |
+|------------------------|---------------------------------------|-------------------------------------------------------------------------------------------|
+| iOS share-sheet        | Share URL/text from any app           | Highest leverage. iOS Shortcut → GitHub API.                                              |
+| Email-to-Issue         | Forward to `scout@<domain>`           | Subject = topic, body = steering. Cloudflare Email Routing → webhook → `gh issue create`. |
+| Voice / Siri           | Spoken topic                          | Same plumbing as share-sheet, dictation input.                                            |
+| Telegram/Slack bot     | DM a topic                            | Reuse Slack remote-control plumbing.                                                      |
+| Backlog drain          | `scout-backlog.md` or `backlog` label | Decouples having an idea from running it. Scout pulls when idle.                          |
+| Bookmarklet            | One click on any page                 | Desk-version of share-sheet.                                                              |
+| Atlas follow-up button | Bottom of every artifact              | Pre-fills `extends: <prior-artifact>`.                                                    |
 
 Every surface ends in `gh issue create --template research.yml`. Build share-sheet first; rest are variations.
 
@@ -47,13 +47,13 @@ Second-order effects:
 
 Today: pure on-demand. Scout never runs unless you ask.
 
-| Flavor | Trigger | Cost | Example |
-|---|---|---|---|
-| **Watch** | Cron over published artifact's ledger | Cheap (ledger-only) | Re-fetch each cited URL, diff against stored `quote`, comment if drift. |
-| **Drain** | Idle-time backlog pull | Cheap | Overnight: Scout works through queued curiosities. |
-| **React** | External event hook | Per-integration | New repo release / arXiv paper / RSS item → Scout opens its own Issue. |
-| **Subscribe** | Cron over standing topic | Expensive (full re-run) | Weekly "best self-hosted LLM router" — only publish if conclusions shifted. |
-| **Curate** | Self-reflective cron over Atlas | Medium | "Run #12 and #34 disagree on X — reconcile?" or "8 dead URLs across 23 runs." |
+| Flavor        | Trigger                               | Cost                    | Example                                                                       |
+|---------------|---------------------------------------|-------------------------|-------------------------------------------------------------------------------|
+| **Watch**     | Cron over published artifact's ledger | Cheap (ledger-only)     | Re-fetch each cited URL, diff against stored `quote`, comment if drift.       |
+| **Drain**     | Idle-time backlog pull                | Cheap                   | Overnight: Scout works through queued curiosities.                            |
+| **React**     | External event hook                   | Per-integration         | New repo release / arXiv paper / RSS item → Scout opens its own Issue.        |
+| **Subscribe** | Cron over standing topic              | Expensive (full re-run) | Weekly "best self-hosted LLM router" — only publish if conclusions shifted.   |
+| **Curate**    | Self-reflective cron over Atlas       | Medium                  | "Run #12 and #34 disagree on X — reconcile?" or "8 dead URLs across 23 runs." |
 
 Distinctions:
 - Watch ≠ Subscribe. Watch checks if *sources* moved. Subscribe checks if *the answer* moved.
