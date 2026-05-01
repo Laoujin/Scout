@@ -114,6 +114,21 @@ Atlas's chrome auto-translates depth labels at render time, but views are static
 
 GitHub stars: copy the `⭐ N` format from the canonical (`⭐ 52k` for ≥10k, `⭐ 1.2k` for 1–10k, `⭐ 320` raw). Don't refetch.
 
+### 6. Named entities link to their official site
+
+When you display an entity by name (project, channel, venue, restaurant, conference, performance) in the view body — in cards, tiles, list rows, prose foregrounds — wrap its name in `<a href="...">` pointing to its **official** URL. The URL must come from `LINKS.json::sources` (the same whitelist that gates rule 2). If no source entry covers the entity, leave the name plain — don't fabricate.
+
+The entity-link is independent of the citation marker. Keep both: `<a href="https://astro.build">Astro</a> ⭐ 52k <sup><a href="https://wirecutter.com/astro-review">[1]</a></sup>`.
+
+Examples:
+- GitHub repo: `<a href="https://github.com/Laoujin/Scout">Scout</a>`
+- YouTube channel: `<a href="https://youtube.com/@aiexplained">AI Explained</a>` (channel index, not a single video)
+- Restaurant: `<a href="https://oak-restaurant.be">OAK</a>` (restaurant's own site)
+- Conference: `<a href="https://iconip2026.org">ICONIP 2026</a>` (conference index)
+- Performance: `<a href="https://opera.be/opus">OPUS (Bach × Papadopoulos ballet)</a>` (the venue's detail page for that show — not Wikipedia)
+
+If the only source you have is a third-party review or aggregator, that's a citation, not an official site — don't link the entity name to it.
+
 ## Creative brief
 
 This is the part that's open, not constrained. Reading order:

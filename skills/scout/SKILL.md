@@ -135,6 +135,11 @@ Depth selects both the target length and the process shape. The tiers are distin
    {"n": 1, "url": "https://example.com", "claim": "what this source supports, one sentence", "source_type": "official|peer-reviewed|vendor-blog|forum|news|wiki", "quote": "verbatim snippet from the source, ≤300 chars", "github_stars": 52000}
    ```
    The `n` field matches the `[[n]]` marker in the body exactly. Every `[[n]]` in the artifact has a corresponding ledger entry. Every ledger entry has a non-empty `url`. **`github_stars`** is required when `url` matches `^https?://github\.com/[^/]+/[^/]+` (any depth) — the integer star count of the parent `owner/repo` (Atlas formats it as `⭐ 52k` in the citations panel). Omit the field for non-GitHub URLs. The ledger ships with the published folder — it is an evidence audit trail and the input to future "extend this research" runs. For `depth=ceo`, the ledger is optional and a single-pass with inline cites is sufficient.
+10. **Link entity names to their official site when known.** For projects, products, venues, channels, conferences, restaurants, performances — when you display the entity's name in a list, card, table, or prose foreground, wrap it in a markdown link to its **official** URL. The URL must come from a source you actually fetched (typically already in `citations.jsonl`); never fabricate. If no official URL is known, leave the name bare. The entity-link is independent of the citation marker — keep both:
+    - **Prose / lists:** `[Astro](https://astro.build) ⭐ 52k [[1]](https://wirecutter.com/astro-review)` — link the name, separately cite the claim.
+    - **Cards (HTML):** `<h3><a href="https://astro.build">Astro</a></h3>` then the supporting text + citations.
+    - **Comparison tables:** the project-name column cell is a link; citation cells stay separate.
+    - **Examples:** GitHub repo → repo URL; YouTube channel → channel URL; restaurant → restaurant's own site; conference → official conference index page; performance → the venue's detail page for that show. Wikipedia or a third-party review is a citation, not an official site — don't substitute.
 
 ## Frontmatter (required; identical for .md and .html)
 
