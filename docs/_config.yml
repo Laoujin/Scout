@@ -1,0 +1,9 @@
+# Scout landing page (served by GitHub Pages from /docs)
+
+# Google Analytics (GA4 measurement ID). Leave blank/comment-out to disable.
+google_analytics: G-9VW0TVN9JJ
+
+# Don't have Jekyll auto-render OPERATE.md as an HTML page — it's meant to be
+# read on GitHub.com via the README links.
+exclude:
+  - OPERATE.md

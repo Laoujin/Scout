@@ -1,3 +1,5 @@
+---
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -838,6 +840,15 @@ section.ya-group { padding: 15px 0; }
   .ap.skel-s6 .s6-header:nth-child(2) { display: none; }
 }
 </style>
+{%- if site.google_analytics -%}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics }}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '{{ site.google_analytics }}');
+</script>
+{%- endif -%}
 </head>
 <body>
 
