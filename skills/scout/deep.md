@@ -24,6 +24,7 @@ When `DEPTH=deep`, the parent (you, the main Scout session) becomes planner + wr
    Researcher summaries stay in your context as draft material.
 5. Draft the body (index.md or index.html) from the researcher summaries and the merged ledger.
    The body is the publishing artifact; researcher summaries are intermediate material — rewrite, don't copy-paste.
+   **Citation re-injection (mandatory):** researchers write bare `[[n]]` markers indexed against their per-agent ledger. After `merge_ledgers.sh`, the `n` values are renumbered. When you lift content into the body, look up each citation's URL in the merged `citations.jsonl` and write it as `[[n]](url)` (MD body) or `<sup><a href="url">[n]</a></sup>` (HTML body) per SKILL.md rule 2. Bare `[[n]]` markers in the final body are a regression.
 6. Dispatch scout-reviewer AND scout-illustrator in parallel (one message, two Agent tool calls).
    Reviewer: subagent_type="scout-reviewer". Pass: ARTIFACT_PATH, LEDGER_PATH=citations.jsonl, OUTLINE_PATH=outline.md, TOPIC, DEPTH=deep.
    Illustrator: subagent_type="scout-illustrator". Pass: TOPIC, final tags list, RESEARCH_DIR. It writes cover.svg or returns `skipped: <reason>`.
