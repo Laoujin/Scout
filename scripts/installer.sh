@@ -165,6 +165,9 @@ cat > "$STAGE/_config.yml" <<EOF
 title: Atlas
 description: Research compiled on demand by Scout.
 
+# Google Analytics (GA4 measurement ID). Uncomment + set your ID to enable.
+# google_analytics: G-XXXXXXXXXX
+
 # baseurl must match your Atlas repo name for project Pages
 # (e.g. /$ATLAS_NAME serves at https://$ATLAS_OWNER.github.io/$ATLAS_NAME/).
 baseurl: /$ATLAS_NAME
