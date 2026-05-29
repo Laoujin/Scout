@@ -52,7 +52,7 @@ bash "$SCRIPT" "$TMP/quotes.md" 2>/dev/null \
   && pass "valid: escaped quotes in title passes" \
   || fail "valid: escaped quotes should pass"
 
-# --- invalid: unquoted colon in title ---
+# --- auto-fix: unquoted colon in title gets quoted ---
 cat > "$TMP/bad_colon.md" <<'MD'
 ---
 title: Slack: the best tool
@@ -61,11 +61,15 @@ summary: A summary.
 ---
 Body.
 MD
-bash "$SCRIPT" "$TMP/bad_colon.md" 2>/dev/null \
-  && fail "invalid: unquoted colon should fail but passed" \
-  || pass "invalid: unquoted colon in title caught"
+if bash "$SCRIPT" "$TMP/bad_colon.md" 2>/dev/null; then
+  grep -qxF 'title: "Slack: the best tool"' "$TMP/bad_colon.md" \
+    && pass "auto-fix: unquoted colon in title quoted in place" \
+    || fail "auto-fix: title not requoted as expected"
+else
+  fail "auto-fix: unquoted colon should be fixed and pass"
+fi
 
-# --- invalid: unquoted value that looks like YAML mapping ---
+# --- auto-fix: nested colons get quoted into a single scalar ---
 cat > "$TMP/bad_mapping.md" <<'MD'
 ---
 title: key: value: nested
@@ -73,9 +77,39 @@ date: 2026-04-28
 ---
 Body.
 MD
-bash "$SCRIPT" "$TMP/bad_mapping.md" 2>/dev/null \
-  && fail "invalid: nested colons should fail but passed" \
-  || pass "invalid: nested colons caught"
+if bash "$SCRIPT" "$TMP/bad_mapping.md" 2>/dev/null; then
+  grep -qxF 'title: "key: value: nested"' "$TMP/bad_mapping.md" \
+    && pass "auto-fix: nested colons quoted into one scalar" \
+    || fail "auto-fix: nested colons not requoted as expected"
+else
+  fail "auto-fix: nested colons should be fixed and pass"
+fi
+
+# --- auto-fix: unquoted double quote inside summary gets escaped ---
+cat > "$TMP/bad_quote.md" <<'MD'
+---
+title: "Fine title"
+summary: The "best" tool, hands down
+date: 2026-04-28
+---
+Body.
+MD
+if bash "$SCRIPT" "$TMP/bad_quote.md" 2>/dev/null; then
+  python3 -c "import sys,yaml; d=yaml.safe_load(open('$TMP/bad_quote.md').read().split('---')[1]); assert d['summary']=='The \"best\" tool, hands down', d['summary']" \
+    && pass "auto-fix: embedded quote escaped, value preserved" \
+    || fail "auto-fix: embedded quote not preserved correctly"
+else
+  fail "auto-fix: embedded quote should be fixed and pass"
+fi
+
+# --- idempotent: a valid file is left byte-identical ---
+cp "$TMP/colon.md" "$TMP/idem.md"
+before="$(md5sum < "$TMP/idem.md")"
+bash "$SCRIPT" "$TMP/idem.md" 2>/dev/null
+after="$(md5sum < "$TMP/idem.md")"
+[ "$before" = "$after" ] \
+  && pass "idempotent: valid file untouched" \
+  || fail "idempotent: valid file was modified"
 
 # --- failure: no frontmatter ---
 cat > "$TMP/no_fm.md" <<'MD'
