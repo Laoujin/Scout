@@ -138,12 +138,17 @@ _child_is_success() {
 _write_placeholder() {
   local dir="$1" depth="$2" reason="$3"
   mkdir -p "$dir"
+  # Quote failure_reason — error reasons routinely contain colons (e.g.
+  # "error (subtype=x): msg") which would otherwise break this placeholder's
+  # own YAML frontmatter.
+  local safe_reason
+  safe_reason="$(printf '%s' "$reason" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')"
   cat > "$dir/index.md" <<MD
 ---
 layout: research
 title: $(basename "$dir")
 status: failed
-failure_reason: $reason
+failure_reason: "$safe_reason"
 attempted_at: $(date -u +%FT%TZ)
 depth: $depth
 ---
@@ -235,11 +240,19 @@ for entry in "${CHILDREN[@]}"; do
       set -e
       # Replay captured stderr so it's visible in workflow logs.
       [ -s "$child_err_file" ] && cat "$child_err_file" >&2
-      # Extract last meaningful error lines for failure annotations.
+      # Reason for the annotation/placeholder. Prefer the child's .scout-error
+      # (written synchronously by run.sh) — the captured stderr races the
+      # child's async `tee` and often arrives empty, which is what produced the
+      # uninformative "child run.sh exit N" annotations. Fall back to the
+      # stderr tail, then to the bare exit code.
       child_err_msg=""
-      if [ "$rc" -ne 0 ] && [ -s "$child_err_file" ]; then
-        child_err_msg="$(grep -v '^[[:space:]]*$' "$child_err_file" | tail -3 | tr '\n' '; ')"
-        child_err_msg="${child_err_msg%%; }"
+      if [ "$rc" -ne 0 ]; then
+        if [ -s "$child_dir/.scout-error" ]; then
+          child_err_msg="$(tr '\n' ' ' < "$child_dir/.scout-error" | sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//')"
+        elif [ -s "$child_err_file" ]; then
+          child_err_msg="$(grep -v '^[[:space:]]*$' "$child_err_file" | tail -3 | tr '\n' '; ')"
+          child_err_msg="${child_err_msg%%; }"
+        fi
       fi
       rm -f "$child_err_file"
 
@@ -331,13 +344,18 @@ for entry in "${CHILDREN[@]}"; do
 done
 CHILDREN_JSON+=$'\n]'
 
+# Topic text is freeform (colons, asterisks, quotes) and these parent
+# placeholders never pass through validate_frontmatter — quote it so a stray
+# colon can't silently break the expedition's Jekyll frontmatter.
+PARENT_TOPIC_Q="\"$(printf '%s' "$PARENT_TOPIC" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')\""
+
 if [ "$SUCCESS_COUNT" -lt 2 ]; then
   cat > "$PARENT_DIR/index.md" <<MD
 ---
 layout: expedition
 title: $(basename "$PARENT_DIR")
 date: $DATE
-topic: $PARENT_TOPIC
+topic: $PARENT_TOPIC_Q
 format: $PARENT_FORMAT
 synthesis: false
 children: $CHILDREN_JSON
@@ -374,7 +392,7 @@ if [ ! -f "$PARENT_DIR/index.md" ] && [ ! -f "$PARENT_DIR/index.html" ]; then
 layout: expedition
 title: $(basename "$PARENT_DIR")
 date: $DATE
-topic: $PARENT_TOPIC
+topic: $PARENT_TOPIC_Q
 format: $PARENT_FORMAT
 synthesis: false
 children: $CHILDREN_JSON

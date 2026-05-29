@@ -35,6 +35,36 @@ grep -q '^failure_reason: ' "$f"  && pass "failure_reason set" || fail "missing 
 grep -q '^attempted_at: '   "$f"  && pass "attempted_at set"  || fail "missing attempted_at"
 grep -q '^depth: standard'  "$f"  && pass "depth recorded"    || fail "missing depth"
 
+# --- reason comes from the child's .scout-error (race-free), not "exit 1" ---
+TMP2=$(mktemp -d)
+mkdir -p "$TMP2/scout/scripts" "$TMP2/atlas-checkout"
+cp "$REPO_ROOT/scripts/lib-issue-parse.sh" "$TMP2/scout/scripts/"
+cp "$REPO_ROOT/scripts/run-decompose.sh"   "$TMP2/scout/scripts/"
+# Stub run.sh that drops a structured reason then fails (mimics run.sh's
+# is_error path) without printing it to stderr.
+cat > "$TMP2/scout/scripts/run.sh" <<'STUB'
+#!/usr/bin/env bash
+mkdir -p "$RESEARCH_DIR"
+printf 'Claude hit a usage/rate limit — likely ran out of tokens.\n' > "$RESEARCH_DIR/.scout-error"
+exit 3
+STUB
+chmod +x "$TMP2/scout/scripts/run.sh"
+
+env PARENT_DIR="$TMP2/atlas-checkout/p" \
+    PARENT_TOPIC="t" PARENT_FORMAT=md DATE=2026-04-26 \
+    SUB_TOPICS_TSV=$'A|standard||true' \
+    SCOUT_DIR="$TMP2/scout" \
+    SCOUT_SKIP_SYNTHESIS=1 \
+    bash "$TMP2/scout/scripts/run-decompose.sh" >/dev/null 2>&1
+
+f2="$TMP2/atlas-checkout/p/a/index.md"
+if grep -q '^failure_reason: .*usage/rate limit' "$f2"; then
+  pass "placeholder reason taken from .scout-error"
+else
+  fail "failure_reason should carry the .scout-error text (got: $(grep '^failure_reason:' "$f2" 2>/dev/null))"
+fi
+rm -rf "$TMP2"
+
 echo
 echo "Passed: $PASS, Failed: $FAIL"
 [ $FAIL -eq 0 ]

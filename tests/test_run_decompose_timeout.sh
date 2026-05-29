@@ -45,7 +45,7 @@ env PARENT_DIR="$TMP/atlas-checkout/p" \
   grep -q 'status: success' "$TMP/atlas-checkout/p/a/index.md" && \
   pass "soft: A succeeded" || fail "soft: A missing or not success"
 [ -f "$TMP/atlas-checkout/p/b/index.md" ] && \
-  grep -q 'failure_reason: soft timeout reached before start' "$TMP/atlas-checkout/p/b/index.md" && \
+  grep -q 'failure_reason: "soft timeout reached before start"' "$TMP/atlas-checkout/p/b/index.md" && \
   pass "soft: B placeholder" || fail "soft: B not a soft-timeout placeholder"
 
 # --- Hard timeout: stub sleeps 5s; hard cap forces remaining=1s, kills child. ---
@@ -74,7 +74,7 @@ env PARENT_DIR="$TMP/atlas-checkout/p" \
     bash "$TMP/scout/scripts/run-decompose.sh"
 
 [ -f "$TMP/atlas-checkout/p/a/index.md" ] && \
-  grep -q 'failure_reason: hard timeout' "$TMP/atlas-checkout/p/a/index.md" && \
+  grep -q 'failure_reason: "hard timeout"' "$TMP/atlas-checkout/p/a/index.md" && \
   pass "hard: A killed" || fail "hard: A not a hard-timeout placeholder"
 
 echo

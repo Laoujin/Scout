@@ -31,21 +31,53 @@ exec 2> >(tee -a "$RUN_LOG" >&2)
 SOFT_FAIL_LOG="$(mktemp -t scout-softfail.XXXXXX.log)"
 export SOFT_FAIL_LOG
 
+# Structured failure reason, written synchronously the moment a failure is
+# known. The decompose parent reads this file instead of scraping the child's
+# stderr tail (which races the async `tee` above and was the source of the
+# uninformative "child run.sh exit 1" annotations). Path is finalised once
+# RESEARCH_DIR is known; the trap guards on it being set.
+SCOUT_ERROR_FILE=""
+
+# Turn a Claude result JSON's error fields into one human-readable line.
+scout_classify_error() {
+  local subtype="$1" stop="$2" apierr="$3" msg="$4"
+  if printf '%s %s %s %s' "$subtype" "$stop" "$apierr" "$msg" \
+       | grep -qiE 'usage limit|rate.?limit|quota|overloaded|429|529|too many requests'; then
+    echo "Claude hit a usage/rate limit — likely ran out of tokens${apierr:+ (api status $apierr)}. Re-run once the limit resets."
+  elif [ "$subtype" = "error_max_turns" ]; then
+    echo "Claude reached the max-turns limit before finishing${msg:+: $msg}"
+  elif [ -n "$msg" ]; then
+    echo "Claude returned an error${subtype:+ (subtype=$subtype)}: $msg"
+  else
+    echo "Claude returned an error${subtype:+ (subtype=$subtype)}${apierr:+ [api=$apierr]}"
+  fi
+}
+
 # On any unhandled error, try to surface the failure on the triggering issue
 # before exiting. `|| true` on gh so a broken token doesn't loop the trap.
 on_error() {
   local code=$?
   local cmd="${BASH_COMMAND:-unknown}"
+  local reason
+  if [ -n "$SCOUT_ERROR_FILE" ] && [ -s "$SCOUT_ERROR_FILE" ]; then
+    reason="$(cat "$SCOUT_ERROR_FILE")"
+  else
+    # Persist the live stderr tail so the decompose parent has a real reason
+    # even though the `tee` above may not have flushed to RUN_LOG yet.
+    reason="$(tail -n 5 "$RUN_LOG" 2>/dev/null | grep -v '^[[:space:]]*$' | tail -n 3 | tr '\n' ' ')"
+    reason="exit $code at \`$cmd\`${reason:+ — $reason}"
+    [ -n "$SCOUT_ERROR_FILE" ] && printf '%s\n' "$reason" > "$SCOUT_ERROR_FILE" 2>/dev/null || true
+  fi
   # Decompose children must not comment on the parent issue — the parent
   # orchestrator writes a placeholder index.md and surfaces failure via the
-  # final summary comment.
+  # final summary comment (reading .scout-error for the reason).
   if [ "${SCOUT_DECOMPOSE_CHILD:-0}" = "1" ]; then
     exit "$code"
   fi
   if [ -n "${ISSUE_NUMBER:-}" ] && [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ]; then
     local tail_log
     tail_log="$(tail -n 30 "$RUN_LOG" 2>/dev/null | sed 's/`/\\`/g')"
-    gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "$(printf 'Scout run failed (exit %s) at: `%s`\n\n<details><summary>Last 30 lines of stderr</summary>\n\n```\n%s\n```\n</details>' "$code" "$cmd" "$tail_log")" || true
+    gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "$(printf 'Scout run failed: %s\n\n<details><summary>Last 30 lines of stderr</summary>\n\n```\n%s\n```\n</details>' "$reason" "$tail_log")" || true
   fi
   exit "$code"
 }
@@ -81,6 +113,8 @@ else
   RESEARCH_DIR="$ATLAS_DIR/research/${DATE}-${FINAL_SLUG}"
 fi
 mkdir -p "$RESEARCH_DIR"
+SCOUT_ERROR_FILE="$RESEARCH_DIR/.scout-error"
+rm -f "$SCOUT_ERROR_FILE"
 
 PROMPT="$(cat <<EOF
 TOPIC: ${TOPIC}
@@ -109,12 +143,42 @@ claude --dangerously-skip-permissions \
 # they had before --output-format json was added.
 jq -r .result "$RESULT_JSON"
 
-# Ledger validation (standard and deep only — ceo may not produce a ledger).
-LEDGER="$RESEARCH_DIR/citations.jsonl"
 ARTIFACT=""
 for CAND in "$RESEARCH_DIR/index.md" "$RESEARCH_DIR/index.html"; do
   [ -f "$CAND" ] && ARTIFACT="$CAND" && break
 done
+
+# Claude reports a failed run via is_error:true while the CLI still exits 0.
+# Detect it here, record a clear reason synchronously, and decide salvage vs
+# hard-fail. Without this run.sh would publish an empty/partial page and the
+# decompose parent would only ever see a generic "exit 1".
+if [ "$(jq -r '.is_error // false' "$RESULT_JSON" 2>/dev/null || echo false)" = "true" ]; then
+  err_subtype="$(jq -r '.subtype // ""'         "$RESULT_JSON" 2>/dev/null || true)"
+  err_stop="$(jq    -r '.stop_reason // ""'     "$RESULT_JSON" 2>/dev/null || true)"
+  err_api="$(jq     -r '.api_error_status // ""' "$RESULT_JSON" 2>/dev/null || true)"
+  err_msg="$(jq     -r '.result // ""'          "$RESULT_JSON" 2>/dev/null | tr '\n' ' ' | cut -c1-300 || true)"
+  REASON="$(scout_classify_error "$err_subtype" "$err_stop" "$err_api" "$err_msg")"
+  printf '%s\n' "$REASON" > "$SCOUT_ERROR_FILE"
+  echo "scout: $REASON" >&2
+
+  if [ "${SCOUT_DECOMPOSE_CHILD:-0}" = "1" ]; then
+    # The parent inspects rc + .scout-error: it salvages a real artifact as
+    # error_with_content, or writes a failed placeholder with this reason.
+    exit 3
+  fi
+  if [ -z "$ARTIFACT" ]; then
+    # Single-pass with nothing to keep — fail hard with the clear reason.
+    if [ -n "${ISSUE_NUMBER:-}" ] && [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ]; then
+      gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "Scout run failed: $REASON" || true
+    fi
+    exit 3
+  fi
+  # Single-pass with a partial artifact — publish it but flag the degradation.
+  echo "$REASON" >> "$SOFT_FAIL_LOG"
+fi
+
+# Ledger validation (standard and deep only — ceo may not produce a ledger).
+LEDGER="$RESEARCH_DIR/citations.jsonl"
 if [ -f "$LEDGER" ]; then
   bash "$SCOUT_DIR/scripts/validate_ledger.sh" "$LEDGER" "$ARTIFACT"
 elif [ "$DEPTH" != "ceo" ]; then
