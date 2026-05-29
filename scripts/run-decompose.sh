@@ -511,3 +511,12 @@ SOFT_LOG="$(mktemp -t scout-decompose-softfail.XXXXXX.log)"
       bash "$SCOUT_DIR/scripts/publish.sh"
 )
 rm -f "$SOFT_LOG"
+
+# Offer a one-click re-run of any failed sub-topics. Non-blocking: a failure to
+# post the comment must not fail the whole expedition.
+if [ -n "${ISSUE_NUMBER:-}" ] && [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ]; then
+  ISSUE_NUMBER="$ISSUE_NUMBER" GH_TOKEN="$GH_TOKEN" GH_REPO="$GH_REPO" \
+    PARENT_DIR="$PARENT_DIR" \
+    bash "$SCOUT_DIR/scripts/rerun-comment.sh" \
+    || echo "[run-decompose] rerun-comment.sh failed (non-blocking)" >&2
+fi

@@ -198,6 +198,49 @@ jobs:
             echo "- **Issue:** #${ISSUE_NUMBER}"
           } >> "$GITHUB_STEP_SUMMARY"
 
+  rerun:
+    if: >
+      github.event_name == 'issue_comment' &&
+      github.event.action == 'edited' &&
+      (github.event.issue.author_association == 'OWNER' || github.event.issue.author_association == 'MEMBER') &&
+      github.event.comment.user.type == 'Bot' &&
+      contains(github.event.comment.body, '<!-- scout-rerun:') &&
+      contains(github.event.changes.body.from, '- [ ] **Re-run failed sub-topics**') &&
+      (contains(github.event.comment.body, '- [x] **Re-run failed sub-topics**') ||
+       contains(github.event.comment.body, '- [X] **Re-run failed sub-topics**'))
+    runs-on: [self-hosted, scout]
+    timeout-minutes: 270
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+      BOT_COMMENT_BODY: ${{ github.event.comment.body }}
+      ATLAS_REPO: git@github.com-atlas:${{ vars.ATLAS_REPO_OWNER || github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
+      GIT_AUTHOR_NAME: ${{ github.event.issue.user.login }}
+      GIT_AUTHOR_EMAIL: ${{ github.event.issue.user.id }}+${{ github.event.issue.user.login }}@users.noreply.github.com
+      GIT_COMMITTER_NAME: ${{ github.event.issue.user.login }}
+      GIT_COMMITTER_EMAIL: ${{ github.event.issue.user.id }}+${{ github.event.issue.user.login }}@users.noreply.github.com
+    steps:
+      - name: Post run-started comment
+        run: |
+          JOB_ID=$(gh api "repos/${GH_REPO}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}/jobs" \
+            --jq ".jobs[] | select(.name == \"${GITHUB_JOB}\") | .id")
+          RUN_URL="https://github.com/${GH_REPO}/actions/runs/${GITHUB_RUN_ID}/job/${JOB_ID}"
+          gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "Re-running failed sub-topics! :recycle:
+
+          Details: $RUN_URL"
+      - uses: actions/checkout@v5
+      - name: Re-run failed sub-topics from issue
+        run: bash scripts/rerun-from-issue.sh
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Re-run"
+            echo ""
+            echo "- **Issue:** #${ISSUE_NUMBER}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   research-dispatch:
     if: github.event_name == 'workflow_dispatch'
     runs-on: [self-hosted, scout]
