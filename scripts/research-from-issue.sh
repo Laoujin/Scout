@@ -34,6 +34,7 @@ parse_issue_body "$issue_body"
 # Determine routing: decompose vs single-pass.
 parse_start_choice "$BOT_COMMENT_BODY"
 parse_sub_topics   "$BOT_COMMENT_BODY"
+parse_series       "$BOT_COMMENT_BODY"   # exports SERIES_SLUG, SERIES_GROUP
 
 if [ "$START_CHOICE" = "decompose" ] && [ "${#SUB_TOPICS[@]}" -gt 0 ]; then
   echo "[research-from-issue] routing: decompose (${#SUB_TOPICS[@]} sub-topics)" >&2
@@ -56,6 +57,7 @@ if [ "$START_CHOICE" = "decompose" ] && [ "${#SUB_TOPICS[@]}" -gt 0 ]; then
 
   export PARENT_DIR PARENT_TOPIC="$TOPIC" DATE
   export SUB_TOPICS_TSV ATLAS_REPO ISSUE_NUMBER GH_TOKEN GH_REPO
+  export SERIES_SLUG SERIES_GROUP
   exec bash "$SCOUT_DIR/scripts/run-decompose.sh"
 fi
 
@@ -63,5 +65,5 @@ fi
 # present" case from before this feature shipped).
 echo "[research-from-issue] routing: single-pass" >&2
 [ -n "$RAW_TOPIC" ] || RAW_TOPIC="$TOPIC"
-export TOPIC RAW_TOPIC DEPTH ISSUE_NUMBER
+export TOPIC RAW_TOPIC DEPTH ISSUE_NUMBER SERIES_SLUG SERIES_GROUP
 exec bash "$SCOUT_DIR/scripts/run.sh"

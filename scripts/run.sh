@@ -250,6 +250,17 @@ if [ "${SCOUT_NO_PUBLISH:-0}" = "1" ]; then
   exit 0
 fi
 
+# Add to an existing Atlas series if the sharpen step suggested one and the
+# user left it ticked. Fail-soft: never blocks publishing.
+if [ -n "${SERIES_SLUG:-}" ] && [ -n "${ATLAS_DIR:-}" ]; then
+  SOFT_FAIL_LOG="$SOFT_FAIL_LOG" \
+    bash "$SCOUT_DIR/scripts/add-to-series.sh" \
+      "$ATLAS_DIR/_data/series.yml" \
+      "${DATE}-${FINAL_SLUG}" \
+      "$SERIES_SLUG" "${SERIES_GROUP:-}" \
+    || echo "run.sh: add-to-series.sh failed (non-blocking)" >> "$SOFT_FAIL_LOG"
+fi
+
 TOPIC="$TOPIC" SLUG="$FINAL_SLUG" DATE="$DATE" ATLAS_REPO="$ATLAS_REPO" \
   ISSUE_NUMBER="${ISSUE_NUMBER:-}" RESEARCH_DIR="$RESEARCH_DIR" \
   bash "$SCOUT_DIR/scripts/publish.sh"
