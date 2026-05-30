@@ -26,6 +26,7 @@ if grep -qE "^[[:space:]]*-[[:space:]]+${ENTRY}[[:space:]]*$" "$YAML"; then
   exit 0
 fi
 
+trap 'rm -f "${tmp:-}"' EXIT
 tmp="$(mktemp)"
 awk -v series="$SERIES" -v group="$GROUP" -v entry="$ENTRY" '
   function indent(s){ match(s, /^ */); return RLENGTH }
@@ -47,7 +48,7 @@ awk -v series="$SERIES" -v group="$GROUP" -v entry="$ENTRY" '
       g_ind = indent(lines[g_start])
       g_end = s_end
       for (i = g_start + 1; i < s_end; i++)
-        if (indent(lines[i]) <= g_ind && trim(lines[i]) ~ /^- label:/) { g_end = i; break }
+        if (indent(lines[i]) == g_ind && trim(lines[i]) ~ /^- label:/) { g_end = i; break }
       for (i = g_start + 1; i < g_end; i++) if (trim(lines[i]) == "entries:") { e_line = i; break }
     } else {
       for (i = s_start + 1; i < s_end; i++) if (trim(lines[i]) == "entries:") { e_line = i; break }
@@ -57,6 +58,7 @@ awk -v series="$SERIES" -v group="$GROUP" -v entry="$ENTRY" '
     entry_ind = indent(lines[e_line]) + 2
     ins_after = e_line
     for (i = e_line + 1; i <= n; i++) {
+      if (lines[i] ~ /^[[:space:]]*$/) continue
       if (lines[i] ~ /^ *- / && indent(lines[i]) == entry_ind) ins_after = i
       else break
     }
