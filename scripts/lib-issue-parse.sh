@@ -214,8 +214,13 @@ parse_series() {
   [ -n "$section" ] || { export SERIES_SLUG SERIES_GROUP; return 0; }
   while IFS= read -r line; do
     line="${line#"${line%%[![:space:]]*}"}"   # strip leading whitespace
-    # Match bullet + checkbox + **slug** — use greedy [^*]+ which is fine since
-    # slugs contain no asterisks.
+    # The series checkbox is ALWAYS the FIRST task-list bullet in the section.
+    # In narrow mode the section is unbounded (no trailing `### `), so a later
+    # `- [x] **Start research**` bullet would be over-read. Stop at the first
+    # task-list bullet and only honor it if ticked.
+    [[ "$line" =~ ^[-*][[:space:]]+\[[\ xX]\] ]] || continue
+    # Match bullet + ticked checkbox + **slug** — use greedy [^*]+ which is fine
+    # since slugs contain no asterisks.
     if [[ "$line" =~ ^[-*][[:space:]]+\[[xX]\][[:space:]]*\*\*([^*]+)\*\*(.*)$ ]]; then
       SERIES_SLUG="${BASH_REMATCH[1]}"
       SERIES_SLUG="${SERIES_SLUG%"${SERIES_SLUG##*[![:space:]]}"}"
@@ -245,8 +250,10 @@ parse_series() {
         # Trim trailing whitespace from group
         SERIES_GROUP="${SERIES_GROUP%"${SERIES_GROUP##*[![:space:]]}"}"
       fi
-      break
     fi
+    # Break after the FIRST task-list bullet regardless of ticked state, so a
+    # later ticked bullet (e.g. Start research) is never reached.
+    break
   done <<< "$section"
   export SERIES_SLUG SERIES_GROUP
 }

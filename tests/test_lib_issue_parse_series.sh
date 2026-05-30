@@ -52,6 +52,19 @@ parse_series "$COMMENT"
 assert_eq "hyphenated-group: slug"  "michelin-weekends"  "$SERIES_SLUG"
 assert_eq "hyphenated-group: group" "Bosnia-Herzegovina" "$SERIES_GROUP"
 
+# --- narrow-mode over-read: unticked series + ticked Start research bullet in
+# the same unbounded section -> nothing (series bullet is the FIRST one) ---
+COMMENT=$'### Series\n- [ ] **michelin-weekends** \xe2\x80\xba Germany \xe2\x80\x94 Munich.\n\nThis looks like part of an existing series. Leave it ticked...\n\n- [x] **Start research** — tick this to publish.\n'
+parse_series "$COMMENT"
+assert_eq "untick+start: slug empty"  "" "$SERIES_SLUG"
+assert_eq "untick+start: group empty" "" "$SERIES_GROUP"
+
+# --- ticked series + ticked Start research -> still the series, not "Start research" ---
+COMMENT=$'### Series\n- [x] **michelin-weekends** \xe2\x80\xba Germany \xe2\x80\x94 Munich.\n\n- [x] **Start research** — tick this.\n'
+parse_series "$COMMENT"
+assert_eq "tick+start: slug"  "michelin-weekends" "$SERIES_SLUG"
+assert_eq "tick+start: group" "Germany"           "$SERIES_GROUP"
+
 echo
 echo "Results: $PASS passed, $FAIL failed"
 if [ $FAIL -gt 0 ]; then

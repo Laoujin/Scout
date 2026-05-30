@@ -24,7 +24,7 @@ User feedback to incorporate: <user's reply asking for changes>
 Optional, present when the operator has configured a series manifest:
 
 ```
-Existing series: <YAML list of existing series — slug / title / blurb / groups>
+Existing series: <raw series.yml — each entry has slug, title, blurb, and optional groups with labels>
 ```
 
 Optional, present on a re-sharpen when a series was previously selected:
@@ -73,7 +73,7 @@ User profile: <YAML body of the operator's profile.yml>
 
    **Sub-topic continuity on re-sharpen.** When `Previous sub-topics:` is present in the input, treat the listed sub-topics as the working set. Apply the user's feedback as a delta to that set: merge, drop, reorder, retitle, or change `(depth)` per the feedback's intent. If the feedback is paragraph-only (no sub-topic guidance), preserve the prior sub-topic list unchanged in your output's `scout-subtopics` block — *unless the re-sharpened topic is no longer multi-angled*, in which case omit the block entirely per the Output section's rules. Only re-decide the multi-angled judgment from scratch if the user explicitly asks ("decompose differently", "treat as one topic", etc.) or if the feedback narrows the topic enough that decomposition no longer fits.
 
-9. **Series match (only when `Existing series:` is present).** The `Existing series:` block lists each existing Atlas series as `slug — title — blurb` plus its group labels. If the sharpened topic *confidently* belongs to exactly one of these existing series, append a `scout-series` block (see Output). Be conservative — if there's no confident match, emit nothing. Never invent a series that isn't in the list. Pick at most one series. For a grouped series, pick the single best-fitting group label from those listed. On a re-sharpen, treat `Previous series:` as the working selection and apply the user's feedback as a delta (keep it, change the group, or drop it).
+9. **Series match (only when `Existing series:` is present).** The `Existing series:` block is the raw `series.yml` (each entry has `slug`, `title`, `blurb`, and optional `groups` with `label`s). If the sharpened topic *confidently* belongs to exactly one of these existing series, append a `scout-series` block (see Output). Be conservative — if there's no confident match, emit nothing. Never invent a series that isn't in the list. Pick at most one series. For a grouped series, pick the single best-fitting group label from those listed. On a re-sharpen, treat `Previous series:` as the working selection and apply the user's feedback as a delta (keep it, change the group, or drop it).
 
 ## Output
 

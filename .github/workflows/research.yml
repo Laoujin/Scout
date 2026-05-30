@@ -121,8 +121,8 @@ jobs:
           PREVIOUS_SERIES="$(printf '%s' "$PREVIOUS_BODY" | awk '
             /^### Series[[:space:]]*$/ { in_section=1; next }
             /^### / && in_section { exit }
-            in_section { print }
-          ' | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')"
+            in_section && /^[[:space:]]*[-*][[:space:]]+\[[ xX]\]/ { print; exit }
+          ')"
 
           SHARPENED_TOPIC="$(RAW_TOPIC="$RAW_TOPIC" DEPTH="$DEPTH" \
                              PREVIOUS_SHARPENED="$PREVIOUS_SHARPENED" \
