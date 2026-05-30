@@ -27,15 +27,28 @@ SUB_TOPICS_BLOCK="$(printf '%s' "$SHARPENED_TOPIC" | awk '
   in_block { print }
 ')"
 
-# Strip the scout-subtopics fenced block (and trailing blanks) from the
-# paragraph that goes into the scout-topic fenced block. This prevents
-# nested fences from breaking research-from-issue.sh's bare-fence awk
-# extractor.
+# Extract the scout-series fenced block (intent: which series + group).
+SERIES_BLOCK="$(printf '%s' "$SHARPENED_TOPIC" | awk '
+  /^```scout-series[[:space:]]*$/ { in_block=1; next }
+  /^```[[:space:]]*$/ && in_block { exit }
+  in_block { print }
+')"
+
+# Strip the scout-subtopics and scout-series fenced blocks (and trailing
+# blanks) from the paragraph that goes into the scout-topic fenced block.
+# This prevents nested fences from breaking research-from-issue.sh's
+# bare-fence awk extractor.
 TOPIC_ONLY="$(printf '%s' "$SHARPENED_TOPIC" | awk '
   /^```scout-subtopics[[:space:]]*$/ { in_block=1; next }
+  /^```scout-series[[:space:]]*$/    { in_block=1; next }
   /^```[[:space:]]*$/ && in_block { in_block=0; next }
   !in_block { print }
 ' | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')"
+
+SERIES_SECTION=""
+if [ -n "$SERIES_BLOCK" ]; then
+  SERIES_SECTION="$(printf '### Series\n\n%s\n\nThis looks like part of an existing series. Leave it ticked to add this entry to the series when research starts; untick to skip.\n' "$SERIES_BLOCK")"
+fi
 
 # Blockquote each line of the topic for the human-readable section.
 quoted="$(printf '%s\n' "$TOPIC_ONLY" | sed 's/^/> /')"
@@ -58,6 +71,7 @@ This topic has several independent angles. Tick the ones to research as part of 
 
 ${SUB_TOPICS_BLOCK}
 
+${SERIES_SECTION}
 ### Go
 
 - [ ] **Start research** (runs every ticked sub-topic in parallel and generates an overview page; depth: \`${DEPTH_LABEL}\`)
@@ -78,6 +92,7 @@ ${TOPIC_ONLY}
 \`\`\`
 <!-- scout-topic-end -->
 
+${SERIES_SECTION}
 - [ ] **Start research** — tick this to publish to Atlas (depth: \`${DEPTH_LABEL}\`).
 
 Not what you wanted? Reply with feedback (e.g. "focus on open-source", "shorter, decision-only") and I'll propose a new sharpened version.
