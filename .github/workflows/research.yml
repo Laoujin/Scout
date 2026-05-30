@@ -40,6 +40,8 @@ jobs:
       GH_REPO: ${{ github.repository }}
       ISSUE_NUMBER: ${{ github.event.issue.number }}
       ISSUE_BODY: ${{ github.event.issue.body }}
+      ATLAS_OWNER: ${{ vars.ATLAS_REPO_OWNER || github.repository_owner }}
+      ATLAS_NAME: ${{ vars.ATLAS_REPO_NAME || 'Atlas' }}
     steps:
       - uses: actions/checkout@v5
       - name: Ensure scout-research label exists
@@ -51,6 +53,10 @@ jobs:
       - name: Sharpen and post proposal
         run: |
           set -euo pipefail
+          SERIES_MANIFEST="$(curl -fsSL \
+            "https://raw.githubusercontent.com/${ATLAS_OWNER}/${ATLAS_NAME}/main/_data/series.yml" \
+            2>/dev/null || true)"
+          export SERIES_MANIFEST
           source scripts/lib-issue-parse.sh
           parse_issue_body "$ISSUE_BODY"
           if [ "$SKIP_SHARPEN" = "true" ]; then
@@ -83,11 +89,17 @@ jobs:
       ISSUE_NUMBER: ${{ github.event.issue.number }}
       ISSUE_BODY: ${{ github.event.issue.body }}
       USER_FEEDBACK: ${{ github.event.comment.body }}
+      ATLAS_OWNER: ${{ vars.ATLAS_REPO_OWNER || github.repository_owner }}
+      ATLAS_NAME: ${{ vars.ATLAS_REPO_NAME || 'Atlas' }}
     steps:
       - uses: actions/checkout@v5
       - name: Re-sharpen with user feedback
         run: |
           set -euo pipefail
+          SERIES_MANIFEST="$(curl -fsSL \
+            "https://raw.githubusercontent.com/${ATLAS_OWNER}/${ATLAS_NAME}/main/_data/series.yml" \
+            2>/dev/null || true)"
+          export SERIES_MANIFEST
           source scripts/lib-issue-parse.sh
           parse_issue_body "$ISSUE_BODY"
           PREVIOUS_BODY="$(gh issue view "$ISSUE_NUMBER" --repo "$GH_REPO" \
@@ -106,9 +118,16 @@ jobs:
             in_section { print }
           ' | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')"
 
+          PREVIOUS_SERIES="$(printf '%s' "$PREVIOUS_BODY" | awk '
+            /^### Series[[:space:]]*$/ { in_section=1; next }
+            /^### / && in_section { exit }
+            in_section { print }
+          ' | sed -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}')"
+
           SHARPENED_TOPIC="$(RAW_TOPIC="$RAW_TOPIC" DEPTH="$DEPTH" \
                              PREVIOUS_SHARPENED="$PREVIOUS_SHARPENED" \
                              PREVIOUS_SUB_TOPICS="$PREVIOUS_SUB_TOPICS" \
+                             PREVIOUS_SERIES="$PREVIOUS_SERIES" \
                              USER_FEEDBACK="$USER_FEEDBACK" \
                              bash scripts/sharpen.sh)"
           ISSUE_NUMBER="$ISSUE_NUMBER" SHARPENED_TOPIC="$SHARPENED_TOPIC" \
