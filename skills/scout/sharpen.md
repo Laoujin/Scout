@@ -61,6 +61,8 @@ User profile: <YAML body of the operator's profile.yml>
 
    **Sub-topic continuity on re-sharpen.** When `Previous sub-topics:` is present in the input, treat the listed sub-topics as the working set. Apply the user's feedback as a delta to that set: merge, drop, reorder, retitle, or change `(depth)` per the feedback's intent. If the feedback is paragraph-only (no sub-topic guidance), preserve the prior sub-topic list unchanged in your output's `scout-subtopics` block — *unless the re-sharpened topic is no longer multi-angled*, in which case omit the block entirely per the Output section's rules. Only re-decide the multi-angled judgment from scratch if the user explicitly asks ("decompose differently", "treat as one topic", etc.) or if the feedback narrows the topic enough that decomposition no longer fits.
 
+9. **Series match (only when `Existing series:` is present).** The `Existing series:` block lists each existing Atlas series as `slug — title — blurb` plus its group labels. If the sharpened topic *confidently* belongs to exactly one of these existing series, append a `scout-series` block (see Output). Be conservative — if there's no confident match, emit nothing. Never invent a series that isn't in the list. Pick at most one series. For a grouped series, pick the single best-fitting group label from those listed. On a re-sharpen, treat `Previous series:` as the working selection and apply the user's feedback as a delta (keep it, change the group, or drop it).
+
 ## Output
 
 Always emit the sharpened topic as one paragraph. No preamble ("Here is..."), no quotes, no bullet list, no markdown headers, no explanation of what you changed. Just the paragraph, ready to be passed verbatim to the research playbook.
@@ -84,6 +86,20 @@ If multi-angled and `Depth: deep` (expedition), append a fenced `scout-subtopics
 - Cap at 8 sub-topics.
 - Every sub-topic must start with `- [x]` (ticked checkbox — selected by default), then `(depth)`, then `**Title**`, then `— rationale`.
 - Don't propose sub-topics that are mere sub-questions of one angle — those belong to the angle's own deep dive.
+
+### Series block format
+
+When rule 9 yields a confident match, append (after any sub-topics block):
+
+````
+```scout-series
+- [x] **<series-slug>** › <group-label> — one-line rationale.
+```
+````
+
+- Ticked (`- [x]`) by default — it's a suggestion the user can untick.
+- Include `› <group-label>` only for a grouped series; omit it entirely for a flat series.
+- Exactly one line. Omit the whole block when there is no confident match.
 
 ### Examples
 
