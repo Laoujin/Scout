@@ -9,6 +9,7 @@
 #               appended to the prompt as a "User profile:" block.
 # PREVIOUS_SUB_TOPICS is only meaningful alongside PREVIOUS_SHARPENED — its content
 # is what the prior bot comment proposed under "### Sub-topics".
+# PREVIOUS_SERIES is likewise only meaningful alongside PREVIOUS_SHARPENED.
 
 set -euo pipefail
 

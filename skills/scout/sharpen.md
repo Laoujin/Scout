@@ -21,6 +21,18 @@ Previous sharpened proposal: <last sharpened version>
 User feedback to incorporate: <user's reply asking for changes>
 ```
 
+Optional, present when the operator has configured a series manifest:
+
+```
+Existing series: <YAML list of existing series — slug / title / blurb / groups>
+```
+
+Optional, present on a re-sharpen when a series was previously selected:
+
+```
+Previous series: <prior scout-series block>
+```
+
 Optional, present when the operator has configured an identity profile:
 
 ```
