@@ -253,8 +253,7 @@ fi
 # Add to an existing Atlas series if the sharpen step suggested one and the
 # user left it ticked. Fail-soft: never blocks publishing.
 if [ -n "${SERIES_SLUG:-}" ] && [ -n "${ATLAS_DIR:-}" ]; then
-  SOFT_FAIL_LOG="$SOFT_FAIL_LOG" \
-    bash "$SCOUT_DIR/scripts/add-to-series.sh" \
+  bash "$SCOUT_DIR/scripts/add-to-series.sh" \
       "$ATLAS_DIR/_data/series.yml" \
       "${DATE}-${FINAL_SLUG}" \
       "$SERIES_SLUG" "${SERIES_GROUP:-}" \

@@ -34,7 +34,7 @@ parse_issue_body "$issue_body"
 # Determine routing: decompose vs single-pass.
 parse_start_choice "$BOT_COMMENT_BODY"
 parse_sub_topics   "$BOT_COMMENT_BODY"
-parse_series       "$BOT_COMMENT_BODY"   # exports SERIES_SLUG, SERIES_GROUP
+parse_series       "$BOT_COMMENT_BODY"
 
 if [ "$START_CHOICE" = "decompose" ] && [ "${#SUB_TOPICS[@]}" -gt 0 ]; then
   echo "[research-from-issue] routing: decompose (${#SUB_TOPICS[@]} sub-topics)" >&2
