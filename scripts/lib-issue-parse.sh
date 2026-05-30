@@ -198,3 +198,55 @@ parse_start_choice() {
   fi
   export START_CHOICE
 }
+
+# --- Series parsing -------------------------------------------------------
+#
+# parse_series reads the `### Series` section of a bot comment and exports:
+#   SERIES_SLUG  — series slug if a ticked line is present, else ""
+#   SERIES_GROUP — group label if present on that line, else ""
+# Only a ticked ([x]/[X]) line counts. Line shape (lenient):
+#   - [x] **<slug>** [(› | /) <group>] [(— | -) <rationale>]
+parse_series() {
+  local body="$1"
+  SERIES_SLUG=""; SERIES_GROUP=""
+  local section line
+  section="$(_extract_section "$body" 'Series')"
+  [ -n "$section" ] || { export SERIES_SLUG SERIES_GROUP; return 0; }
+  while IFS= read -r line; do
+    line="${line#"${line%%[![:space:]]*}"}"   # strip leading whitespace
+    # Match bullet + checkbox + **slug** — use greedy [^*]+ which is fine since
+    # slugs contain no asterisks.
+    if [[ "$line" =~ ^[-*][[:space:]]+\[[xX]\][[:space:]]*\*\*([^*]+)\*\*(.*)?$ ]]; then
+      SERIES_SLUG="${BASH_REMATCH[1]}"
+      SERIES_SLUG="${SERIES_SLUG%"${SERIES_SLUG##*[![:space:]]}"}"
+      local remainder="${BASH_REMATCH[2]}"
+      # Strip leading whitespace from remainder
+      remainder="${remainder#"${remainder%%[![:space:]]*}"}"
+      # If remainder starts with › (U+203A, UTF-8: e2 80 ba) or /, a group follows
+      local group_sep=$'\xe2\x80\xba'
+      if [[ "$remainder" == "${group_sep}"* ]] || [[ "$remainder" == "/"* ]]; then
+        # Remove the leading separator character
+        if [[ "$remainder" == "${group_sep}"* ]]; then
+          remainder="${remainder#"$group_sep"}"
+        else
+          remainder="${remainder#/}"
+        fi
+        # Strip leading whitespace
+        remainder="${remainder#"${remainder%%[![:space:]]*}"}"
+        # Split on the first em-dash (—, U+2014, UTF-8: e2 80 94) or hyphen
+        local em_dash=$'\xe2\x80\x94'
+        if [[ "$remainder" == *"${em_dash}"* ]]; then
+          SERIES_GROUP="${remainder%%"${em_dash}"*}"
+        elif [[ "$remainder" == *"-"* ]]; then
+          SERIES_GROUP="${remainder%%-*}"
+        else
+          SERIES_GROUP="$remainder"
+        fi
+        # Trim trailing whitespace from group
+        SERIES_GROUP="${SERIES_GROUP%"${SERIES_GROUP##*[![:space:]]}"}"
+      fi
+      break
+    fi
+  done <<< "$section"
+  export SERIES_SLUG SERIES_GROUP
+}
