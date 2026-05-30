@@ -216,7 +216,7 @@ parse_series() {
     line="${line#"${line%%[![:space:]]*}"}"   # strip leading whitespace
     # Match bullet + checkbox + **slug** — use greedy [^*]+ which is fine since
     # slugs contain no asterisks.
-    if [[ "$line" =~ ^[-*][[:space:]]+\[[xX]\][[:space:]]*\*\*([^*]+)\*\*(.*)?$ ]]; then
+    if [[ "$line" =~ ^[-*][[:space:]]+\[[xX]\][[:space:]]*\*\*([^*]+)\*\*(.*)$ ]]; then
       SERIES_SLUG="${BASH_REMATCH[1]}"
       SERIES_SLUG="${SERIES_SLUG%"${SERIES_SLUG##*[![:space:]]}"}"
       local remainder="${BASH_REMATCH[2]}"
@@ -237,8 +237,8 @@ parse_series() {
         local em_dash=$'\xe2\x80\x94'
         if [[ "$remainder" == *"${em_dash}"* ]]; then
           SERIES_GROUP="${remainder%%"${em_dash}"*}"
-        elif [[ "$remainder" == *"-"* ]]; then
-          SERIES_GROUP="${remainder%%-*}"
+        elif [[ "$remainder" == *" -"* ]]; then
+          SERIES_GROUP="${remainder%% -*}"
         else
           SERIES_GROUP="$remainder"
         fi

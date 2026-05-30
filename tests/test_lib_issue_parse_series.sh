@@ -17,34 +17,40 @@ assert_eq() {
 echo "Testing parse_series()..."
 
 # --- ticked, with group ---
-C=$'### Series\n- [x] **michelin-weekends** \xe2\x80\xba Germany \xe2\x80\x94 Munich weekend.\n\n### Go\n- [ ] **Start research**\n'
-parse_series "$C"
+COMMENT=$'### Series\n- [x] **michelin-weekends** \xe2\x80\xba Germany \xe2\x80\x94 Munich weekend.\n\n### Go\n- [ ] **Start research**\n'
+parse_series "$COMMENT"
 assert_eq "grouped: slug"  "michelin-weekends" "$SERIES_SLUG"
 assert_eq "grouped: group" "Germany"           "$SERIES_GROUP"
 
 # --- ticked, flat (no group) ---
-C=$'### Series\n- [x] **sessions-and-workshops** \xe2\x80\x94 talk prep.\n'
-parse_series "$C"
+COMMENT=$'### Series\n- [x] **sessions-and-workshops** \xe2\x80\x94 talk prep.\n'
+parse_series "$COMMENT"
 assert_eq "flat: slug"  "sessions-and-workshops" "$SERIES_SLUG"
 assert_eq "flat: group" ""                        "$SERIES_GROUP"
 
 # --- unticked -> nothing ---
-C=$'### Series\n- [ ] **michelin-weekends** \xe2\x80\xba Germany \xe2\x80\x94 Munich.\n'
-parse_series "$C"
+COMMENT=$'### Series\n- [ ] **michelin-weekends** \xe2\x80\xba Germany \xe2\x80\x94 Munich.\n'
+parse_series "$COMMENT"
 assert_eq "unticked: slug"  "" "$SERIES_SLUG"
 assert_eq "unticked: group" "" "$SERIES_GROUP"
 
 # --- absent section -> nothing ---
-C=$'### Go\n- [ ] **Start research**\n'
-parse_series "$C"
+COMMENT=$'### Go\n- [ ] **Start research**\n'
+parse_series "$COMMENT"
 assert_eq "absent: slug"  "" "$SERIES_SLUG"
 assert_eq "absent: group" "" "$SERIES_GROUP"
 
 # --- lenient: ascii separators, asterisk bullet, leading ws, slash group ---
-C=$'### Series\n  * [X] **michelin-weekends** / Germany - Munich.\n'
-parse_series "$C"
+COMMENT=$'### Series\n  * [X] **michelin-weekends** / Germany - Munich.\n'
+parse_series "$COMMENT"
 assert_eq "lenient: slug"  "michelin-weekends" "$SERIES_SLUG"
 assert_eq "lenient: group" "Germany"           "$SERIES_GROUP"
+
+# --- hyphenated group label with space-hyphen rationale separator (fix #1) ---
+COMMENT=$'### Series\n- [x] **michelin-weekends** \xe2\x80\xba Bosnia-Herzegovina - some rationale.\n'
+parse_series "$COMMENT"
+assert_eq "hyphenated-group: slug"  "michelin-weekends"  "$SERIES_SLUG"
+assert_eq "hyphenated-group: group" "Bosnia-Herzegovina" "$SERIES_GROUP"
 
 echo
 echo "Results: $PASS passed, $FAIL failed"
