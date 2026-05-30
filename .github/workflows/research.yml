@@ -55,7 +55,7 @@ jobs:
           set -euo pipefail
           SERIES_MANIFEST="$(curl -fsSL \
             "https://raw.githubusercontent.com/${ATLAS_OWNER}/${ATLAS_NAME}/main/_data/series.yml" \
-            2>/dev/null || true)"
+            2>/dev/null || { echo "::warning::Could not fetch Atlas series manifest (${ATLAS_OWNER}/${ATLAS_NAME}); series suggestion disabled for this run" >&2; true; })"
           export SERIES_MANIFEST
           source scripts/lib-issue-parse.sh
           parse_issue_body "$ISSUE_BODY"
@@ -98,7 +98,7 @@ jobs:
           set -euo pipefail
           SERIES_MANIFEST="$(curl -fsSL \
             "https://raw.githubusercontent.com/${ATLAS_OWNER}/${ATLAS_NAME}/main/_data/series.yml" \
-            2>/dev/null || true)"
+            2>/dev/null || { echo "::warning::Could not fetch Atlas series manifest (${ATLAS_OWNER}/${ATLAS_NAME}); series suggestion disabled for this run" >&2; true; })"
           export SERIES_MANIFEST
           source scripts/lib-issue-parse.sh
           parse_issue_body "$ISSUE_BODY"
