@@ -94,8 +94,9 @@ New function, same leniency as `parse_sub_topics`:
 - Exports `SERIES_SLUG` and `SERIES_GROUP` (empty when absent/unticked).
 
 `research-from-issue.sh` calls `parse_series "$BOT_COMMENT_BODY"` alongside `parse_start_choice` /
-`parse_sub_topics`, and exports `SERIES_SLUG` / `SERIES_GROUP` into the run env (single-pass `run.sh`
-and decompose `run-decompose.sh` paths both).
+`parse_sub_topics`, and exports `SERIES_SLUG` / `SERIES_GROUP` into the run env. Only the single-pass
+`run.sh` path acts on them in v1 (see Out of scope); exporting them on the decompose path too is
+harmless and leaves the wiring ready for the follow-up.
 
 ### 5. YAML edit — `scripts/add-to-series.sh`
 
@@ -118,6 +119,11 @@ tree, so `publish.sh`'s existing `git add .` sweeps it into the same research co
 - A single entry in multiple series.
 - `workflow_dispatch` runs (no bot comment / sharpen step → no series suggestion).
 - Back-filling series for already-published entries.
+- **Decompose / expedition runs** (`run-decompose.sh`). Its parent folder is slugged up-front (no
+  title-rename) and published via a per-child + final-sweep machine — a different insertion point.
+  Series so far are all single-pass (`standard` depth), so v1 ships single-pass only. `parse_series`
+  still exports the vars on this path, so the follow-up is just an `add-to-series.sh` call in the
+  parent's publish step.
 
 ## Testing (TDD)
 
