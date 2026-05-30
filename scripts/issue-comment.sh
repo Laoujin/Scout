@@ -47,7 +47,10 @@ TOPIC_ONLY="$(printf '%s' "$SHARPENED_TOPIC" | awk '
 
 SERIES_SECTION=""
 if [ -n "$SERIES_BLOCK" ]; then
-  SERIES_SECTION="$(printf '### Series\n\n%s\n\nThis looks like part of an existing series. Leave it ticked to add this entry to the series when research starts; untick to skip.\n' "$SERIES_BLOCK")"
+  # Append a sentinel (x) before capturing, then strip it, to preserve trailing
+  # newlines that command substitution $(...) would otherwise eat.
+  SERIES_SECTION="$(printf '### Series\n\n%s\n\nThis looks like part of an existing series. Leave it ticked to add this entry to the series when research starts; untick to skip.\n\n' "$SERIES_BLOCK"; printf x)"
+  SERIES_SECTION="${SERIES_SECTION%x}"
 fi
 
 # Blockquote each line of the topic for the human-readable section.
