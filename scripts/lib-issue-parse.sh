@@ -40,6 +40,42 @@ _trim_blanks() {
   '
 }
 
+# Extract the sharpened topic from a bot comment body. Prefers the HTML-marker
+# region (current format); falls back to a bare ```scout-topic fence for
+# pre-marker comments. Unwraps an old ```scout-topic fence found *inside* the
+# markers so already-sharpened issues keep working.
+# COMPAT: the fence-unwrap branch + bare-fence fallback can be removed once all
+# pre-2026-06 sharpened issues are closed.
+extract_topic() {
+  local body="$1" region
+  region="$(printf '%s' "$body" | awk '
+    /<!-- scout-topic-start -->/ { in_m=1; next }
+    /<!-- scout-topic-end -->/   { in_m=0; exit }
+    in_m { print }
+  ')"
+  if [ -z "$region" ]; then
+    region="$(printf '%s' "$body" | awk '
+      /^```scout-topic[[:space:]]*$/ { in_b=1; next }
+      /^```[[:space:]]*$/ && in_b { exit }
+      in_b { print }
+    ')"
+  fi
+  case "$region" in
+    '```scout-topic'*)
+      region="$(printf '%s' "$region" | awk '
+        /^```scout-topic/ { f=1; next }
+        /^```/            { f=0 }
+        f')" ;;
+  esac
+  printf '%s' "$region" | _trim_blanks
+}
+
+# First non-empty line of a (possibly structured) topic, stripped of bold
+# markers and a leading bullet — used as the slug/title source.
+topic_title() {
+  printf '%s\n' "$1" | sed -n '/[^[:space:]]/{s/^[[:space:]]*//;s/\*\*//g;s/^[-*][[:space:]]*//;s/[[:space:]]*$//;p;q}'
+}
+
 # Map display-name aliases from the Issue Form back to internal codes used by
 # downstream scripts (run.sh, sharpen.sh, skills, agents).
 _normalize_depth() {
