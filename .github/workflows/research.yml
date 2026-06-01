@@ -132,11 +132,7 @@ jobs:
               --json comments \
               --jq '[.comments[] | select(.author.login == "github-actions[bot]")] | last | .body')"
 
-          PREVIOUS_SHARPENED="$(printf '%s' "$PREVIOUS_BODY" | awk '
-            /^```scout-topic[[:space:]]*$/ { in_block=1; next }
-            /^```[[:space:]]*$/ && in_block { exit }
-            in_block { print }
-          ')"
+          PREVIOUS_SHARPENED="$(extract_topic "$PREVIOUS_BODY")"
 
           PREVIOUS_SUB_TOPICS="$(printf '%s' "$PREVIOUS_BODY" | awk '
             /^### Sub-topics[[:space:]]*$/ { in_section=1; next }
