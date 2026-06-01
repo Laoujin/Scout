@@ -1256,7 +1256,7 @@ section.ya-group { padding: 15px 0; }
     <div class="faq">
       <details>
         <summary>What does a run cost?</summary>
-        <p>On a Pro/Max subscription you'd already have for coding, runs consume your existing quota — no incremental cost. On API-key auth, measured per-run from my own Atlas (Sonnet 4.6):</p>
+        <p>Since 15 June 2026, headless Claude Code runs — which is what Scout uses — bill a separate monthly credit at API rates (Pro $20, Max 5&times; $100, Max 20&times; $200) rather than your interactive subscription quota. The table below is what a run draws from that credit, measured per-run from my own Atlas; Scout tiers the model by depth (<code>haiku</code>/<code>sonnet</code>/<code>opus</code>) to stretch it:</p>
         <table>
           <thead>
             <tr><th>Tier</th><th>Mode</th><th>Time</th><th>Cost median (range)</th><th>n</th></tr>
@@ -1294,7 +1294,7 @@ section.ya-group { padding: 15px 0; }
       </details>
       <details>
         <summary>Does it work on GitHub-hosted runners?</summary>
-        <p>Not out of the box. The self-hosted runner is what lets Scout use your Claude subscription instead of paying per-request. You can flip <code>runs-on</code> to <code>ubuntu-latest</code> and inject an API key, but you lose the cost advantage.</p>
+        <p>Not out of the box. The self-hosted runner is what lets Scout authenticate with your Claude subscription login and keep research on your own hardware. Since 15 June 2026 headless runs bill a monthly credit at API rates either way, so the runner is about auth and privacy, not dodging per-request cost. You can flip <code>runs-on</code> to <code>ubuntu-latest</code> and inject an API key instead.</p>
       </details>
       <details>
         <summary>What data leaves my network?</summary>

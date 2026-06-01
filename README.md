@@ -107,11 +107,13 @@ Then, in any Claude Code session:
 
 `Depth` controls how Scout researches:
 
-| Depth        | Output                     | Mechanism                         | Wall-clock |
-|--------------|----------------------------|-----------------------------------|------------|
-| `recon`      | One-page decision brief    | Single pass, inline citations     | ~2-5 min   |
-| `survey`     | 2-4 page balanced overview | Single pass + reflect-and-requery | ~5-10 min  |
-| `expedition` | All-angle long-form        | Parallel sub-agents + post-review | ~15-60 min |
+| Depth        | Output                     | Mechanism                         | Model    | Wall-clock |
+|--------------|----------------------------|-----------------------------------|----------|------------|
+| `recon`      | One-page decision brief    | Single pass, inline citations     | `haiku`  | ~2-5 min   |
+| `survey`     | 2-4 page balanced overview | Single pass + reflect-and-requery | `sonnet` | ~5-10 min  |
+| `expedition` | All-angle long-form        | Parallel sub-agents + post-review | `opus`   | ~15-60 min |
+
+Each depth maps to a model tier to balance quality against the per-run cost of headless Claude Code. Override the tiers per-fork with `SCOUT_MODEL*` Actions Variables — see [Tune model cost](docs/OPERATE.md#tune-model-cost).
 
 See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for per-tier behaviour and [`skills/scout/deep.md`](skills/scout/deep.md) for the expedition flow.
 
