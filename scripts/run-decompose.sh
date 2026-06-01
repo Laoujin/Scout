@@ -377,7 +377,9 @@ Use the synthesis skill. Write the parent index.md to PARENT_DIR/index.md.
 EOF
 )"
 
+  source "$SCOUT_DIR/scripts/lib-models.sh"
   claude --dangerously-skip-permissions \
+         --model "$SCOUT_MODEL_BASE" \
          --print \
          --output-format json \
          --append-system-prompt "$SKILL_CONTENT" \

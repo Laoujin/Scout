@@ -25,6 +25,17 @@ concurrency:
   group: research-${{ github.event.issue.number || github.ref }}
   cancel-in-progress: false
 
+# Model tiering. Defaults live in scripts/lib-models.sh; set these as repo
+# Variables (Settings -> Secrets and variables -> Actions -> Variables) to
+# override without touching code. Unset vars render as "" and fall through to
+# the lib defaults. SCOUT_MODEL forces every tier to one model (e.g. a
+# month-end credit clamp).
+env:
+  SCOUT_MODEL: ${{ vars.SCOUT_MODEL }}
+  SCOUT_MODEL_CHEAP: ${{ vars.SCOUT_MODEL_CHEAP }}
+  SCOUT_MODEL_BASE: ${{ vars.SCOUT_MODEL_BASE }}
+  SCOUT_MODEL_DEEP: ${{ vars.SCOUT_MODEL_DEEP }}
+
 jobs:
   sharpen-on-open:
     if: >

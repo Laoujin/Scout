@@ -103,7 +103,9 @@ EOF
 OUT="$RESEARCH_DIR/.view-candidacy.json"
 RESULT_JSON="$RESEARCH_DIR/.view-candidacy-result.json"
 
+source "$SCOUT_DIR/scripts/lib-models.sh"
 claude --dangerously-skip-permissions \
+       --model "$SCOUT_MODEL_CHEAP" \
        --print \
        --output-format json \
        --append-system-prompt "$SKILL_CONTENT" \

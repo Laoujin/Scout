@@ -16,6 +16,7 @@ setup_with_n_successes() {
   mkdir -p "$tmp/scout/scripts" "$tmp/scout/skills/scout" "$tmp/atlas-checkout"
   cp "$REPO_ROOT/scripts/lib-issue-parse.sh" "$tmp/scout/scripts/"
   cp "$REPO_ROOT/scripts/run-decompose.sh"   "$tmp/scout/scripts/"
+  cp "$REPO_ROOT/scripts/lib-models.sh"      "$tmp/scout/scripts/"
   cp "$REPO_ROOT/skills/scout/synthesis.md"  "$tmp/scout/skills/scout/"
 
   # run.sh stub: writes success for first $n calls, then failure.

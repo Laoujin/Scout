@@ -51,6 +51,7 @@ cp "$REPO_ROOT/scripts/lib-publish.sh"      "$TMP/scout/scripts/"
 cp "$REPO_ROOT/scripts/lib-issue-parse.sh"  "$TMP/scout/scripts/"
 cp "$REPO_ROOT/scripts/slug.sh"             "$TMP/scout/scripts/"
 cp "$REPO_ROOT/scripts/run-decompose.sh"    "$TMP/scout/scripts/"
+cp "$REPO_ROOT/scripts/lib-models.sh"       "$TMP/scout/scripts/"
 # Real publish.sh handles the final parent commit.
 cp "$REPO_ROOT/scripts/publish.sh"          "$TMP/scout/scripts/"
 echo "stub synthesis skill" > "$TMP/scout/skills/scout/synthesis.md"

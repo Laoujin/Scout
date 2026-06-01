@@ -81,6 +81,7 @@ chmod +x "$TMP/bin/claude"
 # Real run-decompose.sh + real add-to-series.sh (integration, not mocks).
 cp "$REPO_ROOT/scripts/run-decompose.sh" "$TMP/scout/scripts/"
 cp "$REPO_ROOT/scripts/add-to-series.sh" "$TMP/scout/scripts/"
+cp "$REPO_ROOT/scripts/lib-models.sh" "$TMP/scout/scripts/"
 
 env PATH="$TMP/bin:$PATH" \
     PARENT_DIR="$PARENT_DIR" \

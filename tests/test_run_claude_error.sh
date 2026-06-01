@@ -17,7 +17,7 @@ echo "Testing run.sh Claude-error handling..."
 setup() {
   local tmp; tmp=$(mktemp -d)
   mkdir -p "$tmp/scout/scripts" "$tmp/scout/skills/scout"
-  for s in run.sh slug.sh validate_frontmatter.sh validate_ledger.sh inject_cost.sh; do
+  for s in run.sh slug.sh lib-models.sh validate_frontmatter.sh validate_ledger.sh inject_cost.sh; do
     cp "$REPO_ROOT/scripts/$s" "$tmp/scout/scripts/"
   done
   cp "$REPO_ROOT/skills/scout/SKILL.md" "$tmp/scout/skills/scout/"

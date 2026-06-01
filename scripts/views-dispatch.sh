@@ -31,6 +31,8 @@ ATLAS_REPO="${ATLAS_REPO:-git@github.com:Laoujin/atlas.git}"
 source "$SCOUT_DIR/scripts/lib-views-parse.sh"
 # shellcheck source=scripts/lib-publish.sh
 source "$SCOUT_DIR/scripts/lib-publish.sh"
+# shellcheck source=scripts/lib-models.sh
+source "$SCOUT_DIR/scripts/lib-models.sh"
 
 # Step 1: parse the bot comment.
 parse_view_targets "$BOT_COMMENT_BODY"
@@ -153,6 +155,7 @@ EOF
 
   (
     claude --dangerously-skip-permissions \
+           --model "$SCOUT_MODEL_BASE" \
            --print \
            --output-format json \
            --append-system-prompt "$SKILL_CONTENT" \

@@ -84,6 +84,7 @@ on_error() {
 trap on_error ERR
 
 source "$SCOUT_DIR/scripts/slug.sh"
+source "$SCOUT_DIR/scripts/lib-models.sh"
 DATE="$(date +%F)"
 SLUG="$(slugify "$TOPIC")"
 if [ -z "$SLUG" ]; then
@@ -134,6 +135,7 @@ SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout/SKILL.md")"
 
 RESULT_JSON="$RESEARCH_DIR/.scout-result.json"
 claude --dangerously-skip-permissions \
+       --model "$(scout_model_for_depth "$DEPTH")" \
        --print \
        --output-format json \
        --append-system-prompt "$SKILL_CONTENT" \

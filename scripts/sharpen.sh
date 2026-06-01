@@ -17,6 +17,7 @@ set -euo pipefail
 : "${DEPTH:=standard}"
 
 SCOUT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+source "$SCOUT_DIR/scripts/lib-models.sh"
 SHARPEN_PROMPT="$(cat "$SCOUT_DIR/skills/scout/sharpen.md")"
 
 input="Raw topic: ${RAW_TOPIC}
@@ -54,6 +55,7 @@ $(cat "$PROFILE_FILE")"
 fi
 
 claude --dangerously-skip-permissions \
+       --model "$SCOUT_MODEL_BASE" \
        --print \
        --append-system-prompt "$SHARPEN_PROMPT" \
        "$input"

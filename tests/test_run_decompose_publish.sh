@@ -76,6 +76,7 @@ STUB
 chmod +x "$TMP/bin/claude"
 
 cp "$REPO_ROOT/scripts/run-decompose.sh" "$TMP/scout/scripts/"
+cp "$REPO_ROOT/scripts/lib-models.sh" "$TMP/scout/scripts/"
 
 env PATH="$TMP/bin:$PATH" \
     PARENT_DIR="$PARENT_DIR" \
