@@ -72,14 +72,17 @@ if [ -s "$WIDE" ]; then
                         || pass "wide uses LF line endings"
 fi
 
-# --- Narrow: no fenced blocks, no bullet lines (single paragraph only) ---
+# --- Narrow: structured brief — bold lead line + >=1 bullet, no fenced blocks ---
 if [ -s "$NARROW" ]; then
   fences=$(grep -c '^```' "$NARROW" || true)
   bullets=$(grep -cE '^[-*] ' "$NARROW" || true)
+  lead=$(grep -cE '^\*\*.+\*\*' "$NARROW" || true)
   [ "$fences" -eq 0 ] && pass "narrow: no fenced blocks" \
                       || fail "narrow: $fences fenced-block line(s) found, expected 0"
-  [ "$bullets" -eq 0 ] && pass "narrow: no bullet lines" \
-                       || fail "narrow: $bullets bullet line(s) found, expected 0"
+  [ "$bullets" -ge 1 ] && pass "narrow: has bullet lines ($bullets)" \
+                       || fail "narrow: no bullet lines, expected >=1"
+  [ "$lead" -ge 1 ] && pass "narrow: has bold lead line" \
+                    || fail "narrow: no bold lead line found"
 fi
 
 # --- Wide: paragraph + scout-subtopics block + 2-8 canonical sub-topic lines ---

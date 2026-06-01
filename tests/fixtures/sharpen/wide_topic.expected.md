@@ -1,4 +1,8 @@
-Design and implement an end-to-end workflow that lets the user chat with Claude Code on Slack (one channel per project) to spec a feature or bugfix, give a "go" message that triggers implementation, and have the change land as a branch and PR, deploy to a Synology NAS, and expose itself at a per-feature subdomain like ProjectName-FeatureX.sangu.be. Cover the wiring, state, and failure modes that tie the pieces together; favor production-ready open-source components in 2026.
+**Design and implement a Slack-driven, per-feature deploy workflow for Claude Code on Synology (2026).**
+
+- Scope: chat with Claude Code on Slack (one channel per project) to spec a feature or bugfix, give a "go" that triggers implementation, and have the change land as a branch and PR, deploy to a Synology NAS, and expose itself at a per-feature subdomain like ProjectName-FeatureX.sangu.be.
+- Cover: the wiring, state, and failure modes that tie the pieces together.
+- Constraints: favor production-ready open-source components.
 
 ```scout-subtopics
 - [x] (expedition) **Slack ↔ Claude Code remote control** — Per-project channel mapping, message → agent invocation, the "go" approval gate, mobile UX. Needs survey of GitHub App vs Agent SDK vs self-hosted bot.

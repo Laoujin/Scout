@@ -77,7 +77,7 @@ User profile: <YAML body of the operator's profile.yml>
 
 ## Output
 
-Always emit the sharpened topic as one paragraph. No preamble ("Here is..."), no quotes, no bullet list, no markdown headers, no explanation of what you changed. Just the paragraph, ready to be passed verbatim to the research playbook.
+Emit the sharpened topic as a structured brief: a **bold one-line deliverable** (verb-led — "Decision framework…", "Survey of…", "Compare…"), then 2–5 markdown bullets. Use bullets such as `Scope:`, `Compare:` (the axes from rule 3), `Constraints:` (steering hints, verbatim), and `Output:` (the shape implied by depth). No preamble ("Here is…"), no quotes, no `#` headings (the bold lead line is the title), no explanation of what you changed. Keep it tight — don't pad. The whole brief is passed verbatim to the research playbook, so the bold lead line should read as the deliverable on its own.
 
 **Then judge whether the topic is multi-angled.** A topic is multi-angled when it bundles independent sub-systems each worth their own deep dive (e.g., issue #10 mixes Slack remote control, branch/PR automation, deployment, routing, and orchestration). It is NOT multi-angled when the angles share a common axis the research already compares along (e.g. "compare ripgrep vs ag vs ack" — single comparison, not multi-angled).
 
@@ -123,7 +123,11 @@ Depth: standard
 
 Output:
 ```
-Decision framework comparing ripgrep, ag, ack, and grep for repository-scale code search in 2026, focused on speed on a 50k-file tree, ergonomic fit (PCRE/regex flavor, smart-case, gitignore awareness), packaging maturity, and the maintenance state of each tool. Decision-only.
+**Decision framework: ripgrep vs ag vs ack vs grep for repository-scale code search (2026).**
+
+- Scope: searching a 50k-file repository; decision-only.
+- Compare: raw speed on a large tree, ergonomic fit (PCRE/regex flavor, smart-case, gitignore awareness), packaging maturity, maintenance state.
+- Output: a comparison table of the four tools with a clear recommendation.
 ```
 
 (No `scout-subtopics` block — single comparison axis.)
@@ -136,7 +140,11 @@ Depth: deep
 
 Output:
 ```
-Design and implement an end-to-end workflow that lets the user chat with Claude Code on Slack to spec, build, and review a feature, then auto-deploy each branch to a per-feature subdomain on Synology. Cover the wiring, state, and failure modes that tie the pieces together; favor production-ready open-source components in 2026.
+**Design and implement a Slack-driven, per-feature deploy workflow for Claude Code on Synology (2026).**
+
+- Scope: chat with Claude Code on Slack to spec, build, and review a feature, then auto-deploy each branch to a per-feature subdomain on Synology.
+- Cover: the wiring, state, and failure modes that tie the pieces together.
+- Constraints: favor production-ready open-source components.
 ```
 ```scout-subtopics
 - [x] (expedition) **Slack ↔ Claude Code remote control** — Per-project channels, message → agent invocation, approval/handoff, mobile UX. Needs survey of GitHub App vs Agent SDK vs self-hosted bot.
