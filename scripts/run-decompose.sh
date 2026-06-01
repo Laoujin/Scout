@@ -494,6 +494,20 @@ RESEARCH_DIR="$PARENT_DIR" SCOUT_DIR="$SCOUT_DIR" \
   bash "$SCOUT_DIR/scripts/view-candidacy.sh" \
   || echo "[run-decompose] view-candidacy.sh failed (non-blocking)" >&2
 
+# Add the parent expedition to an existing Atlas series if one was suggested
+# and left ticked (mirrors run.sh's single-pass wiring). Must run before the
+# final publish so the series.yml edit is swept into the same commit. The
+# series.yml lives two levels up from PARENT_DIR (<atlas-checkout>/research/<slug>).
+# Fail-soft: never blocks publishing.
+if [ -n "${SERIES_SLUG:-}" ]; then
+  series_yml="$(cd "$PARENT_DIR/../.." && pwd)/_data/series.yml"
+  bash "$SCOUT_DIR/scripts/add-to-series.sh" \
+      "$series_yml" \
+      "${DATE}-${PARENT_SLUG}" \
+      "$SERIES_SLUG" "${SERIES_GROUP:-}" \
+    || echo "[run-decompose] add-to-series.sh failed (non-blocking)" >&2
+fi
+
 # --- Publish: parent synthesis + manifest + any failure placeholders. ---
 # Children that succeeded were already pushed individually inside the loop; this
 # final publish picks up whatever's left (synthesis index.md, manifest.json,
