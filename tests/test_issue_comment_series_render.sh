@@ -33,9 +33,12 @@ TOPIC=$'A Munich weekend planned around a Michelin anchor.\n```scout-series\n- [
 run_comment "$TOPIC"
 grep -q '### Series' "$CAPTURE_FILE" && pass "narrow: series section rendered" || fail "narrow: no ### Series section"
 grep -qF -- '- [x] **michelin-weekends**' "$CAPTURE_FILE" && pass "narrow: checkbox rendered ticked" || fail "narrow: checkbox missing"
-awk '/```scout-topic/{f=1;next} /```/{f=0} f' "$CAPTURE_FILE" | grep -q 'scout-series' \
-  && fail "narrow: scout-series leaked into scout-topic block" \
-  || pass "narrow: scout-series stripped from scout-topic block"
+awk '/<!-- scout-topic-start -->/{f=1;next} /<!-- scout-topic-end -->/{f=0} f' "$CAPTURE_FILE" | grep -q 'scout-series' \
+  && fail "narrow: scout-series leaked into topic block" \
+  || pass "narrow: scout-series stripped from topic block"
+grep -qE '^> ' "$CAPTURE_FILE" && fail "narrow: blockquote should be gone" || pass "narrow: no blockquote"
+grep -qF '```scout-topic' "$CAPTURE_FILE" && fail "narrow: scout-topic fence should be gone" || pass "narrow: no scout-topic fence"
+grep -qF '<!-- scout-topic-start -->' "$CAPTURE_FILE" && pass "narrow: marker present" || fail "narrow: marker missing"
 # Fix 1: blank line before the action item
 BODY="$(cat "$CAPTURE_FILE")"
 PREV_LINE="$(printf '%s\n' "$BODY" | grep -n '^\- \[ \] \*\*Start research\*\*' | head -1 | cut -d: -f1)"
@@ -61,12 +64,12 @@ grep -q '### Series' "$CAPTURE_FILE" && pass "wide: Series section present" || f
 grep -q '### Go' "$CAPTURE_FILE" && pass "wide: ### Go header present" || fail "wide: no ### Go header"
 grep -qF '**Start research**' "$CAPTURE_FILE" && pass "wide: Start research checkbox present" || fail "wide: Start research missing"
 grep -qF '**Research as one expedition instead**' "$CAPTURE_FILE" && pass "wide: Research as one expedition present" || fail "wide: Research as one expedition missing"
-awk '/```scout-topic/{f=1;next} /```/{f=0} f' "$CAPTURE_FILE" | grep -q 'scout-subtopics' \
-  && fail "wide: scout-subtopics leaked into scout-topic block" \
-  || pass "wide: scout-subtopics stripped from scout-topic block"
-awk '/```scout-topic/{f=1;next} /```/{f=0} f' "$CAPTURE_FILE" | grep -q 'scout-series' \
-  && fail "wide: scout-series leaked into scout-topic block" \
-  || pass "wide: scout-series stripped from scout-topic block"
+awk '/<!-- scout-topic-start -->/{f=1;next} /<!-- scout-topic-end -->/{f=0} f' "$CAPTURE_FILE" | grep -q 'scout-subtopics' \
+  && fail "wide: scout-subtopics leaked into topic block" \
+  || pass "wide: scout-subtopics stripped from topic block"
+awk '/<!-- scout-topic-start -->/{f=1;next} /<!-- scout-topic-end -->/{f=0} f' "$CAPTURE_FILE" | grep -q 'scout-series' \
+  && fail "wide: scout-series leaked into topic block" \
+  || pass "wide: scout-series stripped from topic block"
 # Fix 1: blank line immediately before ### Go
 BODY="$(cat "$CAPTURE_FILE")"
 GO_LINE="$(printf '%s\n' "$BODY" | grep -n '^### Go$' | head -1 | cut -d: -f1)"

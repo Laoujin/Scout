@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Post a sharpen-result comment to the triggering Issue.
-# Comment shape: human-readable blockquote + machine-parseable scout-topic fenced
-# block + a [ ] Start research checkbox the user ticks to publish to Atlas.
+# Comment shape: the sharpened brief as markdown between scout-topic HTML
+# markers (single source — readable + machine-parseable) + a [ ] Start research
+# checkbox the user ticks to publish to Atlas.
 # When the sharpener emits a scout-subtopics block, the comment also includes
 # a `### Sub-topics` markdown section, a `### Go` header, and a second
 # `Research as one expedition instead` checkbox alongside Start research.
@@ -35,9 +36,8 @@ SERIES_BLOCK="$(printf '%s' "$SHARPENED_TOPIC" | awk '
 ')"
 
 # Strip the scout-subtopics and scout-series fenced blocks (and trailing
-# blanks) from the paragraph that goes into the scout-topic fenced block.
-# This prevents nested fences from breaking research-from-issue.sh's
-# bare-fence awk extractor.
+# blanks) from the brief that goes between the scout-topic markers, so those
+# blocks render as their own sections below instead of inside the brief.
 TOPIC_ONLY="$(printf '%s' "$SHARPENED_TOPIC" | awk '
   /^```scout-subtopics[[:space:]]*$/ { in_block=1; next }
   /^```scout-series[[:space:]]*$/    { in_block=1; next }
@@ -53,19 +53,12 @@ if [ -n "$SERIES_BLOCK" ]; then
   SERIES_SECTION="${SERIES_SECTION%x}"
 fi
 
-# Blockquote each line of the topic for the human-readable section.
-quoted="$(printf '%s\n' "$TOPIC_ONLY" | sed 's/^/> /')"
-
 if [ -n "$SUB_TOPICS_BLOCK" ]; then
   body="$(cat <<EOF
 ### ${COMMENT_HEADER}
 
-${quoted}
-
 <!-- scout-topic-start -->
-\`\`\`scout-topic
 ${TOPIC_ONLY}
-\`\`\`
 <!-- scout-topic-end -->
 
 This topic has several independent angles. Tick the ones to research as part of this expedition; each becomes its own page, and the parent produces an overview that ties them together. Edit a \`(depth)\` to override the recommended level.
@@ -87,12 +80,8 @@ else
   body="$(cat <<EOF
 ### ${COMMENT_HEADER}
 
-${quoted}
-
 <!-- scout-topic-start -->
-\`\`\`scout-topic
 ${TOPIC_ONLY}
-\`\`\`
 <!-- scout-topic-end -->
 
 ${SERIES_SECTION}
