@@ -1,5 +1,20 @@
 name: research
 
+run-name: >-
+  ${{
+       github.event_name == 'workflow_dispatch'
+         && format('[research] {0}', inputs.topic)
+    || github.event_name == 'issues'
+         && format('[sharpen] {0}', github.event.issue.title)
+    || github.event_name == 'issue_comment' && github.event.action == 'created'
+         && format('[sharpen] {0}', github.event.issue.title)
+    || contains(github.event.comment.body, 'Start creating the HTML pages')
+         && format('[html views] {0}', github.event.issue.title)
+    || contains(github.event.comment.body, 'Re-run failed sub-topics')
+         && format('[rerun] {0}', github.event.issue.title)
+    || github.event.issue.title
+  }}
+
 on:
   issues:
     types: [opened]
