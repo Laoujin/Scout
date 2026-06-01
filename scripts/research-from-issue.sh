@@ -15,15 +15,11 @@ set -euo pipefail
 SCOUT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 source "$SCOUT_DIR/scripts/lib-issue-parse.sh"
 
-# Topic — content of the scout-topic fenced block in the bot comment.
-TOPIC="$(printf '%s' "$BOT_COMMENT_BODY" | awk '
-  /^```scout-topic[[:space:]]*$/ { in_block=1; next }
-  /^```[[:space:]]*$/ && in_block { exit }
-  in_block { print }
-')"
+# Topic — sharpened brief from the bot comment (markers, with old-fence compat).
+TOPIC="$(extract_topic "$BOT_COMMENT_BODY")"
 
 if [ -z "$TOPIC" ]; then
-  echo "Error: could not extract scout-topic block from bot comment." >&2
+  echo "Error: could not extract sharpened topic from bot comment." >&2
   exit 1
 fi
 
@@ -46,10 +42,10 @@ if [ "$START_CHOICE" = "decompose" ] && [ "${#SUB_TOPICS[@]}" -gt 0 ]; then
   git clone --filter=blob:none --depth=1 "$ATLAS_REPO" "$ATLAS_DIR"
   source "$SCOUT_DIR/scripts/slug.sh"
   DATE="$(date +%F)"
-  PARENT_SLUG="$(slugify "$TOPIC")"
+  PARENT_SLUG="$(slugify "$(topic_title "$TOPIC")")"
   n=2
   while [ -d "$ATLAS_DIR/research/${DATE}-${PARENT_SLUG}" ]; do
-    PARENT_SLUG="$(slugify "$TOPIC")-${n}"
+    PARENT_SLUG="$(slugify "$(topic_title "$TOPIC")")-${n}"
     n=$((n+1))
   done
   PARENT_DIR="$ATLAS_DIR/research/${DATE}-${PARENT_SLUG}"
