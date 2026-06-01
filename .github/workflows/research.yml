@@ -59,7 +59,7 @@ jobs:
       (github.event.issue.author_association == 'OWNER' || github.event.issue.author_association == 'MEMBER') &&
       (startsWith(github.event.issue.title, '[research] ') ||
        contains(github.event.issue.labels.*.name, 'scout-research'))
-    runs-on: [self-hosted, scout]
+    runs-on: [self-hosted, scout-light]
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -107,7 +107,7 @@ jobs:
        contains(github.event.issue.labels.*.name, 'scout-research')) &&
       github.event.issue.state == 'open' &&
       !startsWith(github.event.comment.body, '/')
-    runs-on: [self-hosted, scout]
+    runs-on: [self-hosted, scout-light]
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

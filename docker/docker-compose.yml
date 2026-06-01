@@ -16,8 +16,31 @@ services:
       - atlas-ssh:/home/runner/.ssh
       - ${SCOUT_PROFILE_HOST:-../profile.yml}:/home/runner/.scout/profile.yml:ro
 
+  # Lightweight runner dedicated to the short sharpen jobs. Keeps sharpening
+  # responsive while a long-running research occupies the main `scout` runner.
+  # Its own config volume + name (a runner registration is 1 job at a time);
+  # shares Claude auth, and mounts atlas-ssh read-only only to skip the
+  # first-boot deploy-key prompt (sharpen never pushes to Atlas).
+  scout-runner-light:
+    build: .
+    image: scout-runner:latest
+    container_name: scout-runner-light
+    restart: unless-stopped
+    environment:
+      RUNNER_URL: ${RUNNER_URL:?Set RUNNER_URL in .env — e.g. https://github.com/<you>/Scout}
+      RUNNER_TOKEN: ${RUNNER_TOKEN_LIGHT:?Set RUNNER_TOKEN_LIGHT in .env}
+      RUNNER_LABELS: scout-light
+      RUNNER_NAME: nas-scout-light
+      ATLAS_REPO: ${ATLAS_REPO:?Set ATLAS_REPO in .env — e.g. git@github.com-atlas:<you>/Atlas.git}
+    volumes:
+      - claude-auth:/home/runner/.claude
+      - runner-config-light:/home/runner/actions-runner
+      - atlas-ssh:/home/runner/.ssh:ro
+      - ${SCOUT_PROFILE_HOST:-../profile.yml}:/home/runner/.scout/profile.yml:ro
+
 volumes:
   claude-auth:
   runner-config:
+  runner-config-light:
   atlas-ssh:
     name: scout_atlas-ssh

@@ -318,6 +318,9 @@ ok
 # ---------- Step 10: Runner registration token + docker/.env ----------
 step "Fetching runner token + writing docker/.env..."
 RUNNER_TOKEN=$(gh api -X POST "repos/$SCOUT_OWNER/$SCOUT_NAME/actions/runners/registration-token" --jq .token)
+# Second token for the dedicated light runner — registration tokens are
+# single-use, so each runner needs its own.
+RUNNER_TOKEN_LIGHT=$(gh api -X POST "repos/$SCOUT_OWNER/$SCOUT_NAME/actions/runners/registration-token" --jq .token)
 ok
 
 cat > "$SCOUT_DIR/docker/.env" <<EOF
@@ -326,6 +329,7 @@ COMPOSE_PROJECT_NAME=scout
 RUNNER_URL=https://github.com/$SCOUT_OWNER/$SCOUT_NAME
 ATLAS_REPO=git@github.com-atlas:$ATLAS_OWNER/$ATLAS_NAME.git
 RUNNER_TOKEN=$RUNNER_TOKEN
+RUNNER_TOKEN_LIGHT=$RUNNER_TOKEN_LIGHT
 EOF
 chmod 600 "$SCOUT_DIR/docker/.env"
 
