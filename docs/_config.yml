@@ -4,6 +4,8 @@
 google_analytics: G-9VW0TVN9JJ
 
 # Don't have Jekyll auto-render OPERATE.md as an HTML page — it's meant to be
-# read on GitHub.com via the README links.
+# read on GitHub.com via the README links. Same for superpowers/ plans & specs:
+# they're internal docs and contain raw Liquid snippets that break the build.
 exclude:
   - OPERATE.md
+  - superpowers
