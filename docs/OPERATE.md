@@ -2,6 +2,19 @@
 
 Day-to-day maintenance of a running Scout install. For first-time install, see the [README](../README.md).
 
+## Two ways to run research
+
+| Command | Where | Billing | Use |
+|--------------|--------------------------|-------------------------|---------------------------------------------|
+| `/scout`       | interactive Claude Code  | your subscription       | at the desk; runs in-session, incl. parallel expeditions |
+| `/scout-async` | GitHub issue → NAS runner | API (headless `claude -p`) | hands-off, fire-from-phone, durable, rerun machinery |
+
+After 2026-06-15 headless `claude -p` is API-billed, so `/scout-async` always costs API; `/scout` stays on your subscription because the interactive session (and its subagents) are the model.
+
+`/scout` self-locates the Scout checkout via `~/.scout/dir` (written by the installer) and reads `ATLAS_REPO` from `docker/.env`. It's symlinked into `~/.claude/commands/`, so `git pull` in Scout updates it automatically.
+
+**Upgrading an existing install:** re-run `bash commands/install-scout-command.sh <you>/Scout <atlas-url>` (or the installer's slash-command step). This switches `/scout` to the interactive command and adds `/scout-async`. Manual equivalent: symlink `~/.claude/commands/scout.md` → `<scout>/.claude/commands/scout.md`, copy+substitute `scout-async.md`, and write `<scout>` to `~/.scout/dir`.
+
 ## Update Scout, Claude
 
 ```bash

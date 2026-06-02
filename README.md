@@ -87,17 +87,18 @@ Scout replies with a sharpened proposal plus a `- [ ] **Start research**` checkb
 - **Bespoke HTML views**: After publishing to Atlas, Scout proposes which pages would benefit from a one-off styled treatment (magazine, manifesto, …) which sits next to the existing markdown.
 
 
-### `/scout` slash command
+### `/scout` and `/scout-async` slash commands
 
-Open Scout Issues from inside Claude Code:
+Install both on the machine where you run Claude Code:
 
 ```bash
 bash commands/install-scout-command.sh <you>/Scout https://<you>.github.io/Atlas/
 ```
 
-`install.sh` also offers this at the end — but it installs on the always-on machine where it ran.
+`install.sh` also offers this at the end (on the always-on machine where it ran).
 
-Then, in any Claude Code session:
+- **`/scout`** — researches **now, in your session**, on your Claude subscription (no API), including parallel expeditions. Use at your desk.
+- **`/scout-async`** — opens a Scout Issue for the self-hosted runner (headless, API-billed). Use for hands-off / fire-from-phone / overnight batches.
 
 ```txt
 /scout Compare the top 3 static site generators in 2026
