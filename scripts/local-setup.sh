@@ -34,7 +34,9 @@ cd "$SCOUT_DIR"
 source "$SCOUT_DIR/scripts/slug.sh"
 
 rm -rf atlas-checkout
-git clone --depth=1 --filter=blob:none "$ATLAS_REPO" atlas-checkout >/dev/null 2>&1
+git clone --depth=1 --filter=blob:none "$ATLAS_REPO" atlas-checkout >/dev/null 2>&1 || {
+  echo "Error: failed to clone Atlas from $ATLAS_REPO (check SSH key / ~/.ssh/config alias / network)" >&2
+  exit 1; }
 
 # Unique slug against the freshly-cloned Atlas — it reflects what is actually
 # published, so this catches collisions from other machines / async runs too.
@@ -47,7 +49,9 @@ PARENT_DIR="$SCOUT_DIR/atlas-checkout/research/${DATE}-${SLUG}"
 mkdir -p "$PARENT_DIR"
 
 printf 'SCOUT_DIR=%s\n' "$SCOUT_DIR"
+printf 'ATLAS_REPO=%s\n' "$ATLAS_REPO"
 printf 'DATE=%s\n' "$DATE"
+printf 'SLUG=%s\n' "$SLUG"
 printf 'PARENT_DIR=%s\n' "$PARENT_DIR"
 printf 'START_TS=%s\n' "$(date +%s)"
 

@@ -25,20 +25,29 @@ each) decides the mode: sub-topics kept → **expedition**; none → **single-pa
 
 ## Step 3 — Setup
 
+Locate the helper: if `~/.scout/dir` exists, use
+`$(cat ~/.scout/dir)/scripts/local-setup.sh`; otherwise this command file lives in
+`<scout>/.claude/commands/`, so use `<scout>/scripts/local-setup.sh`.
+
 Build `SUB_TOPICS_TSV` (one `title<TAB>depth` line per approved sub-topic; empty
-for single-pass), then run `scripts/local-setup.sh` with it:
+for single-pass) and run it:
 
 ```
 SUB_TOPICS_TSV=$'Routing angle\tdeep\nState angle\tsurvey' \
-  bash "$(cat ~/.scout/dir 2>/dev/null)/scripts/local-setup.sh" "<brief title>"
+  bash <scout>/scripts/local-setup.sh "<brief title>"
 ```
 
-If `~/.scout/dir` is unset, this command file lives in `<scout>/.claude/commands/`,
-so call `<scout>/scripts/local-setup.sh` directly. Parse its output for
-`SCOUT_DIR`, `DATE`, `PARENT_DIR`, `START_TS`, and the `CHILD=<slug><TAB><dir>`
-lines. Read the playbooks under `$SCOUT_DIR/skills/scout/`.
+Parse its output for `SCOUT_DIR`, `ATLAS_REPO`, `DATE`, `SLUG`, `PARENT_DIR`,
+`START_TS`, and the `CHILD=<slug><TAB><dir>` lines. Read the playbooks under
+`$SCOUT_DIR/skills/scout/`.
 
 ## Step 4 — Research
+
+**Depth codes:** when you pass `DEPTH` into a `SKILL.md` research prompt (child or
+single-pass), translate the user-facing depth to SKILL.md's internal code —
+`recon`→`ceo`, `survey`→`standard`, `expedition`→`deep` (mirrors `run.sh`).
+Keep the user-facing value (`recon`/`survey`/`expedition`) in the `children:`
+frontmatter.
 
 **Expedition:** dispatch ALL children in ONE message (parallel) — one `Agent`
 call per `CHILD`. Each agent's prompt: the full procedure from
@@ -75,5 +84,14 @@ frontmatter. No `manifest.json`, no `children:`.
 
 ## Step 6 — Publish
 
-`cd "$SCOUT_DIR" && bash scripts/publish.sh` (it commits + pushes `atlas-checkout/`
-to Atlas `main`). Print the resulting Atlas URL.
+Forward the values from Step 3 so the commit message and published URL are
+correct (`publish.sh` defaults them to `unknown` otherwise, and needs
+`ATLAS_REPO` to build the URL):
+
+```
+cd "$SCOUT_DIR" && ATLAS_REPO="<atlas_repo>" SLUG="<slug>" DATE="<date>" \
+  TOPIC="<brief title>" bash scripts/publish.sh
+```
+
+It commits + pushes `atlas-checkout/` to Atlas `main` and prints
+`Published: <url>` — surface that URL to the user.

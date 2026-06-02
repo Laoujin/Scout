@@ -31,7 +31,9 @@ run() { HOME="$FAKE_HOME" DATE=2026-06-02 ATLAS_REPO="$FAKE_ATLAS" SUB_TOPICS_TS
 # --- expedition: two sub-topics ---
 OUT="$(run $'Routing angle\tdeep\nState angle\tsurvey' 'My Expedition Topic')"
 echo "$OUT" | grep -q "^SCOUT_DIR=$SCOUTD$" && pass "prints SCOUT_DIR" || fail "no/!= SCOUT_DIR"
+echo "$OUT" | grep -q "^ATLAS_REPO=$FAKE_ATLAS$" && pass "prints ATLAS_REPO" || fail "no ATLAS_REPO"
 echo "$OUT" | grep -q '^DATE=2026-06-02$' && pass "prints DATE" || fail "no DATE"
+echo "$OUT" | grep -q '^SLUG=my-expedition-topic$' && pass "prints SLUG" || fail "no SLUG"
 echo "$OUT" | grep -q '^START_TS=[0-9]\+$' && pass "prints START_TS" || fail "no START_TS"
 PARENT="$(echo "$OUT" | sed -n 's/^PARENT_DIR=//p')"
 case "$PARENT" in */research/2026-06-02-my-expedition-topic) pass "parent dir slug" ;; *) fail "bad parent: $PARENT" ;; esac
