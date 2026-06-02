@@ -134,12 +134,32 @@ EOF
 SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout/SKILL.md")"
 
 RESULT_JSON="$RESEARCH_DIR/.scout-result.json"
+trap - ERR
+set +e
 claude --dangerously-skip-permissions \
        --model "$(scout_model_for_depth "$DEPTH")" \
        --print \
        --output-format json \
        --append-system-prompt "$SKILL_CONTENT" \
        "$PROMPT" > "$RESULT_JSON"
+CLAUDE_RC=$?
+set -e
+trap on_error ERR
+
+CLAUDE_IS_ERROR="$(jq -r '.is_error // false' "$RESULT_JSON" 2>/dev/null || echo false)"
+if [ "$CLAUDE_RC" -ne 0 ] && [ "$CLAUDE_IS_ERROR" != "true" ]; then
+  tail_reason="$(tail -n 5 "$RUN_LOG" 2>/dev/null | grep -v '^[[:space:]]*$' | tail -n 3 | tr '\n' ' ')"
+  REASON="Claude CLI exited $CLAUDE_RC${tail_reason:+ — $tail_reason}"
+  printf '%s\n' "$REASON" > "$SCOUT_ERROR_FILE"
+  if [ "${SCOUT_DECOMPOSE_CHILD:-0}" = "1" ]; then
+    exit "$CLAUDE_RC"
+  fi
+  if [ -n "${ISSUE_NUMBER:-}" ] && [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ]; then
+    tail_log="$(tail -n 30 "$RUN_LOG" 2>/dev/null | sed 's/`/\\`/g')"
+    gh issue comment "$ISSUE_NUMBER" --repo "$GH_REPO" --body "$(printf 'Scout run failed: %s\n\n<details><summary>Last 30 lines of stderr</summary>\n\n```\n%s\n```\n</details>' "$REASON" "$tail_log")" || true
+  fi
+  exit "$CLAUDE_RC"
+fi
 
 # Echo the human-readable result to stdout so workflow logs keep the shape
 # they had before --output-format json was added.
@@ -150,11 +170,10 @@ for CAND in "$RESEARCH_DIR/index.md" "$RESEARCH_DIR/index.html"; do
   [ -f "$CAND" ] && ARTIFACT="$CAND" && break
 done
 
-# Claude reports a failed run via is_error:true while the CLI still exits 0.
-# Detect it here, record a clear reason synchronously, and decide salvage vs
-# hard-fail. Without this run.sh would publish an empty/partial page and the
-# decompose parent would only ever see a generic "exit 1".
-if [ "$(jq -r '.is_error // false' "$RESULT_JSON" 2>/dev/null || echo false)" = "true" ]; then
+# Claude may now fail in two shapes: `is_error:true` with exit 0, or a non-zero
+# CLI exit that still leaves behind a structured result JSON. Handle both here
+# so the decompose parent always gets a real .scout-error reason.
+if [ "$CLAUDE_IS_ERROR" = "true" ]; then
   err_subtype="$(jq -r '.subtype // ""'         "$RESULT_JSON" 2>/dev/null || true)"
   err_stop="$(jq    -r '.stop_reason // ""'     "$RESULT_JSON" 2>/dev/null || true)"
   err_api="$(jq     -r '.api_error_status // ""' "$RESULT_JSON" 2>/dev/null || true)"
