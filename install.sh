@@ -215,33 +215,40 @@ if [[ -f "$INSTALL_DIR/.next" ]]; then
 
 EOF
 
-  # Optional: install the /scout Claude Code slash command, baked to
-  # this user's Scout repo so /scout targets the right issue tracker.
-  read -rp "Install /scout slash command to ~/.claude/commands/? [y/N]: " _ans
+  # Optional: install the Scout slash commands. /scout-async is copied with the
+  # repo slug substituted; /scout is symlinked to the local checkout so it
+  # self-locates and auto-updates on `git pull`. ~/.scout/dir records the path.
+  read -rp "Install Scout slash commands (/scout, /scout-async) to ~/.claude/commands/? [y/N]: " _ans
   if [[ "${_ans,,}" =~ ^(y|yes)$ ]]; then
-    _target="$HOME/.claude/commands/scout.md"
-    if [[ -e "$_target" ]]; then
-      read -rp "  $_target exists. Overwrite? [y/N]: " _ow
-      [[ "${_ow,,}" =~ ^(y|yes)$ ]] || { echo "  skipped"; _ans=no; }
-    fi
-  fi
-  if [[ "${_ans,,}" =~ ^(y|yes)$ ]]; then
-    mkdir -p "$(dirname "$_target")"
-    _tpl="$BUILD_CTX/scout.md.template"
-    if [[ -n "$LOCAL_SCOUT" ]]; then
-      [[ -f "$LOCAL_SCOUT/commands/scout.md" ]] \
-        && cp "$LOCAL_SCOUT/commands/scout.md" "$_tpl" \
-        || { echo "  skipped: $LOCAL_SCOUT/commands/scout.md missing" >&2; _tpl=""; }
-    else
-      curl -fsSL "https://raw.githubusercontent.com/${UPSTREAM}/${REF}/commands/scout.md" -o "$_tpl" \
-        || { echo "  skipped: could not fetch template" >&2; _tpl=""; }
-    fi
-    if [[ -n "$_tpl" ]]; then
-      _atlas_url="https://${ATLAS_OWNER}.github.io/${ATLAS_NAME}/"
+    _cmddir="$HOME/.claude/commands"
+    mkdir -p "$_cmddir"
+    _scout_local="$CLONE_PATH"   # local Scout checkout created by this installer
+    _atlas_url="https://${ATLAS_OWNER}.github.io/${ATLAS_NAME}/"
+
+    # /scout-async — copy + substitute (needs the repo slug, can't be a symlink).
+    _async_src="$_scout_local/.claude/commands/scout-async.md"
+    if [[ -f "$_async_src" ]]; then
       sed -e "s|{{SCOUT_REPO}}|$SCOUT_OWNER/$SCOUT_NAME|g" \
           -e "s|{{ATLAS_URL}}|$_atlas_url|g" \
-          "$_tpl" > "$_target"
-      echo "  installed: $_target → $SCOUT_OWNER/$SCOUT_NAME"
+          "$_async_src" > "$_cmddir/scout-async.md"
+      echo "  installed: $_cmddir/scout-async.md → $SCOUT_OWNER/$SCOUT_NAME"
+    else
+      echo "  skipped scout-async: $_async_src missing" >&2
+    fi
+
+    # /scout — symlink (self-locating); record the checkout path.
+    mkdir -p "$HOME/.scout"
+    printf '%s\n' "$_scout_local" > "$HOME/.scout/dir"
+    _inter_src="$_scout_local/.claude/commands/scout.md"
+    if [[ -f "$_inter_src" ]]; then
+      if ln -sf "$_inter_src" "$_cmddir/scout.md" 2>/dev/null; then
+        echo "  linked:    $_cmddir/scout.md → $_inter_src"
+      else
+        cp "$_inter_src" "$_cmddir/scout.md"   # filesystems without symlinks
+        echo "  copied:    $_cmddir/scout.md (symlink unavailable; re-run install after updates)"
+      fi
+    else
+      echo "  skipped scout: $_inter_src missing" >&2
     fi
   fi
 
