@@ -68,6 +68,25 @@ grep -qi "usage" "$tmp/research/.scout-error" 2>/dev/null \
   || fail ".scout-error should mention the usage limit (got: $(cat "$tmp/research/.scout-error" 2>/dev/null))"
 rm -rf "$tmp"
 
+# --- Case 1b: Claude exits non-zero but still writes is_error JSON ---
+tmp=$(setup)
+cat > "$tmp/result.json" <<'JSON'
+{"type":"result","subtype":"success","is_error":true,"api_error_status":529,"result":"API Error: 529 Overloaded","total_cost_usd":0,"duration_ms":0}
+JSON
+cat > "$tmp/claude" <<'STUB'
+#!/usr/bin/env bash
+cat "$STUB_RESULT_JSON"
+exit 1
+STUB
+chmod +x "$tmp/claude"
+STUB_WRITE_ARTIFACT=0 run_child "$tmp"; rc=$?
+[ "$rc" -ne 0 ] && pass "non-zero Claude exit still exits non-zero" || fail "should exit non-zero when Claude exits 1 with is_error JSON (got $rc)"
+[ -s "$tmp/research/.scout-error" ] && pass ".scout-error written for non-zero Claude exit" || fail ".scout-error missing when Claude exits 1 with result JSON"
+grep -qi "api status 529" "$tmp/research/.scout-error" 2>/dev/null \
+  && pass ".scout-error keeps the Claude API status" \
+  || fail ".scout-error should include api status 529 (got: $(cat "$tmp/research/.scout-error" 2>/dev/null))"
+rm -rf "$tmp"
+
 # --- Case 2: is_error WITH a real artifact (decompose child) ---
 # Child still exits non-zero so the parent classifies it as error_with_content
 # (using .scout-error as the reason) rather than a clean success; the artifact
