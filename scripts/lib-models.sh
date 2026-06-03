@@ -49,8 +49,10 @@ scout_model_label() {
       fam="${rest%%-*}"            # opus
       rest="${rest#"$fam"-}"       # 4-8 | 4-5-20251001
       major="${rest%%-*}"          # 4
-      rest="${rest#"$major"-}"     # 8 | 5-20251001
-      minor="${rest%%-*}"          # 8 | 5
+      rest="${rest#"$major"-}"     # 8 | 5-20251001 | 7[1m]
+      minor="${rest%%-*}"          # 8 | 5 | 7[1m]
+      minor="${minor%%[*}"         # strip context-variant suffix: 7[1m] -> 7
+      major="${major%%[*}"
       if [ "$rest" = "$major" ] || [ -z "$minor" ]; then
         printf '%s %s\n' "$(_scout_cap "$fam")" "$major"
       else

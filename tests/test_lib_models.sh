@@ -53,6 +53,7 @@ lbl() { source "$LIB"; scout_model_label "$1"; }
 eq "$( lbl claude-opus-4-8 )"           "Opus 4.8"   "label: opus id -> Opus 4.8"
 eq "$( lbl claude-sonnet-4-6 )"         "Sonnet 4.6" "label: sonnet id -> Sonnet 4.6"
 eq "$( lbl claude-haiku-4-5-20251001 )" "Haiku 4.5"  "label: haiku id (date suffix) -> Haiku 4.5"
+eq "$( lbl 'claude-opus-4-7[1m]' )"     "Opus 4.7"   "label: 1M-context variant suffix stripped"
 eq "$( lbl sonnet )"                    "Sonnet"     "label: tier alias -> Sonnet"
 eq "$( lbl '' )"                        ""           "label: empty -> empty"
 
