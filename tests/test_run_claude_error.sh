@@ -145,6 +145,42 @@ STUB_WRITE_ARTIFACT=1 run_child "$tmp"; rc=$?
 [ -s "$tmp/research/.scout-result.json" ] && pass "result JSON re-shipped from protected temp" || fail ".scout-result.json should be shipped from the temp"
 rm -rf "$tmp"
 
+# --- Case 6: a ledger issue is non-fatal ---
+# Regression: validate_ledger.sh aborts on the first violation. Run under set -e
+# BEFORE cost injection, that aborted the whole run — skipping cost/duration and
+# wrongly flagging a complete page. A ledger issue must be a soft warning: the
+# page still publishes, with its cost. (A duplicate URL is no longer a violation
+# at all, so this uses a genuine one — an unknown source_type.)
+tmp=$(setup)
+cat > "$tmp/result.json" <<'JSON'
+{"is_error":false,"subtype":"success","result":"done","total_cost_usd":0.40,"duration_ms":1200}
+JSON
+cat > "$tmp/claude" <<'STUB'
+#!/usr/bin/env bash
+cat > "$RESEARCH_DIR/index.md" <<MD
+---
+title: "Real"
+date: 2026-05-29
+depth: ceo
+format: md
+citations: 2
+reading_time_min: 1
+---
+Body with a citation [[1]].
+MD
+cat > "$RESEARCH_DIR/citations.jsonl" <<JL
+{"n":1,"url":"https://example.com/a","claim":"c1","source_type":"news"}
+{"n":2,"url":"https://example.com/b","claim":"c2","source_type":"bogus-type"}
+JL
+cat "$STUB_RESULT_JSON"
+STUB
+chmod +x "$tmp/claude"
+STUB_WRITE_ARTIFACT=1 run_child "$tmp"; rc=$?
+[ "$rc" -eq 0 ] && pass "ledger error is non-fatal (run still succeeds)" || fail "run.sh must not abort on a ledger issue (got $rc)"
+[ ! -f "$tmp/research/.scout-error" ] && pass "no .scout-error for a mere ledger issue" || fail ".scout-error should not be written for a non-fatal ledger warning"
+grep -q '^cost_usd:' "$tmp/research/index.md" && pass "cost still injected despite ledger issue" || fail "cost injection should run after a non-fatal ledger warning"
+rm -rf "$tmp"
+
 # --- Case 5: GitHub auth stripped from the agent's env ---
 # The agent's only job is to write files; run.sh owns publishing. If the agent
 # can authenticate gh it posts its own (wrong, 404) "Published:" comments, so

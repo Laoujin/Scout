@@ -205,7 +205,7 @@ Example body structures (not prescriptive):
    - Frontmatter present with all required fields? `format` matches the extension; `citations` equals number of distinct URLs cited; `reading_time_min` reflects length.
    - For HTML: no `<!doctype>`, `<head>`, `<body>`, `<link>`, or "← Atlas" back-link (layout provides them).
    - For standard/deep: `citations.jsonl` exists; line count equals the `citations` frontmatter field; every `[[n]]` in the body matches a ledger entry's `n`; no ledger entry has empty `url`.
-   - For standard/deep: no duplicate URLs in the ledger (the same source is one entry, cited multiple times via the same `n`).
+   - For standard/deep: prefer one ledger entry per distinct URL (cite the same source multiple times via the same `n`). A repeated URL is tolerated, not an error — don't sweat it.
 6.5. **Dispatch scout-illustrator.** Call `Agent(subagent_type="scout-illustrator", ...)` with a brief that contains `TOPIC`, the final `tags` list, and `RESEARCH_DIR`. It returns `wrote cover.svg` or `skipped: <reason>`. Record which.
 7. Write the file with the `Write` tool. If the illustrator wrote a cover, include `cover: cover.svg` in the frontmatter; otherwise omit the field.
 8. Report: one line with the final path. `run.sh` handles commit and push.

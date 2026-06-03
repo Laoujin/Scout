@@ -222,9 +222,14 @@ if [ "$CLAUDE_IS_ERROR" = "true" ]; then
 fi
 
 # Ledger validation (standard and deep only — ceo may not produce a ledger).
+# Non-fatal: a ledger issue (e.g. a duplicate citation URL) must not abort the
+# run. Aborting here skips cost injection below and wrongly flags an otherwise
+# complete page as failed/degraded. Surface it via SOFT_FAIL_LOG and carry on.
 LEDGER="$RESEARCH_DIR/citations.jsonl"
 if [ -f "$LEDGER" ]; then
-  bash "$SCOUT_DIR/scripts/validate_ledger.sh" "$LEDGER" "$ARTIFACT"
+  if ! bash "$SCOUT_DIR/scripts/validate_ledger.sh" "$LEDGER" "$ARTIFACT" 2>>"$SOFT_FAIL_LOG"; then
+    echo "run.sh: citations.jsonl has ledger issues (non-blocking) — see soft-fail log" | tee -a "$SOFT_FAIL_LOG" >&2
+  fi
 elif [ "$DEPTH" != "ceo" ]; then
   echo "run.sh: warning: citations.jsonl not found for depth=$DEPTH (non-blocking)" >&2
 fi

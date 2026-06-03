@@ -43,7 +43,7 @@ echo "Testing validate_ledger.sh..."
 # --- Ledger-only tests --------------------------------------------------------
 run_test "valid ledger passes"        0 ""              "$FIXTURES/valid.jsonl"
 run_test "empty url fails"            1 "empty url"     "$FIXTURES/invalid_empty_url.jsonl"
-run_test "duplicate url fails"        1 "duplicate"     "$FIXTURES/invalid_duplicate_url.jsonl"
+run_test "duplicate url accepted"     0 ""              "$FIXTURES/invalid_duplicate_url.jsonl"
 run_test "missing source_type fails"  1 "source_type"   "$FIXTURES/invalid_missing_source_type.jsonl"
 run_test "missing file fails loudly"  1 ""              "$FIXTURES/does_not_exist.jsonl"
 

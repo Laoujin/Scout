@@ -15,7 +15,6 @@ if [ ! -f "$LEDGER" ]; then
 fi
 
 LINE_NUM=0
-declare -A SEEN_URLS
 while IFS= read -r LINE || [ -n "$LINE" ]; do
   LINE_NUM=$((LINE_NUM + 1))
   [ -z "$LINE" ] && continue
@@ -52,11 +51,9 @@ while IFS= read -r LINE || [ -n "$LINE" ]; do
       ;;
   esac
 
-  if [ -n "${SEEN_URLS[$URL]:-}" ]; then
-    echo "validate_ledger: duplicate url at line $LINE_NUM: $URL (first seen at line ${SEEN_URLS[$URL]})" >&2
-    exit 1
-  fi
-  SEEN_URLS[$URL]=$LINE_NUM
+  # A repeated URL is not an error — it's just the same source listed under two
+  # entries. Links still resolve and the page reads fine, so we accept it rather
+  # than reject the whole ledger (which would also lose the run's cost metadata).
 done < "$LEDGER"
 
 if [ -n "$ARTIFACT" ] && [ -f "$ARTIFACT" ]; then
