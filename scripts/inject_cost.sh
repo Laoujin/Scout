@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
-# Insert cost_usd and duration_sec into the YAML frontmatter of a research
-# artifact (index.md or index.html), immediately before the closing `---`.
-# Usage: inject_cost.sh <artifact-path> <cost_usd> <duration_sec>
+# Insert cost_usd, duration_sec and (optionally) model into the YAML frontmatter
+# of a research artifact (index.md or index.html), before the closing `---`.
+# Usage: inject_cost.sh <artifact-path> <cost_usd> <duration_sec> [model]
 
 set -euo pipefail
 
-if [ "$#" -ne 3 ]; then
-  echo "inject_cost.sh: usage: inject_cost.sh <artifact> <cost_usd> <duration_sec>" >&2
+if [ "$#" -lt 3 ] || [ "$#" -gt 4 ]; then
+  echo "inject_cost.sh: usage: inject_cost.sh <artifact> <cost_usd> <duration_sec> [model]" >&2
   exit 1
 fi
 
 ARTIFACT="$1"
 COST="$2"
 DURATION="$3"
+MODEL="${4:-}"
 
 if [ ! -f "$ARTIFACT" ]; then
   echo "inject_cost.sh: artifact not found: $ARTIFACT" >&2
@@ -34,8 +35,11 @@ if [ -z "$end_line" ]; then
 fi
 
 tmp=$(mktemp)
-awk -v end="$end_line" -v cost="$COST" -v dur="$DURATION" '
-  NR == end { printf "cost_usd: %s\nduration_sec: %s\n", cost, dur }
+awk -v end="$end_line" -v cost="$COST" -v dur="$DURATION" -v model="$MODEL" '
+  NR == end {
+    printf "cost_usd: %s\nduration_sec: %s\n", cost, dur
+    if (model != "") printf "model: \"%s\"\n", model
+  }
   { print }
 ' "$ARTIFACT" > "$tmp"
 mv "$tmp" "$ARTIFACT"

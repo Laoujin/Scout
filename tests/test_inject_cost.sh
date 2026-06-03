@@ -70,6 +70,26 @@ else
 fi
 rm -f "$tmp"
 
+# --- optional model arg (4th) is injected, quoted, inside frontmatter ---
+tmp=$(mktemp --suffix=.md); cp "$FIXTURES/valid.md" "$tmp"
+"$INJECTOR" "$tmp" 0.50 100 "Sonnet 4.6" > /dev/null 2>&1; rc=$?
+if [ "$rc" = "0" ] && grep -q '^model: "Sonnet 4.6"$' "$tmp"; then
+  pass "model: 4th arg injected as quoted frontmatter field"
+else
+  fail "model: expected 'model: \"Sonnet 4.6\"' (rc=$rc)"
+fi
+rm -f "$tmp"
+
+# --- backward compat: 3 args injects no model line ---
+tmp=$(mktemp --suffix=.md); cp "$FIXTURES/valid.md" "$tmp"
+"$INJECTOR" "$tmp" 0.50 100 > /dev/null 2>&1
+if grep -q '^model:' "$tmp"; then
+  fail "model: should not be injected when 4th arg omitted"
+else
+  pass "model: omitted 4th arg leaves no model line"
+fi
+rm -f "$tmp"
+
 # --- failure: no frontmatter ---
 read tmp rc < <(run_on_copy no_frontmatter.md 0.10 30)
 if [ "$rc" = "1" ]; then

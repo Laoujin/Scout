@@ -163,6 +163,11 @@ trap on_error ERR
 # so nothing the agent did to RESEARCH_DIR can have orphaned it.
 [ -s "$RESULT_JSON" ] && cp -f "$RESULT_JSON" "$SHIPPED_RESULT_JSON" 2>/dev/null || true
 
+# Friendly label of the model that did the research, for the Atlas footer.
+# Prefer what actually ran (result JSON); fall back to the depth's tier alias.
+RUN_MODEL_LABEL="$(scout_model_label_from_result "$RESULT_JSON")"
+[ -n "$RUN_MODEL_LABEL" ] || RUN_MODEL_LABEL="$(scout_model_label "$(scout_model_for_depth "$DEPTH")")"
+
 CLAUDE_IS_ERROR="$(jq -r '.is_error // false' "$RESULT_JSON" 2>/dev/null || echo false)"
 if [ "$CLAUDE_RC" -ne 0 ] && [ "$CLAUDE_IS_ERROR" != "true" ]; then
   tail_reason="$(tail -n 5 "$RUN_LOG" 2>/dev/null | grep -v '^[[:space:]]*$' | tail -n 3 | tr '\n' ' ')"
@@ -241,7 +246,7 @@ inject_claude_cost() {
   [ -n "$dur_ms" ] && [ "$dur_ms" != "null" ] || { echo "duration_ms missing from result JSON" >&2; return 1; }
   cost_2dp=$(printf '%.2f' "$cost_raw") || return 1
   dur_sec=$(awk -v ms="$dur_ms" 'BEGIN{printf "%d", (ms/1000)+0.5}') || return 1
-  bash "$SCOUT_DIR/scripts/inject_cost.sh" "$ARTIFACT" "$cost_2dp" "$dur_sec"
+  bash "$SCOUT_DIR/scripts/inject_cost.sh" "$ARTIFACT" "$cost_2dp" "$dur_sec" "${RUN_MODEL_LABEL:-}"
 }
 if ! inject_claude_cost 2>>"$SOFT_FAIL_LOG"; then
   echo "cost injection failed — see $SOFT_FAIL_LOG" | tee -a "$SOFT_FAIL_LOG" >&2

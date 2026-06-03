@@ -33,3 +33,41 @@ scout_model_for_depth() {
     *)    echo "$SCOUT_MODEL_BASE"  ;;
   esac
 }
+
+_scout_cap() { local s="${1:-}"; [ -z "$s" ] && return 0; printf '%s%s\n' "$(printf '%s' "${s:0:1}" | tr '[:lower:]' '[:upper:]')" "${s:1}"; }
+
+# Friendly display label for a resolved model id or a tier alias. Used to stamp
+# the model into research frontmatter so the Atlas footer can show it.
+#   claude-opus-4-8 -> "Opus 4.8"   claude-sonnet-4-6 -> "Sonnet 4.6"
+#   claude-haiku-4-5-20251001 -> "Haiku 4.5"   sonnet -> "Sonnet"   "" -> ""
+scout_model_label() {
+  local m="${1:-}" fam rest major minor
+  case "$m" in
+    "") return 0 ;;
+    claude-*)
+      rest="${m#claude-}"          # opus-4-8 | haiku-4-5-20251001
+      fam="${rest%%-*}"            # opus
+      rest="${rest#"$fam"-}"       # 4-8 | 4-5-20251001
+      major="${rest%%-*}"          # 4
+      rest="${rest#"$major"-}"     # 8 | 5-20251001
+      minor="${rest%%-*}"          # 8 | 5
+      if [ "$rest" = "$major" ] || [ -z "$minor" ]; then
+        printf '%s %s\n' "$(_scout_cap "$fam")" "$major"
+      else
+        printf '%s %s.%s\n' "$(_scout_cap "$fam")" "$major" "$minor"
+      fi
+      ;;
+    *) _scout_cap "$m" ;;          # tier alias (sonnet/opus/haiku)
+  esac
+}
+
+# Pick the model that did the most output work from a Claude result JSON's
+# `modelUsage` map (ignores tiny side-calls like the illustrator's haiku) and
+# return its friendly label. Empty if the file/field is absent. Needs jq.
+scout_model_label_from_result() {
+  local f="${1:-}" id=""
+  [ -f "$f" ] || return 0
+  command -v jq >/dev/null 2>&1 || return 0
+  id="$(jq -r '(.modelUsage // {}) | to_entries | max_by(.value.outputTokens // 0) | .key // empty' "$f" 2>/dev/null || true)"
+  scout_model_label "$id"
+}

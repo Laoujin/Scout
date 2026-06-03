@@ -378,12 +378,18 @@ EOF
 )"
 
   source "$SCOUT_DIR/scripts/lib-models.sh"
-  claude --dangerously-skip-permissions \
+  # Capture to a temp outside the working tree and strip GitHub auth — same
+  # reasons as the per-child run in run.sh: the synthesis agent must not orphan
+  # its own result file or post its own "Published:" comments.
+  SYNTH_RESULT_TMP="$(mktemp -t scout-synth.XXXXXX.json)"
+  env -u GH_TOKEN -u GITHUB_TOKEN -u GH_REPO \
+    claude --dangerously-skip-permissions \
          --model "$SCOUT_MODEL_BASE" \
          --print \
          --output-format json \
          --append-system-prompt "$SKILL_CONTENT" \
-         "$PROMPT" > "$PARENT_DIR/.synthesis-result.json" || true
+         "$PROMPT" > "$SYNTH_RESULT_TMP" || true
+  [ -s "$SYNTH_RESULT_TMP" ] && cp -f "$SYNTH_RESULT_TMP" "$PARENT_DIR/.synthesis-result.json" 2>/dev/null || true
 fi
 
 # Synthesis fallback: if claude didn't write index.{md,html}, emit a minimal
@@ -462,6 +468,10 @@ if [ -n "$PARENT_FILE" ]; then
   _set_field "$PARENT_FILE" duration_sec     "$TOT_DUR"
   _set_field "$PARENT_FILE" citations        "$TOT_CITES"
   _set_field "$PARENT_FILE" reading_time_min "$TOT_READING"
+  # Stamp the model that wrote the overview (the synthesis run) for the footer.
+  SYNTH_MODEL_LABEL="$(scout_model_label_from_result "$PARENT_DIR/.synthesis-result.json")"
+  [ -n "$SYNTH_MODEL_LABEL" ] || SYNTH_MODEL_LABEL="$(scout_model_label "$SCOUT_MODEL_BASE")"
+  [ -n "$SYNTH_MODEL_LABEL" ] && _set_field "$PARENT_FILE" model "\"$SYNTH_MODEL_LABEL\""
 fi
 
 # --- Title-based slug rename for parent expedition ---------------------------
