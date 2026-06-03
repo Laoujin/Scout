@@ -111,6 +111,74 @@ STUB_WRITE_ARTIFACT=1 run_child "$tmp"; rc=$?
 [ ! -f "$tmp/research/.scout-error" ] && pass "no .scout-error on success" || fail ".scout-error should not exist on success"
 rm -rf "$tmp"
 
+# --- Case 4: agent orphans .scout-result.json mid-run → still succeeds ---
+# Regression (2026-06-03): a child agent runs in RESEARCH_DIR with
+# --dangerously-skip-permissions; an over-eager model git-cleaned the untracked
+# result file, so run.sh's `jq .result` read it as "No such file" and the child
+# was wrongly flagged error_with_content. run.sh must capture the result OUTSIDE
+# the working tree and ship it regardless of what the agent does in RESEARCH_DIR.
+tmp=$(setup)
+cat > "$tmp/result.json" <<'JSON'
+{"is_error":false,"subtype":"success","result":"done","total_cost_usd":0.4,"duration_ms":1200}
+JSON
+cat > "$tmp/claude" <<'STUB'
+#!/usr/bin/env bash
+cat > "$RESEARCH_DIR/index.md" <<MD
+---
+title: "Real"
+date: 2026-05-29
+depth: ceo
+format: md
+citations: 0
+reading_time_min: 1
+---
+Body.
+MD
+cat "$STUB_RESULT_JSON"
+# Simulate the agent wiping untracked dotfiles in its own working dir.
+rm -f "$RESEARCH_DIR/.scout-result.json"
+STUB
+chmod +x "$tmp/claude"
+STUB_WRITE_ARTIFACT=1 run_child "$tmp"; rc=$?
+[ "$rc" -eq 0 ] && pass "survives agent orphaning the result file" || fail "should exit 0 when agent removes .scout-result.json (got $rc)"
+[ ! -f "$tmp/research/.scout-error" ] && pass "no .scout-error when result orphaned but artifact good" || fail ".scout-error should not be written (got: $(cat "$tmp/research/.scout-error" 2>/dev/null))"
+[ -s "$tmp/research/.scout-result.json" ] && pass "result JSON re-shipped from protected temp" || fail ".scout-result.json should be shipped from the temp"
+rm -rf "$tmp"
+
+# --- Case 5: GitHub auth stripped from the agent's env ---
+# The agent's only job is to write files; run.sh owns publishing. If the agent
+# can authenticate gh it posts its own (wrong, 404) "Published:" comments, so
+# run.sh must strip GH auth before invoking claude.
+tmp=$(setup)
+cat > "$tmp/result.json" <<'JSON'
+{"is_error":false,"subtype":"success","result":"done","total_cost_usd":0.1,"duration_ms":500}
+JSON
+cat > "$tmp/claude" <<'STUB'
+#!/usr/bin/env bash
+{ echo "GH_TOKEN=[${GH_TOKEN:-UNSET}]"; echo "GITHUB_TOKEN=[${GITHUB_TOKEN:-UNSET}]"; } > "$RESEARCH_DIR/gh-env.txt"
+cat > "$RESEARCH_DIR/index.md" <<MD
+---
+title: "Real"
+date: 2026-05-29
+depth: ceo
+format: md
+citations: 0
+reading_time_min: 1
+---
+Body.
+MD
+cat "$STUB_RESULT_JSON"
+STUB
+chmod +x "$tmp/claude"
+GH_TOKEN=secret GITHUB_TOKEN=secret2 STUB_WRITE_ARTIFACT=1 run_child "$tmp"; rc=$?
+grep -q 'GH_TOKEN=\[UNSET\]' "$tmp/research/gh-env.txt" 2>/dev/null \
+  && pass "GH_TOKEN stripped from agent env" \
+  || fail "GH_TOKEN should be unset for the agent (got: $(grep GH_TOKEN "$tmp/research/gh-env.txt" 2>/dev/null))"
+grep -q 'GITHUB_TOKEN=\[UNSET\]' "$tmp/research/gh-env.txt" 2>/dev/null \
+  && pass "GITHUB_TOKEN stripped from agent env" \
+  || fail "GITHUB_TOKEN should be unset for the agent"
+rm -rf "$tmp"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 if [ "$FAIL" -gt 0 ]; then

@@ -133,10 +133,22 @@ EOF
 
 SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout/SKILL.md")"
 
-RESULT_JSON="$RESEARCH_DIR/.scout-result.json"
+# Capture Claude's result JSON to a temp OUTSIDE the working tree, then copy it
+# in after the run. The agent runs with --dangerously-skip-permissions in this
+# same RESEARCH_DIR; writing the result here directly let a child agent orphan
+# it mid-run (git-clean of untracked files), surfacing as a spurious
+# "jq: .scout-result.json: No such file" → error_with_content. Keep it out of
+# the agent's reach.
+RESULT_JSON="$(mktemp -t scout-result.XXXXXX.json)"
+SHIPPED_RESULT_JSON="$RESEARCH_DIR/.scout-result.json"
 trap - ERR
 set +e
-claude --dangerously-skip-permissions \
+# Strip GitHub auth from the agent's environment: the agent's only job is to
+# write files into RESEARCH_DIR — run.sh owns all commit/push/publish. Left
+# authenticated, an over-eager model posts its own (wrong, 404) "Published:"
+# issue comments. run.sh keeps GH_TOKEN for its own legitimate use below.
+env -u GH_TOKEN -u GITHUB_TOKEN -u GH_REPO \
+  claude --dangerously-skip-permissions \
        --model "$(scout_model_for_depth "$DEPTH")" \
        --print \
        --output-format json \
@@ -145,6 +157,11 @@ claude --dangerously-skip-permissions \
 CLAUDE_RC=$?
 set -e
 trap on_error ERR
+
+# Persist the result next to the research so it ships and the decompose parent
+# can aggregate metrics. Copied from the protected temp after the agent exited,
+# so nothing the agent did to RESEARCH_DIR can have orphaned it.
+[ -s "$RESULT_JSON" ] && cp -f "$RESULT_JSON" "$SHIPPED_RESULT_JSON" 2>/dev/null || true
 
 CLAUDE_IS_ERROR="$(jq -r '.is_error // false' "$RESULT_JSON" 2>/dev/null || echo false)"
 if [ "$CLAUDE_RC" -ne 0 ] && [ "$CLAUDE_IS_ERROR" != "true" ]; then
@@ -162,8 +179,9 @@ if [ "$CLAUDE_RC" -ne 0 ] && [ "$CLAUDE_IS_ERROR" != "true" ]; then
 fi
 
 # Echo the human-readable result to stdout so workflow logs keep the shape
-# they had before --output-format json was added.
-jq -r .result "$RESULT_JSON"
+# they had before --output-format json was added. Non-fatal: a missing or
+# unreadable result must never sink an otherwise-good artifact.
+jq -r '.result // ""' "$RESULT_JSON" 2>/dev/null || true
 
 ARTIFACT=""
 for CAND in "$RESEARCH_DIR/index.md" "$RESEARCH_DIR/index.html"; do
@@ -229,7 +247,8 @@ if ! inject_claude_cost 2>>"$SOFT_FAIL_LOG"; then
   echo "cost injection failed — see $SOFT_FAIL_LOG" | tee -a "$SOFT_FAIL_LOG" >&2
 fi
 
-# Keep .scout-result.json — it ships with the published research.
+# .scout-result.json was already copied from the protected temp (above) and
+# ships with the published research.
 
 # --- Title-based slug rename -------------------------------------------------
 # After the artifact is written, derive a cleaner slug from the frontmatter
