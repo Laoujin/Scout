@@ -67,7 +67,7 @@ User profile: <YAML body of the operator's profile.yml>
 
    Expertise hints (e.g. `programming (expert)`) shift the implied register of the sharpened brief: skip 101 framing for expert-level interests. Don't translate this into output-style instructions — the sharpened topic is still a research brief, not a writing-style memo.
 
-7. **Don't invent constraints.** If the user didn't say "open-source only", don't add "focus on open-source". If unsure, leave out.
+7. **Don't invent constraints — but do suggest missing coverage.** Keep two things distinct. A *constraint* biases the output ("open-source only", "academic sources only"): never invent one — if the user didn't say it, leave it out. A *coverage angle* is a facet of the domain worth researching: standard facets the brief is silent on should be *surfaced as opt-in suggestions* (the completeness sweep in the Output section), not assumed. Suggesting an angle the user can decline ≠ imposing a constraint they didn't ask for.
 
 8. **On a re-sharpen:** treat `User feedback to incorporate` as a hard constraint. Take the previous sharpened proposal, apply the feedback as a delta, output the revised version. Don't drift away from the user's original intent.
 
@@ -83,6 +83,14 @@ Emit the sharpened topic as a structured brief: a **bold one-line deliverable** 
 
 If multi-angled and `Depth: deep` (expedition), append a fenced `scout-subtopics` block listing 2–8 sub-topics. Otherwise emit nothing after the paragraph.
 
+**Then run a completeness sweep (expedition only).** Decomposition above is faithful to what the brief *says*; this step covers what it *omits*. Ask: for this kind of deliverable, what standard facets would a practitioner expect that the brief is silent on? Surface up to 3 as **unticked** `- [ ]` sub-topics — proposed but not assumed, so the user ticks only the ones they want (rule 7: suggest coverage, never impose a constraint). Skip anything the stated angles already cover; if nothing standard is genuinely missing, add nothing. Typical omissions by deliverable type:
+
+- Build/ship a service or tool → security & auth, deployment/distribution, testing, observability.
+- Choose a tool/product → total cost, migration effort, lock-in, maintenance burden.
+- Design/architecture → failure modes, scaling, operability.
+
+The two angles that prompted this rule (a "build your own MCP server" session that named protocol/ideas/format/debugging/RAG but silently omitted **security** and **deployment**) are exactly what the sweep exists to catch — the user shouldn't have to ask "what am I missing?".
+
 ### Sub-topics block format
 
 ````
@@ -95,8 +103,8 @@ If multi-angled and `Depth: deep` (expedition), append a fenced `scout-subtopics
 - `depth` is one of `recon` / `survey` / `expedition`.
 - Default each child to `survey`; downgrade to `recon` for narrow angles; upgrade to `expedition` only when the sub-topic is itself multi-angled.
 - Avoid `expedition` for more than one or two children — each `expedition` child internally spawns 3–8 parallel sub-agents, so stacking them runs hot.
-- Cap at 8 sub-topics.
-- Every sub-topic must start with `- [x]` (ticked checkbox — selected by default), then `(depth)`, then `**Title**`, then `— rationale`.
+- Cap at 8 sub-topics total (stated + suggested); at most 3 of those may be unticked completeness suggestions.
+- Each sub-topic starts with a checkbox, then `(depth)`, then `**Title**`, then `— rationale`. Use `- [x]` (ticked, selected by default) for angles derived from the stated brief. Use `- [ ]` (unticked, opt-in) for completeness-sweep suggestions the user didn't state. List all ticked angles first, then any unticked suggestions.
 - Don't propose sub-topics that are mere sub-questions of one angle — those belong to the angle's own deep dive.
 
 ### Series block format
@@ -152,4 +160,5 @@ Output:
 - [x] (survey) **Synology preview deployments** — Container Manager / Docker Compose lifecycle per branch, build pipeline, teardown on branch delete.
 - [x] (expedition) **Per-feature subdomain routing** — Wildcard `*.sangu.be` reverse proxy (Traefik/Caddy/nginx), wildcard TLS via Let's Encrypt DNS-01, dynamic config from branch metadata.
 - [x] (recon) **Orchestration and state** — Glue tying the four pieces above; where state lives; failure modes and recovery.
+- [ ] (recon) **Secrets and credential handling** — Where Slack tokens, GitHub creds, and TLS keys live across the pipeline; not named in the brief but standard for a deploy workflow. (completeness suggestion)
 ```
