@@ -23,6 +23,15 @@ topic into the structured brief. For `expedition`, also produce its
 their edits. Stop until they approve. The approved sub-topic set (title + depth
 each) decides the mode: sub-topics kept → **expedition**; none → **single-pass**.
 
+**Series match.** Read the Atlas series list from `<scout>/../atlas/_data/series.yml`
+(the sibling Atlas checkout; skip this whole step if the file is absent). Pass it to
+the sharpening as `sharpen.md`'s `Existing series:` input and apply its rule 9: if the
+brief *confidently* belongs to exactly one existing series, propose a `scout-series`
+block — ticked `- [x]`, with `› <group-label>` only when that series has `groups:`
+(pick the single best-fitting label). Show the block under the brief; the user may
+untick it or change the group. Carry the approved `<series-slug>` (and optional
+`<group-label>`) into Step 6. If no confident match, propose nothing.
+
 ## Step 3 — Setup
 
 Locate the helper: if `~/.scout/dir` exists, use
@@ -52,10 +61,14 @@ frontmatter.
 **Expedition:** dispatch ALL children in ONE message (parallel) — one `Agent`
 call per `CHILD`. Each agent's prompt: the full procedure from
 `$SCOUT_DIR/skills/scout/SKILL.md`, plus `TOPIC=<sub-topic title>`,
-`DEPTH=<child depth>`, `FORMAT=<format>`, `DATE=<date>`, `RESEARCH_DIR=<child dir>`.
-It must write `<child dir>/index.{md,html}` with full frontmatter and return:
+`DEPTH=<child depth>`, `FORMAT=<format>`, `DATE=<date>`, `RESEARCH_DIR=<child dir>`,
+and `MODEL=<friendly label of the model running this session, e.g. "Opus 4.8">`.
+It must write `<child dir>/index.{md,html}` with full frontmatter — including
+`model: "<MODEL>"`, `duration_sec: <its end − start epoch seconds>`, and
+`cost_usd: "sub"` (mirrors what `inject_cost.sh` adds in the CI flow) — and return:
 status, the artifact path, a one-line summary, and its start/end epoch seconds.
-Children are single-pass (do not nest dispatch).
+Children are single-pass (do not nest dispatch) — so a child does **not** draft its
+own cover; covers are added centrally in Step 5.
 
 **Single-pass:** you do the research yourself per
 `$SCOUT_DIR/skills/scout/SKILL.md` and write `$PARENT_DIR/index.{md,html}`.
@@ -66,8 +79,15 @@ that one, drop the angle, or proceed.
 ## Step 5 — Cover & synthesize (expedition)
 
 Read `$SCOUT_DIR/skills/scout/synthesis.md` and follow it:
-1. Dispatch `Agent(subagent_type="scout-illustrator", …)` with `TOPIC`, the final
-   `TAGS`, `RESEARCH_DIR=$PARENT_DIR`. Record `wrote cover.svg` vs `skipped`.
+1. **Covers — parent AND every successful child** (the CI flow gives each angle its
+   own cover; match it). In ONE message dispatch `scout-illustrator` once per
+   successful `CHILD` (`TOPIC=<child title>`, `TAGS=<child tags>`,
+   `RESEARCH_DIR=<child dir>`) **and** once for the parent (`RESEARCH_DIR=$PARENT_DIR`,
+   the final expedition `TAGS`). For each that returns `wrote cover.svg`, add
+   `cover: cover.svg` to that artifact's frontmatter; omit it where it skipped.
+   (If the `scout-illustrator` agent type isn't registered in this harness, run a
+   `general-purpose` agent with the body of `$SCOUT_DIR/.claude/agents/scout-illustrator.md`
+   as its brief — same inputs, same one-line return.)
 2. Write `$PARENT_DIR/manifest.json` = a JSON array, one object per child:
    `{"slug","title","depth","status","start","end"}`.
 3. Write `$PARENT_DIR/index.md` with `layout: expedition`, the `children:`
@@ -79,12 +99,23 @@ Read `$SCOUT_DIR/skills/scout/synthesis.md` and follow it:
    `synthesis: false` per the skill.
 
 **Single-pass:** dispatch `scout-illustrator` for the single artifact
-(`RESEARCH_DIR=$PARENT_DIR`), and add `duration_sec` + `cost_usd: "sub"` to its
-frontmatter. No `manifest.json`, no `children:`.
+(`RESEARCH_DIR=$PARENT_DIR`), and add `model: "<MODEL>"`, `duration_sec`, and
+`cost_usd: "sub"` to its frontmatter. No `manifest.json`, no `children:`.
 
 ## Step 6 — Publish
 
-Forward the values from Step 3 so the commit message and published URL are
+**File into the series first (if one was approved in Step 2).** Run this *before*
+`publish.sh` so the `series.yml` edit is swept into the same commit (mirrors
+`run-decompose.sh`'s wiring). `add-to-series.sh` edits the cloned checkout's copy
+and never creates a new series:
+
+```
+bash "$SCOUT_DIR/scripts/add-to-series.sh" \
+  "$SCOUT_DIR/atlas-checkout/_data/series.yml" \
+  "<date>-<slug>" "<series-slug>" "<group-label>"   # omit group-label for a flat series
+```
+
+Then forward the values from Step 3 so the commit message and published URL are
 correct (`publish.sh` defaults them to `unknown` otherwise, and needs
 `ATLAS_REPO` to build the URL):
 
