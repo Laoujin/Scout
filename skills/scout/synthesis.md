@@ -70,7 +70,7 @@ children:
 
 **`tags` and `summary` are required.** Atlas's homepage card uses `summary` as the description and `tags` as the chip row; without them the card is title-only. Pick `tags` that span the expedition (not duplicates of any single child's tags). Write `summary` to read as the expedition's elevator pitch, distinct from any child's summary.
 
-The orchestrator (`run-decompose.sh`) injects `citations`, `reading_time_min`, `cost_usd`, and `duration_sec` (parent synthesis + sum of successful children) after this skill returns. Do NOT include those four fields yourself.
+The orchestrator (`run-decompose.sh`) injects `citations`, `reading_time_min`, `cost_usd`, `duration_sec` (parent synthesis + sum of successful children), and `issue` (the originating issue number) after this skill returns. Do NOT include those five fields yourself.
 
 The Atlas `expedition` layout renders the `children` frontmatter as a card grid below the synthesis — you do NOT need to list children in the body. Only write the synthesis prose.
 

@@ -468,6 +468,9 @@ if [ -n "$PARENT_FILE" ]; then
   _set_field "$PARENT_FILE" duration_sec     "$TOT_DUR"
   _set_field "$PARENT_FILE" citations        "$TOT_CITES"
   _set_field "$PARENT_FILE" reading_time_min "$TOT_READING"
+  # Stamp the originating issue so the expedition footer can link it (the
+  # synthesis skill never sees the issue number — inject it here, like metrics).
+  [ -n "${ISSUE_NUMBER:-}" ] && _set_field "$PARENT_FILE" issue "$ISSUE_NUMBER"
   # Stamp the model that wrote the overview (the synthesis run) for the footer.
   SYNTH_MODEL_LABEL="$(scout_model_label_from_result "$PARENT_DIR/.synthesis-result.json")"
   [ -n "$SYNTH_MODEL_LABEL" ] || SYNTH_MODEL_LABEL="$(scout_model_label "$SCOUT_MODEL_BASE")"

@@ -159,6 +159,11 @@ grep -q '^reading_time_min: 4$' "$PARENT_DIR/index.md" \
   && pass "parent reading_time_min = sum(children)" \
   || fail "wrong reading_time_min: $(grep ^reading_time "$PARENT_DIR/index.md")"
 
+# Issue number stamped into parent frontmatter so the footer can link it.
+grep -q '^issue: 42$' "$PARENT_DIR/index.md" \
+  && pass "parent issue = ISSUE_NUMBER" \
+  || fail "missing/wrong issue: $(grep ^issue "$PARENT_DIR/index.md")"
+
 rm -rf "$TMP"
 
 echo
