@@ -72,3 +72,14 @@ gh variable delete SCOUT_MODEL                  # back to the per-depth defaults
 ```
 
 Unset Variables fall through to the `lib-models.sh` defaults. `SCOUT_MODEL` (if set) overrides all three tiers at once.
+
+## Triage a published Atlas
+
+After a batch of expeditions (e.g. a michelin-weekend series), audit Atlas for broken, missing, or wrongly-flagged research — failed/empty expeditions, false ⚠ "degraded" badges, missing cost/cover/issue, doubled-date or duplicate-name slugs, manifest/ledger drift.
+
+```bash
+python3 skills/scout-triage/scan.py <atlas>/research      # read-only; groups findings by category
+python3 skills/scout-triage/scan.py <atlas>/research --json
+```
+
+The scan only detects. Remediation is a judgment call (is a flagged page real content or a genuine failure?) — drive it with the `scout-triage` skill (`skills/scout-triage/SKILL.md`), which maps each category to its fix and writes the findings to `<atlas>/TRIAGE.md`. Fix root causes in `scout/`, symptoms in `atlas/`.
