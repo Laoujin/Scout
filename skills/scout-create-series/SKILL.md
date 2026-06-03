@@ -96,7 +96,10 @@ Then add each confirmed member (group label only for grouped series):
 scripts/add-to-series.sh "$ATLAS_DIR/_data/series.yml" "<entry-dir-slug>" "<slug>" "<Label A>"
 ```
 
-`add-to-series.sh` is idempotent and fail-soft — safe to re-run.
+`add-to-series.sh` is idempotent and fail-soft — safe to re-run. Note: its idempotency
+is **file-global** — an entry already listed in *any* series silently no-ops (single-membership
+is by design). If a confirmed member doesn't appear, it already belongs to another series; pick a
+different entry or move it deliberately by hand.
 
 ### 6. Review
 
