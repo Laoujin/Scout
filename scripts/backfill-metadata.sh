@@ -2,13 +2,17 @@
 # Backfill missing model / duration_sec / cost_usd into legacy research
 # frontmatter, reading truthful values from each node's .scout-result.json.
 # Only fields the triage scanner flags as MISSING_* are injected, so the
-# scanner's exemptions (tiny/failed bodies, sub-runs, parent cost) are honoured
-# and nothing is fabricated — a node with no result JSON is left flagged.
-# Idempotent. Usage: backfill-metadata.sh <research-root>
+# scanner's exemptions (tiny/failed bodies, sub-runs, parent cost) are honoured.
+# A field that can't be recovered (no/empty result JSON) is left flagged — UNLESS
+# BACKFILL_SENTINEL is set, in which case the unrecoverable field is stamped with
+# that sentinel string (e.g. "n/a") so it clears the health backlog without
+# faking a number. Real values are always preferred over the sentinel.
+# Idempotent. Usage: [BACKFILL_SENTINEL=n/a] backfill-metadata.sh <research-root>
 
 set -euo pipefail
 
 ROOT="${1:?usage: backfill-metadata.sh <research-root>}"
+SENTINEL="${BACKFILL_SENTINEL:-}"
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCAN="$DIR/../skills/scout-triage/scan.py"
 # shellcheck source=lib-models.sh
@@ -27,7 +31,7 @@ mapfile -t rows < <(jq -r '
   | select(.cats | length > 0)
   | "\(.p)\t\(.cats | join(","))"' <<<"$health")
 
-backfilled=0; lost=0
+backfilled=0; lost=0; marked=0
 for row in "${rows[@]}"; do
   rel="${row%%$'\t'*}"; cats=",${row#*$'\t'},"
   node="$ROOT/$rel"
@@ -36,26 +40,28 @@ for row in "${rows[@]}"; do
   [ -n "$art" ] || continue
 
   res="$node/.scout-result.json"
-  if [ ! -f "$res" ]; then
-    echo "  lost: $rel (no .scout-result.json)"; lost=$((lost + 1)); continue
-  fi
+  have_res=0; [ -f "$res" ] && have_res=1
 
-  inject=()
+  inject=(); sentineled=0
   if [[ "$cats" == *",MISSING_MODEL,"* ]]; then
-    m="$(scout_model_label_from_result "$res")"
-    [ -n "$m" ] && inject+=("model: \"$m\"")
+    m=""; [ "$have_res" = 1 ] && m="$(scout_model_label_from_result "$res")"
+    if [ -n "$m" ]; then inject+=("model: \"$m\"")
+    elif [ -n "$SENTINEL" ]; then inject+=("model: \"$SENTINEL\""); sentineled=1; fi
   fi
   if [[ "$cats" == *",MISSING_DURATION,"* ]]; then
-    d="$(jq -r '.duration_ms // empty' "$res")"
-    [ -n "$d" ] && inject+=("duration_sec: $(( (d + 500) / 1000 ))")
+    d=""; [ "$have_res" = 1 ] && d="$(jq -r '.duration_ms // empty' "$res")"
+    if [ -n "$d" ]; then inject+=("duration_sec: $(( (d + 500) / 1000 ))")
+    elif [ -n "$SENTINEL" ]; then inject+=("duration_sec: \"$SENTINEL\""); sentineled=1; fi
   fi
   if [[ "$cats" == *",MISSING_COST,"* ]]; then
-    c="$(jq -r '.total_cost_usd // empty' "$res")"
-    [ -n "$c" ] && inject+=("cost_usd: $c")
+    c=""; [ "$have_res" = 1 ] && c="$(jq -r '.total_cost_usd // empty' "$res")"
+    if [ -n "$c" ]; then inject+=("cost_usd: $c")
+    elif [ -n "$SENTINEL" ]; then inject+=("cost_usd: \"$SENTINEL\""); sentineled=1; fi
   fi
 
   if [ "${#inject[@]}" -eq 0 ]; then
-    echo "  lost: $rel (result lacks usable fields)"; lost=$((lost + 1)); continue
+    echo "  lost: $rel (no recoverable data; set BACKFILL_SENTINEL to mark unrecorded)"
+    lost=$((lost + 1)); continue
   fi
 
   # Insert the new fields just before the closing frontmatter delimiter.
@@ -64,8 +70,12 @@ for row in "${rows[@]}"; do
   tmp=$(mktemp)
   awk -v end="$end_line" -v block="$block" 'NR==end{printf "%s\n", block} {print}' "$art" > "$tmp"
   mv "$tmp" "$art"
-  echo "  fixed: $rel  [${inject[*]}]"
+  if [ "$sentineled" = 1 ]; then
+    echo "  marked: $rel  [${inject[*]}]"; marked=$((marked + 1))
+  else
+    echo "  fixed: $rel  [${inject[*]}]"
+  fi
   backfilled=$((backfilled + 1))
 done
 
-echo "backfill: $backfilled node(s) updated, $lost lost (no/empty result)"
+echo "backfill: $backfilled node(s) updated ($marked with sentinel '$SENTINEL'), $lost lost"

@@ -86,6 +86,32 @@ jq -e '.hygiene[] | select(.slug=="2026-01-03-lost") | .items[].findings | map(.
 [ "$(grep -c '^model:' "$A1")" = "1" ] \
   && pass "idempotent: re-run does not duplicate injected fields" || fail "idempotent: re-run duplicated fields"
 
+# --- Sentinel mode (BACKFILL_SENTINEL): mark unrecoverable fields instead of leaving them flagged ---
+# A fresh node with no result JSON and all three fields missing.
+mkdir -p "$RES/2026-01-04-allmissing"
+printf -- '---\ntitle: "AM"\ncover: cover.svg\n---\n%s\n' "$BODY" > "$RES/2026-01-04-allmissing/index.md"
+printf '<svg/>' > "$RES/2026-01-04-allmissing/cover.svg"
+
+BACKFILL_SENTINEL="n/a" "$BACKFILL" "$RES" > /dev/null 2>&1
+
+A4="$RES/2026-01-04-allmissing/index.md"
+grep -q '^model: "n/a"$' "$A4" && grep -q '^cost_usd: "n/a"$' "$A4" && grep -q '^duration_sec: "n/a"$' "$A4" \
+  && pass "sentinel: unrecoverable node gets the sentinel for all three" \
+  || fail "sentinel: all-missing node not fully sentineled"
+
+# The lost node (2026-01-03) was missing ONLY model; cost/duration were real and present.
+A3b="$RES/2026-01-03-lost/index.md"
+grep -q '^model: "n/a"$' "$A3b" && grep -q '^cost_usd: 2.0$' "$A3b" && [ "$(grep -c '^cost_usd:' "$A3b")" = "1" ] \
+  && pass "sentinel: only the flagged field is sentineled; real fields untouched" \
+  || fail "sentinel: partial sentinel clobbered or missed"
+
+# Scanner no longer flags the sentineled nodes.
+HEALTH2="$(SCOUT_HEALTH_GENERATED=T python3 "$SCAN" --health "$RES")"
+f2="$(jq -r '[.hygiene[] | select(.slug=="2026-01-04-allmissing" or .slug=="2026-01-03-lost")
+            | .items[].findings[].category
+            | select(.=="MISSING_MODEL" or .=="MISSING_DURATION" or .=="MISSING_COST")] | length' <<<"$HEALTH2")"
+[ "$f2" = "0" ] && pass "sentinel: scanner no longer flags sentineled nodes" || fail "sentinel: still flagged ($f2)"
+
 rm -rf "$ROOT"
 echo
 echo "Results: $PASS passed, $FAIL failed"
