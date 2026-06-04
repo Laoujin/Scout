@@ -106,7 +106,8 @@ jobs:
       (startsWith(github.event.issue.title, '[research] ') ||
        contains(github.event.issue.labels.*.name, 'scout-research')) &&
       github.event.issue.state == 'open' &&
-      !startsWith(github.event.comment.body, '/')
+      !startsWith(github.event.comment.body, '/') &&
+      !contains(github.event.comment.body, '<!-- scout-rerun:')
     runs-on: [self-hosted, scout-sharpener]
     timeout-minutes: 10
     env:

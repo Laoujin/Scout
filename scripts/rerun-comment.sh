@@ -47,6 +47,10 @@ for slug in "${FAILED_SLUGS[@]}"; do
 done
 ROWS="${ROWS%$'\n'}"
 
+# The scout-rerun marker is load-bearing: the `rerun` workflow job keys off it to
+# trigger a re-run, and `resharpen-on-comment` excludes it so this machine-posted
+# comment isn't mistaken for human feedback (it would otherwise re-sharpen when a
+# local/PAT re-fire authors the comment as a real user, not the bot).
 BODY="$(cat <<EOF
 ### Some sub-topics failed
 
