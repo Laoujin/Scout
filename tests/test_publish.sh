@@ -231,6 +231,45 @@ else
 fi
 rm -rf "$tmp"
 
+# --- Case 9: local git identity authors the commit when GIT_AUTHOR_NAME unset ---
+# Local /scout runs don't set GIT_AUTHOR_NAME; the commit should be attributed to
+# the user's own git identity, not the "Scout" CI fallback.
+tmp=$(setup_tmp)
+git -C "$tmp/atlas-checkout" config user.name "Local User"
+git -C "$tmp/atlas-checkout" config user.email "local@example.com"
+( cd "$tmp" && env -u GIT_AUTHOR_NAME -u GIT_AUTHOR_EMAIL \
+    ATLAS_REPO="git@github.com-atlas:test/atlas.git" \
+    DATE="2026-04-23" SLUG="test" TOPIC="test topic" \
+    GH_TOKEN="" GH_REPO="" ISSUE_NUMBER="" \
+    bash "$SCRIPT" >"$tmp/publish.log" 2>&1 )
+RC=$?
+author="$(git --git-dir="$tmp/atlas-remote.git" log main -1 --format='%an <%ae>')"
+if [ "$RC" = "0" ] && [ "$author" = "Local User <local@example.com>" ]; then
+  pass "case 9: local git identity authors local-run commits"
+else
+  fail "case 9: rc=$RC author='$author' (expected 'Local User <local@example.com>'), log: $(publish_log "$tmp")"
+fi
+rm -rf "$tmp"
+
+# --- Case 10: explicit GIT_AUTHOR_NAME still wins (CI behavior preserved) ---
+tmp=$(setup_tmp)
+git -C "$tmp/atlas-checkout" config user.name "Local User"
+git -C "$tmp/atlas-checkout" config user.email "local@example.com"
+( cd "$tmp" && env \
+    ATLAS_REPO="git@github.com-atlas:test/atlas.git" \
+    DATE="2026-04-23" SLUG="test" TOPIC="test topic" \
+    GH_TOKEN="" GH_REPO="" ISSUE_NUMBER="" \
+    GIT_AUTHOR_NAME="Issue Author" GIT_AUTHOR_EMAIL="ci@example.com" \
+    bash "$SCRIPT" >"$tmp/publish.log" 2>&1 )
+RC=$?
+author="$(git --git-dir="$tmp/atlas-remote.git" log main -1 --format='%an <%ae>')"
+if [ "$RC" = "0" ] && [ "$author" = "Issue Author <ci@example.com>" ]; then
+  pass "case 10: explicit GIT_AUTHOR_NAME wins (CI)"
+else
+  fail "case 10: rc=$RC author='$author' (expected 'Issue Author <ci@example.com>'), log: $(publish_log "$tmp")"
+fi
+rm -rf "$tmp"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] && exit 0 || exit 1

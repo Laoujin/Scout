@@ -76,7 +76,7 @@ pr_fallback() {
 # pushing to <fallback-branch> and prints a compare URL.
 # Preconditions: cwd is the atlas-checkout git repo. ATLAS_REPO env may be set
 # (used in PR-fallback compare URL). GIT_AUTHOR_{NAME,EMAIL} envs control the
-# commit identity (Scout fallback if unset).
+# commit identity, else the checkout's git config, else a "Scout" fallback.
 # Returns: 0 on success (main or PR-fallback branch),
 #          2 nothing staged (caller decides whether that's an error),
 #          3 hard failure (auth/network/etc).
@@ -88,8 +88,14 @@ publish_path() {
     return 2
   fi
 
-  git -c user.name="${GIT_AUTHOR_NAME:-Scout}" \
-      -c user.email="${GIT_AUTHOR_EMAIL:-scout@users.noreply.github.com}" \
+  # Identity precedence: explicit GIT_AUTHOR_* (CI passes the issue author) →
+  # the checkout's own git config (so local /scout runs commit as the user, not
+  # "Scout") → "Scout" only when no identity is configured at all.
+  local an ae
+  an="${GIT_AUTHOR_NAME:-$(git config user.name 2>/dev/null || true)}"
+  ae="${GIT_AUTHOR_EMAIL:-$(git config user.email 2>/dev/null || true)}"
+  git -c user.name="${an:-Scout}" \
+      -c user.email="${ae:-scout@users.noreply.github.com}" \
     commit -m "$msg"
 
   local rc=0
