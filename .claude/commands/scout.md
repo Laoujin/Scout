@@ -83,11 +83,16 @@ Read `$SCOUT_DIR/skills/scout/synthesis.md` and follow it:
    own cover; match it). In ONE message dispatch `scout-illustrator` once per
    successful `CHILD` (`TOPIC=<child title>`, `TAGS=<child tags>`,
    `RESEARCH_DIR=<child dir>`) **and** once for the parent (`RESEARCH_DIR=$PARENT_DIR`,
-   the final expedition `TAGS`). For each that returns `wrote cover.svg`, add
-   `cover: cover.svg` to that artifact's frontmatter; omit it where it skipped.
-   (If the `scout-illustrator` agent type isn't registered in this harness, run a
-   `general-purpose` agent with the body of `$SCOUT_DIR/.claude/agents/scout-illustrator.md`
-   as its brief — same inputs, same one-line return.)
+   the final expedition `TAGS`). Then wire each child's cover **deterministically** —
+   the children's artifacts were already written in Step 4, so don't hand-edit them:
+   for every successful `CHILD` run
+   `bash $SCOUT_DIR/scripts/inject_cover.sh <child dir>/index.{md,html}`. It adds
+   `cover: cover.svg` iff the illustrator wrote one and is a no-op otherwise, so an
+   orphaned `cover.svg` can't slip past. (The parent's `cover:` is set when you write
+   its index in step 3 below.) If the `scout-illustrator` agent type isn't registered
+   in this harness, run a `general-purpose` agent with the body of
+   `$SCOUT_DIR/.claude/agents/scout-illustrator.md` as its brief — same inputs, same
+   one-line return.
 2. Write `$PARENT_DIR/manifest.json` = a JSON array, one object per child:
    `{"slug","title","depth","status","start","end"}`.
 3. Write `$PARENT_DIR/index.md` with `layout: expedition`, the `children:`
