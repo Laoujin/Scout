@@ -99,6 +99,10 @@ grep -q '^model: "n/a"$' "$A4" && grep -q '^cost_usd: "n/a"$' "$A4" && grep -q '
   && pass "sentinel: unrecoverable node gets the sentinel for all three" \
   || fail "sentinel: all-missing node not fully sentineled"
 
+# A non-sub leaf with no issue: is flagged MISSING_ISSUE; the sentinel clears it too.
+grep -q '^issue: "n/a"$' "$A4" \
+  && pass "sentinel: missing issue is also stamped" || fail "sentinel: issue not stamped"
+
 # The lost node (2026-01-03) was missing ONLY model; cost/duration were real and present.
 A3b="$RES/2026-01-03-lost/index.md"
 grep -q '^model: "n/a"$' "$A3b" && grep -q '^cost_usd: 2.0$' "$A3b" && [ "$(grep -c '^cost_usd:' "$A3b")" = "1" ] \
@@ -109,7 +113,7 @@ grep -q '^model: "n/a"$' "$A3b" && grep -q '^cost_usd: 2.0$' "$A3b" && [ "$(grep
 HEALTH2="$(SCOUT_HEALTH_GENERATED=T python3 "$SCAN" --health "$RES")"
 f2="$(jq -r '[.hygiene[] | select(.slug=="2026-01-04-allmissing" or .slug=="2026-01-03-lost")
             | .items[].findings[].category
-            | select(.=="MISSING_MODEL" or .=="MISSING_DURATION" or .=="MISSING_COST")] | length' <<<"$HEALTH2")"
+            | select(.=="MISSING_MODEL" or .=="MISSING_DURATION" or .=="MISSING_COST" or .=="MISSING_ISSUE")] | length' <<<"$HEALTH2")"
 [ "$f2" = "0" ] && pass "sentinel: scanner no longer flags sentineled nodes" || fail "sentinel: still flagged ($f2)"
 
 rm -rf "$ROOT"

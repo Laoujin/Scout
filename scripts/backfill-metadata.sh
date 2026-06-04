@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Backfill missing model / duration_sec / cost_usd into legacy research
-# frontmatter, reading truthful values from each node's .scout-result.json.
+# Backfill missing model / duration_sec / cost_usd (and issue) into legacy
+# research frontmatter, reading truthful values from each node's
+# .scout-result.json (issue is GitHub-only, so it is sentinel-only).
 # Only fields the triage scanner flags as MISSING_* are injected, so the
 # scanner's exemptions (tiny/failed bodies, sub-runs, parent cost) are honoured.
 # A field that can't be recovered (no/empty result JSON) is left flagged — UNLESS
@@ -27,7 +28,8 @@ health="$(python3 "$SCAN" --health "$ROOT")"
 mapfile -t rows < <(jq -r '
   .hygiene[].items[]
   | {p: .path, cats: [.findings[].category]
-       | map(select(. == "MISSING_MODEL" or . == "MISSING_DURATION" or . == "MISSING_COST"))}
+       | map(select(. == "MISSING_MODEL" or . == "MISSING_DURATION"
+                    or . == "MISSING_COST" or . == "MISSING_ISSUE"))}
   | select(.cats | length > 0)
   | "\(.p)\t\(.cats | join(","))"' <<<"$health")
 
@@ -57,6 +59,10 @@ for row in "${rows[@]}"; do
     c=""; [ "$have_res" = 1 ] && c="$(jq -r '.total_cost_usd // empty' "$res")"
     if [ -n "$c" ]; then inject+=("cost_usd: $c")
     elif [ -n "$SENTINEL" ]; then inject+=("cost_usd: \"$SENTINEL\""); sentineled=1; fi
+  fi
+  # issue is a GitHub artifact, never in the result JSON — sentinel-only.
+  if [[ "$cats" == *",MISSING_ISSUE,"* ]] && [ -n "$SENTINEL" ]; then
+    inject+=("issue: \"$SENTINEL\""); sentineled=1
   fi
 
   if [ "${#inject[@]}" -eq 0 ]; then
