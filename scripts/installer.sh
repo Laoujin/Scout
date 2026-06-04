@@ -215,6 +215,22 @@ layout: default
 ---
 EOF
 
+# Health page + seed. The daily triage workflow overwrites _data/health.json with the
+# real audit; this empty seed lets /health and the homepage pill render before the
+# first run (pill shows a quiet "healthy" dot until then).
+cat > "$STAGE/health.md" <<'EOF'
+---
+layout: health
+permalink: /health/
+sitemap: false
+---
+EOF
+
+mkdir -p "$STAGE/_data"
+cat > "$STAGE/_data/health.json" <<'EOF'
+{ "generated": null, "counts": { "critical": 0, "hygiene": 0 }, "critical": [], "hygiene": [] }
+EOF
+
 cat > "$STAGE/Gemfile" <<'EOF'
 source "https://rubygems.org"
 

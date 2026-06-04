@@ -1,0 +1,25 @@
+name: triage
+
+# Daily Atlas health audit. Regenerates _data/health.json (the /health page + homepage
+# pill) and pushes it to Atlas main, which triggers the Pages rebuild. scan.py is a
+# local, network-free, zero-model audit, so this is cheap (runner-seconds).
+on:
+  schedule:
+    - cron: "0 6 * * *"   # 06:00 UTC daily
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: [self-hosted, scout]
+    timeout-minutes: 15
+    env:
+      ATLAS_REPO: git@github.com-atlas:${{ vars.ATLAS_REPO_OWNER || github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
+      GIT_AUTHOR_NAME: Scout
+      GIT_AUTHOR_EMAIL: scout@users.noreply.github.com
+    steps:
+      - uses: actions/checkout@v5
+      - name: Regenerate Atlas health report
+        run: bash scripts/triage-health.sh
+      - name: Summary
+        if: always()
+        run: echo "Atlas health triage ran at $(date -u +'%Y-%m-%d %H:%M UTC')" >> "$GITHUB_STEP_SUMMARY"
