@@ -30,8 +30,8 @@ FAILURE_MARKERS = ("research failed", "run.sh exit")
 SEVERITY = {  # ordering for the grouped report
     "DEAD": 0, "GENUINE_FAILURE": 1, "STRAY_DIR": 2, "FALSE_FLAG": 3,
     "MANIFEST_MISMATCH": 4, "MISSING_COST": 5, "MISSING_COVER": 6,
-    "MISSING_ISSUE": 7, "SLUG_DOUBLED_DATE": 8,
-    "SLUG_REPEAT_TOKEN": 9, "LEDGER_MISMATCH": 10,
+    "MISSING_MODEL": 7, "MISSING_DURATION": 8, "MISSING_ISSUE": 9,
+    "SLUG_DOUBLED_DATE": 10, "SLUG_REPEAT_TOKEN": 11, "LEDGER_MISMATCH": 12,
 }
 
 DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
@@ -124,17 +124,32 @@ def check_node(node, findings, *, is_parent, slug):
         why = "validation_error present" if "validation_error" in sc else f"status={status}"
         add(findings, "FALSE_FLAG", folder, f"{why} but body has real content ({len(body)} chars) — strip flag, set status success")
 
-    # Cover line vs file on disk.
-    if (folder / "cover.svg").exists() and "cover" not in sc:
+    # Cover: an orphaned file, a dangling reference, or no cover at all on a real page.
+    cover_file = (folder / "cover.svg").exists()
+    cover_line = "cover" in sc
+    if cover_file and not cover_line:
         add(findings, "MISSING_COVER", folder, "cover.svg on disk but no `cover:` in frontmatter")
+    elif cover_line and not cover_file:
+        add(findings, "MISSING_COVER", folder, "`cover:` in frontmatter but no cover.svg on disk — dangling reference")
+    elif not cover_file and not tiny:
+        add(findings, "MISSING_COVER", folder, "no cover.svg and no `cover:` — never illustrated (or illustrator skipped)")
 
-    # Parents are synthesis pages: cost/model/issue conventions are per-leaf.
+    # Every real research page (parent or leaf) should record what produced it.
+    if not tiny:
+        if "model" not in sc:
+            add(findings, "MISSING_MODEL", folder, "no `model:` — which model produced this is unrecorded")
+        if "duration_sec" not in sc:
+            add(findings, "MISSING_DURATION", folder, "no `duration_sec:` — runtime unrecorded")
+
+    # Per-leaf conventions. Interactive (subscription) runs carry cost_usd: "sub" and
+    # legitimately have no issue number, so they're exempt from MISSING_ISSUE.
+    is_sub_run = sc.get("cost_usd", "").strip().strip('"').lower() == "sub"
     if not is_parent and not tiny:
         if "cost_usd" not in sc:
             backfill = load_result_cost(folder)
             note = f"backfillable from .scout-result.json (${backfill})" if backfill else "lost (no result JSON)"
             add(findings, "MISSING_COST", folder, f"no `cost_usd` — {note}")
-        if "issue" not in sc:
+        if "issue" not in sc and not is_sub_run:
             add(findings, "MISSING_ISSUE", folder, "no `issue:` field")
 
 
