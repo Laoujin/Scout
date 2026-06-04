@@ -16,6 +16,7 @@ import json
 import os
 import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 # Body shorter than this (chars, after frontmatter) with a failure marker = genuine
@@ -33,6 +34,16 @@ SEVERITY = {  # ordering for the grouped report
     "MISSING_MODEL": 7, "MISSING_DURATION": 8, "MISSING_ISSUE": 9,
     "SLUG_DOUBLED_DATE": 10, "SLUG_REPEAT_TOKEN": 11, "LEDGER_MISMATCH": 12,
 }
+
+# Critical = the research is actually broken (delete / re-run / repair). Everything
+# else is hygiene (cosmetic metadata gaps) — kept off the homepage pill so a backlog
+# of legacy metadata gaps can't drown the "X is broken" signal.
+CRITICAL = {"DEAD", "GENUINE_FAILURE", "STRAY_DIR", "MANIFEST_MISMATCH",
+            "LEDGER_MISMATCH", "FALSE_FLAG"}
+
+
+def severity_of(category):
+    return "critical" if category in CRITICAL else "hygiene"
 
 DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
 DOUBLED_DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-\1\b")
@@ -105,7 +116,8 @@ def slug_repeat_token(slug):
 
 
 def add(findings, cat, path, detail):
-    findings.append({"category": cat, "path": str(path), "detail": detail})
+    findings.append({"category": cat, "severity": severity_of(cat),
+                     "path": str(path), "detail": detail})
 
 
 def check_node(node, findings, *, is_parent, slug):
@@ -230,9 +242,50 @@ def scan(root):
     return findings
 
 
+def _utcnow_iso():
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
+def build_health(findings, root, generated):
+    """Group findings by research slug, split by severity, for Atlas's _data/health.json.
+    A research appears under `critical` if it has any critical finding (listing only its
+    critical findings) and/or under `hygiene` for its hygiene findings — same research can
+    appear in both. `counts` is the number of distinct research per tier (drives the pill)."""
+    tree = {}  # slug -> severity -> (node, rel_path) -> [ {category, detail} ]
+    for f in findings:
+        p = Path(f["path"])
+        try:
+            rel = p.relative_to(root)
+        except ValueError:
+            rel = Path(p.name)
+        parts = rel.parts
+        slug = parts[0] if parts else p.name
+        node = "parent" if len(parts) <= 1 else "child"
+        (tree.setdefault(slug, {}).setdefault(f["severity"], {})
+            .setdefault((node, str(rel)), []).append(
+                {"category": f["category"], "detail": f["detail"]}))
+
+    def bucket(sev):
+        out = []
+        for slug in sorted(tree):
+            paths = tree[slug].get(sev)
+            if not paths:
+                continue
+            items = [{"node": n, "path": pth, "findings": fs}
+                     for (n, pth), fs in sorted(paths.items(), key=lambda kv: kv[0][1])]
+            out.append({"slug": slug, "items": items})
+        return out
+
+    crit, hyg = bucket("critical"), bucket("hygiene")
+    return {"generated": generated,
+            "counts": {"critical": len(crit), "hygiene": len(hyg)},
+            "critical": crit, "hygiene": hyg}
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     as_json = "--json" in sys.argv[1:]
+    as_health = "--health" in sys.argv[1:]
     if args:
         root = Path(args[0])
     else:
@@ -243,6 +296,11 @@ def main():
 
     findings = scan(root)
     findings.sort(key=lambda f: (SEVERITY.get(f["category"], 99), f["path"]))
+
+    if as_health:
+        generated = os.environ.get("SCOUT_HEALTH_GENERATED") or _utcnow_iso()
+        print(json.dumps(build_health(findings, root, generated), indent=2))
+        return
 
     if as_json:
         print(json.dumps(findings, indent=2))
