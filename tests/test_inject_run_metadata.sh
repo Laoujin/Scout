@@ -72,6 +72,26 @@ MD
 MODEL="Opus 4.8" DURATION=321 bash "$REPO_ROOT/scripts/inject-run-metadata.sh" "$S"
 [ "$(fm "$S/index.md" duration_sec)" = '321' ] && pass "single-pass duration from DURATION env" || fail "single dur='$(fm "$S/index.md" duration_sec)'"
 
+# A manifest child with no index dir must be skipped gracefully (not abort under set -e)
+G="$TMP/ghost"; mkdir -p "$G"
+cat > "$G/index.md" <<'MD'
+---
+title: Ghost parent
+---
+body
+MD
+cat > "$G/manifest.json" <<'JSON'
+[
+  {"slug":"missing","title":"Missing","depth":"deep","status":"failed","start":10,"end":20}
+]
+JSON
+if MODEL="Opus 4.8" bash "$REPO_ROOT/scripts/inject-run-metadata.sh" "$G" >/dev/null 2>&1; then
+  pass "skips manifest child with no index file (exit 0)"
+else
+  fail "aborted on manifest child with no index file"
+fi
+[ "$(fm "$G/index.md" model)" = '"Opus 4.8"' ] && pass "ghost parent still stamped" || fail "ghost parent not stamped"
+
 echo
 echo "Results: $PASS passed, $FAIL failed"
 if [ $FAIL -gt 0 ]; then printf '  %s\n' "${FAIL_MSGS[@]}"; exit 1; fi

@@ -37,6 +37,7 @@ _artifact() {
   local d="$1"
   [ -f "$d/index.md" ]   && { printf '%s' "$d/index.md";   return; }
   [ -f "$d/index.html" ] && { printf '%s' "$d/index.html"; return; }
+  return 0
 }
 
 MANIFEST="$DIR/manifest.json"
