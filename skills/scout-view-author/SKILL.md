@@ -76,29 +76,37 @@ Views are fixed HTML+CSS. **No `<script>` tags.** No filter chips that don't fil
 
 Real images dramatically change how a view feels. Try hard. There is no cap — fetch as many as the topic earns. Each download still has a 10-second timeout and the >2KB / valid-magic file checks; abandon a single fetch if it stalls or returns junk, but keep going for the next slot.
 
-For each image slot in your design (hero, card thumbnails, etc.):
+For each image slot, **match the source to the subject** and exhaust the real-image sources below before any gradient. The `og:image` of a cited page only exists for the specific named thing that page is about — it is useless for a generic subject (a dish, a festival, an animal, a landmark). That mismatch is what produces gradient-filled card grids; Commons is the fix.
 
-1. **OG image extraction.** `WebFetch` strips `<head>`, so it won't surface OG tags. Use `curl` directly:
+1. **Wikimedia Commons — primary for generic & photogenic subjects.** Dishes, landmarks, festivals, markets, flora/fauna, generic activities — the things no single citation page has an `og:image` for — almost always have a Commons photo (license-clean, hotlink-safe). Search the API; the **UA header is mandatory** — Commons returns an empty body without one:
+   ```bash
+   curl -sL --max-time 10 -A "Mozilla/5.0" \
+     "https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=<subject>&gsrnamespace=6&gsrlimit=5&prop=imageinfo&iiprop=url|mime&iiurlwidth=1200&format=json"
+   ```
+   Each result carries a 1200px `thumburl`. Pick the most on-subject one and download it (same UA). Prefer a specific match (`Cendol in Penang`) over a generic one, but a clean generic shot beats a gradient every time.
+
+2. **OG image extraction — primary for named venues/products/businesses.** When the slot is a specific named entity with its own site (restaurant, hotel, attraction, conference), pull its `og:image`. `WebFetch` strips `<head>`, so use `curl`:
    ```bash
    curl -sL --max-time 10 -A "Mozilla/5.0" "<source-url>" | \
      grep -oiE '<meta[^>]+(property|name)="(og:image|twitter:image)"[^>]*content="[^"]+"' | \
      head -1 | grep -oE 'content="[^"]+"' | sed 's/content="//;s/"$//'
    ```
-   If a URL comes back, download it:
-   ```bash
-   curl -L --max-time 10 -A "Mozilla/5.0" -o "<RESEARCH_DIR>/views/<VIEW_NAME>/images/<slug>.jpg" "<og-url>"
-   ```
-   Verify: file exists, >2KB, valid image (`file <path>` returns `JPEG image data` / `PNG image data` / etc.). If valid, reference as `<img src="<VIEW_NAME>/images/<slug>.jpg" alt="...">`.
 
-2. **Existing assets in the canonical's directory.** If `RESEARCH_DIR/cover.svg` exists, you can use it as `<img src="../cover.svg">` for hero or accent.
+Download every candidate (Commons `thumburl` or OG url) the same way, then verify:
+```bash
+curl -L --max-time 10 -A "Mozilla/5.0" -o "<RESEARCH_DIR>/views/<VIEW_NAME>/images/<slug>.jpg" "<image-url>"
+```
+Verify: file exists, >2KB, valid image (`file <path>` returns `JPEG image data` / `PNG image data` / etc.). If valid, reference as `<img src="<VIEW_NAME>/images/<slug>.jpg" alt="...">`.
 
-3. **Favicon-as-thumbnail (utility, not hero).** Source-card thumbnails inline `<img src="https://www.google.com/s2/favicons?domain=<domain>&sz=128">`. No download — the URL is stable. These work everywhere.
+3. **Existing assets in the canonical's directory.** If `RESEARCH_DIR/cover.svg` exists, you can use it as `<img src="../cover.svg">` for hero or accent.
 
-4. **Gradient placeholder with text overlay.** Last resort: `<div class="card-photo" style="background: linear-gradient(135deg, #...);">CARD NAME</div>`. Looks intentional, not missing.
+4. **Favicon-as-thumbnail (utility, not hero).** Source-card thumbnails inline `<img src="https://www.google.com/s2/favicons?domain=<domain>&sz=128">`. No download — the URL is stable. These work everywhere.
 
-5. **Unicode glyphs as graphic elements.** ⌥ ★ ⊠ ✎ ∞ ↑ ↓ → ← ⚖ 💬 etc. — used at large display sizes (40px+) they become typographic illustrations. Useful when no image source exists but you want graphical density.
+5. **Gradient placeholder — genuine last resort, not a default.** Only after BOTH Commons and OG-extraction have failed for that specific subject. A gradient sitting in a card *photo* slot reads as a broken/missing image — the exact thing this strategy exists to prevent. Fine for *decorative* slots (a section band, a postmark, tape) or a truly unfindable subject; never as a shortcut to skip the search above.
 
-A view with 1 OG image + 2 favicons + 3 gradient placeholders is fine. A view with 6 gradient placeholders and zero real images is a sign the topic is image-poor — consider whether the visual register should lean *typographic* (manifesto, poster) instead of *photographic* (magazine).
+6. **Unicode glyphs as graphic elements.** ⌥ ★ ⊠ ✎ ∞ ↑ ↓ → ← ⚖ 💬 etc. — used at large display sizes (40px+) they become typographic illustrations. Useful when no image source exists but you want graphical density.
+
+Most photo slots should hold real photos. A few favicons (source cards) and the rare gradient for a genuinely unfindable subject are fine; a card grid where a third of the photo slots are gradients means the search was cut short, not that the topic is image-poor — Commons almost always has the generic ones. If a topic *truly* is image-poor, lean the register *typographic* (manifesto, poster) rather than shipping a photo grid full of gradients.
 
 Place all downloads at `<RESEARCH_DIR>/views/<VIEW_NAME>/images/`. The HTML lives at `views/<VIEW_NAME>.html`, so the correct relative reference is **`<VIEW_NAME>/images/<filename>`** — NOT `images/<filename>` (that resolves to `views/images/...` and 404s).
 
@@ -185,6 +193,7 @@ A view fails when:
     - All `<a href>` URLs come from `links.json` or are inline citation URLs from the ledger.
     - No `ceo` / `standard` / `deep` strings anywhere.
     - Source-card favicons (when used) use `s2/favicons` URLs.
+    - **No gradient in a card *photo* slot** unless that subject was searched on BOTH Wikimedia Commons and OG-extraction and genuinely returned nothing. Grep your file for `linear-gradient` in photo/card/tile slots and re-source any that are just unfilled — generic subjects (dishes, festivals, landmarks, animals) are exactly what Commons covers.
     - **No negative `margin` on the outer wrapper.** The layout already gives you full-bleed (`html, body { margin: 0; padding: 0; }`); patterns like `margin: -2rem -2rem 0` to "break out of gutters" pull content above the viewport and clip the top. Use `margin: 0` and lay out within the wrapper.
     - The view doesn't look like it could be the magazine layout for a different topic. It inhabits THIS topic.
 12. **Report.** One line: `wrote views/<VIEW_NAME>.html (register=<your-chosen-register>, images: <N> downloaded, <M> favicons, <K> gradients)`.
@@ -197,6 +206,6 @@ A view fails when:
 - **Writing `ceo`/`standard`/`deep` in user-facing text.** Always translate.
 - **Pulling a 50KB OG image without bounds.** Honor the 10-second timeout + filesystem checks.
 - **Skipping the `links.json` write.** It's the audit trail and the URL whitelist.
-- **Treating gradient placeholders as the goal.** They're the last fallback. Try real images first when the topic is photogenic.
+- **Reaching for a gradient before trying Wikimedia Commons.** OG-extraction failing for a generic subject (a dish, a festival, an animal, a landmark) is not license to gradient — that's precisely what Commons is for. Gradients are the last fallback after both sources fail, and only ever in a photo slot if the subject is truly unfindable.
 - **Breaking out of layout gutters that don't exist.** `_layouts/view.html` zeros body margin/padding — there is nothing to escape. Negative top margin on the outer wrapper clips the first ~24–32px above the viewport. This bug was recurring across multiple views; the fix is to never reach for the breakout pattern.
 - **Producing template-shaped output.** If your view could be palette-swapped onto a different research topic and still make sense, you've built a template, not a commission. Pull harder for topic-specific identity.
