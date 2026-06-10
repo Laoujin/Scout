@@ -33,13 +33,14 @@ SEVERITY = {  # ordering for the grouped report
     "MANIFEST_MISMATCH": 4, "MISSING_COST": 5, "MISSING_COVER": 6,
     "MISSING_MODEL": 7, "MISSING_DURATION": 8, "MISSING_ISSUE": 9,
     "SLUG_DOUBLED_DATE": 10, "SLUG_REPEAT_TOKEN": 11, "LEDGER_MISMATCH": 12,
+    "SERIES_MISSING_ENTRY": 2,
 }
 
 # Critical = the research is actually broken (delete / re-run / repair). Everything
 # else is hygiene (cosmetic metadata gaps) — kept off the homepage pill so a backlog
 # of legacy metadata gaps can't drown the "X is broken" signal.
 CRITICAL = {"DEAD", "GENUINE_FAILURE", "STRAY_DIR", "MANIFEST_MISMATCH",
-            "LEDGER_MISMATCH", "FALSE_FLAG"}
+            "LEDGER_MISMATCH", "FALSE_FLAG", "SERIES_MISSING_ENTRY"}
 
 
 def severity_of(category):
@@ -211,8 +212,34 @@ def check_ledger(node, findings, *, is_parent):
             add(findings, "LEDGER_MISMATCH", folder, f"ledger line {i} is not valid JSON")
 
 
+# Series entries are bare list items (`- <slug>`); the mapping items they sit beside
+# (`- slug:`, `- label:`) carry a `key: value`, so the colon distinguishes them.
+SERIES_SLUG_RE = re.compile(r"^- slug:\s*(\S+)")
+SERIES_ENTRY_RE = re.compile(r"^\s+-\s+(?!\S+:\s)(\S.*?)\s*$")
+
+
+def check_series(root, findings):
+    """Every entry in _data/series.yml must have a research/ folder. A dangling entry
+    is a broken /series/<slug>/ card and a dead link — critical, not cosmetic. This is
+    the cross-check scan() would otherwise miss (it only walks folders that exist)."""
+    series_yml = root.parent / "_data" / "series.yml"
+    if not series_yml.exists():
+        return
+    current = None
+    for line in series_yml.read_text(encoding="utf-8", errors="replace").split("\n"):
+        m = SERIES_SLUG_RE.match(line)
+        if m:
+            current = m.group(1)
+            continue
+        m = SERIES_ENTRY_RE.match(line)
+        if m and not (root / m.group(1)).is_dir():
+            add(findings, "SERIES_MISSING_ENTRY", root / m.group(1),
+                f"listed in series '{current}' but research/{m.group(1)}/ does not exist")
+
+
 def scan(root):
     findings = []
+    check_series(root, findings)
     for folder in sorted(p for p in root.iterdir() if p.is_dir()):
         slug = folder.name
         if DOUBLED_DATE_RE.match(slug):

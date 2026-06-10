@@ -28,11 +28,16 @@ mkdir -p "$RES/2026-01-03-clean"
 printf -- '---\ntitle: "C"\nmodel: "Opus 4.8"\nduration_sec: 5\ncost_usd: "sub"\ncover: cover.svg\n---\n%s\n' "$BODY" > "$RES/2026-01-03-clean/index.md"
 printf '<svg/>' > "$RES/2026-01-03-clean/cover.svg"
 
+# series manifest: one real member (2026-01-03-clean) + one phantom (no folder)
+mkdir -p "$ROOT/_data"
+printf -- '- slug: demo\n  title: Demo\n  blurb: x\n  entries:\n    - 2026-01-03-clean\n    - 2026-01-09-ghost-no-folder\n' > "$ROOT/_data/series.yml"
+
 HEALTH="$(SCOUT_HEALTH_GENERATED=T python3 "$SCAN" --health "$RES")"
 JSON="$(python3 "$SCAN" --json "$RES")"
 
-[ "$(jq '.counts.critical' <<<"$HEALTH")" = "1" ] \
-  && pass "one critical research" || fail "expected counts.critical=1, got $(jq '.counts.critical' <<<"$HEALTH")"
+# two critical: the failed leaf + the phantom series entry (2026-01-09-ghost-no-folder)
+[ "$(jq '.counts.critical' <<<"$HEALTH")" = "2" ] \
+  && pass "two critical research" || fail "expected counts.critical=2, got $(jq '.counts.critical' <<<"$HEALTH")"
 
 jq -e '.critical[] | select(.slug=="2026-01-01-failed")' <<<"$HEALTH" >/dev/null \
   && pass "failed research in critical tier" || fail "failed research not in critical tier"
@@ -58,6 +63,18 @@ jq -e '.hygiene[] | select(.slug=="2026-01-02-hygiene") | .items[0].findings | m
 
 [ "$(jq '[.[] | select(.category=="MISSING_ISSUE")] | length' <<<"$JSON")" = "0" ] \
   && pass "cost_usd:sub runs exempt from MISSING_ISSUE" || fail "sub run wrongly flagged MISSING_ISSUE"
+
+[ "$(jq -r '[.[] | select(.category=="SERIES_MISSING_ENTRY") | .path] | length' <<<"$JSON")" = "1" ] \
+  && pass "exactly one phantom series entry flagged" || fail "expected 1 SERIES_MISSING_ENTRY, got $(jq -r '[.[] | select(.category=="SERIES_MISSING_ENTRY")] | length' <<<"$JSON")"
+
+[ "$(jq -r '.[] | select(.category=="SERIES_MISSING_ENTRY") | .path' <<<"$JSON" | grep -c ghost-no-folder)" = "1" ] \
+  && pass "phantom entry names the missing folder" || fail "SERIES_MISSING_ENTRY did not name the ghost folder"
+
+[ "$(jq -r '.[] | select(.category=="SERIES_MISSING_ENTRY") | .severity' <<<"$JSON" | head -1)" = "critical" ] \
+  && pass "SERIES_MISSING_ENTRY tagged critical" || fail "SERIES_MISSING_ENTRY not critical"
+
+jq -e '.critical[] | select(.slug=="2026-01-09-ghost-no-folder")' <<<"$HEALTH" >/dev/null \
+  && pass "phantom entry surfaces in health critical tier" || fail "phantom entry not in health critical tier"
 
 rm -rf "$ROOT"
 echo
