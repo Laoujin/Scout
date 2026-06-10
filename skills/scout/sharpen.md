@@ -101,8 +101,7 @@ The two angles that prompted this rule (a "build your own MCP server" session th
 ````
 
 - `depth` is one of `recon` / `survey` / `expedition`.
-- Default each child to `survey`; downgrade to `recon` for narrow angles; upgrade to `expedition` only when the sub-topic is itself multi-angled.
-- Avoid `expedition` for more than one or two children — each `expedition` child internally spawns 3–8 parallel sub-agents, so stacking them runs hot.
+- Default each child to `survey`; downgrade to `recon` for narrow angles; upgrade to `expedition` whenever the sub-topic is itself multi-angled.
 - Cap at 8 sub-topics total (stated + suggested); at most 3 of those may be unticked completeness suggestions.
 - Each sub-topic starts with a checkbox, then `(depth)`, then `**Title**`, then `— rationale`. Use `- [x]` (ticked, selected by default) for angles derived from the stated brief. Use `- [ ]` (unticked, opt-in) for completeness-sweep suggestions the user didn't state. List all ticked angles first, then any unticked suggestions.
 - Don't propose sub-topics that are mere sub-questions of one angle — those belong to the angle's own deep dive.
