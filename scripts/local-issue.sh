@@ -29,7 +29,16 @@ cmd_open() {
   local title="$1" body_file="$2" repo num
   repo="$(_repo_slug)" || { echo "[local-issue] no origin remote; skipping issue" >&2; return 0; }
   [ -f "$body_file" ] || { echo "[local-issue] prompt file not found: $body_file" >&2; return 0; }
-  num="$(gh issue create --repo "$repo" --title "$title" --body-file "$body_file" 2>/dev/null \
+  # The [research-local] prefix dodges research.yml's startsWith(title,'[research] ')
+  # guard and the scout-local-research label is distinct from the scout-research
+  # trigger label — so CI never processes a local provenance issue. Ensure the label
+  # first: `gh issue create --label` fails on a missing label, and we swallow that
+  # failure below, which would silently drop the whole issue.
+  gh label create scout-local-research --color 0e7490 \
+    --description "Scout started with /scout slash command on subscription" \
+    --repo "$repo" --force >/dev/null 2>&1 || true
+  num="$(gh issue create --repo "$repo" --title "[research-local] $title" \
+         --label scout-local-research --body-file "$body_file" 2>/dev/null \
          | grep -oE '[0-9]+$' | tail -1)"
   if [ -n "$num" ]; then printf '%s\n' "$num"; else echo "[local-issue] issue create failed; continuing" >&2; fi
 }

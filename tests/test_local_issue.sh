@@ -37,7 +37,9 @@ NUM="$(PATH="$TMP/bin:$PATH" SCOUT_DIR="$TMP/scoutdir" \
        bash "$REPO_ROOT/scripts/local-issue.sh" open "Hoi An guide" "$PROMPT")"
 [ "$NUM" = "77" ] && pass "open prints parsed issue number" || fail "open number='$NUM' (want 77)"
 grep -q -- "--repo Laoujin/Scout" "$GH_LOG" && pass "create targets repo from remote" || fail "wrong/no repo: $(cat "$GH_LOG")"
-grep -q -- "--title Hoi An guide" "$GH_LOG" && pass "create passes title" || fail "no title in: $(cat "$GH_LOG")"
+grep -qF -- "--title [research-local] Hoi An guide" "$GH_LOG" && pass "create prefixes title with [research-local]" || fail "no prefixed title in: $(cat "$GH_LOG")"
+grep -qF -- "--label scout-local-research" "$GH_LOG" && pass "create applies scout-local-research label" || fail "no label in: $(cat "$GH_LOG")"
+grep -qF -- "label create scout-local-research" "$GH_LOG" && pass "open ensures the scout-local-research label exists first" || fail "no label-create ensure call in: $(cat "$GH_LOG")"
 diff -q "$PROMPT" "$GH_BODY" >/dev/null 2>&1 && pass "issue body is the verbatim prompt" || fail "body not verbatim"
 
 # --- close: comments Published then closes ---
