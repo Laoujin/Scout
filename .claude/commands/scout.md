@@ -159,6 +159,25 @@ drop, or proceed. A failed view never blocks Step 6 — publish proceeds without
 
 ## Step 6 — Publish
 
+**Validate first (non-fatal — mirrors `run.sh`'s pre-publish checks).** For each
+canonical page you're about to publish — the single-pass `$PARENT_DIR`, or each
+**successful child** dir of an expedition — run both validators against its
+`index.{md,html}`:
+
+```
+bash "$SCOUT_DIR/scripts/validate_frontmatter.sh" <dir>/index.{md,html}
+[ -f "<dir>/citations.jsonl" ] && \
+  bash "$SCOUT_DIR/scripts/validate_ledger.sh" "<dir>/citations.jsonl" "<dir>/index.{md,html}"
+```
+
+`validate_frontmatter.sh` auto-fixes safe YAML issues and exits non-zero only on an
+unfixable parse error; `validate_ledger.sh` checks the citations schema and that every
+`[[n]]` in the artifact resolves. Neither blocks publishing — if either reports a
+problem, show it to the user and let them fix-and-revalidate or publish as-is. Like
+`run.sh`, validate **per page**: the single-pass artifact, or each expedition child.
+The expedition **parent** synthesis index is intentionally not frontmatter-validated
+(its hand-written summary is kept out of the YAML validator, matching CI).
+
 **File into the series first (if one was approved in Step 2).** Run this *before*
 `publish.sh` so the `series.yml` edit is swept into the same commit (mirrors
 `run-decompose.sh`'s wiring). `add-to-series.sh` edits the cloned checkout's copy
