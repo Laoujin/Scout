@@ -192,6 +192,34 @@ _annotate_error() {
   _set_field "$file" "validation_error" "\"$error\""
 }
 
+# --- Manifest helpers --------------------------------------------------------
+# manifest.json is the durable record of an expedition's children (slug, title,
+# depth, status, timing); scan.py (triage) and the rerun flow both parse it.
+# Build it from an in-memory array, not by streaming bytes to disk, so it can be
+# re-materialised verbatim after the synthesis/illustrator agents run. Those
+# agents hold --dangerously-skip-permissions write access to PARENT_DIR and have
+# been observed clobbering the file mid-run (head truncated → leading ","); a
+# re-emit from memory just before publish makes any such tampering moot.
+_manifest_entry() {
+  local slug="$1" title="$2" depth="$3" status="$4" start="$5" end="$6"
+  printf '{"slug":"%s","title":"%s","depth":"%s","status":"%s","start":%d,"end":%d}' \
+    "$slug" "$(printf '%s' "$title" | sed 's/"/\\"/g')" "$depth" "$status" "$start" "$end"
+}
+_manifest_write() {
+  local path="$1"; shift
+  local tmp="$path.tmp" n=$# i=0 entry
+  {
+    printf '['
+    for entry in "$@"; do
+      i=$((i + 1))
+      printf '\n  %s' "$entry"
+      [ "$i" -lt "$n" ] && printf ','
+    done
+    printf '\n]\n'
+  } > "$tmp"
+  mv "$tmp" "$path"
+}
+
 # --- Main loop ----------------------------------------------------------------
 
 START_TS=$(date +%s)
@@ -201,8 +229,7 @@ PARENT_FORMAT_INTERNAL="$PARENT_FORMAT"
 mapfile -t CHILDREN <<< "$(printf '%s\n' "$SUB_TOPICS_TSV" | grep '|true$' | head -n "$SCOUT_MAX_CHILDREN")"
 
 manifest_path="$PARENT_DIR/manifest.json"
-echo "[" > "$manifest_path.tmp"
-manifest_first=1
+declare -a MANIFEST_ENTRIES=()
 
 for entry in "${CHILDREN[@]}"; do
   [ -n "$entry" ] || continue
@@ -278,15 +305,10 @@ for entry in "${CHILDREN[@]}"; do
 
   # Append to manifest.
   child_end=$(date +%s)
-  if [ "$manifest_first" -eq 1 ]; then manifest_first=0; else echo "," >> "$manifest_path.tmp"; fi
-  printf '  {"slug":"%s","title":"%s","depth":"%s","status":"%s","start":%d,"end":%d}' \
-    "$cslug" "$(printf '%s' "$ctitle" | sed 's/"/\\"/g')" "$cdepth" \
-    "$child_status" "$child_start" "$child_end" >> "$manifest_path.tmp"
+  MANIFEST_ENTRIES+=("$(_manifest_entry "$cslug" "$ctitle" "$cdepth" "$child_status" "$child_start" "$child_end")")
 done
 
-echo >> "$manifest_path.tmp"
-echo "]" >> "$manifest_path.tmp"
-mv "$manifest_path.tmp" "$manifest_path"
+_manifest_write "$manifest_path" ${MANIFEST_ENTRIES[@]+"${MANIFEST_ENTRIES[@]}"}
 
 # --- Synthesis pass -----------------------------------------------------------
 
@@ -522,6 +544,13 @@ if [ -n "${SERIES_SLUG:-}" ]; then
       "$SERIES_SLUG" "${SERIES_GROUP:-}" \
     || echo "[run-decompose] add-to-series.sh failed (non-blocking)" >&2
 fi
+
+# Re-materialise the manifest from the in-memory entries before publishing. The
+# synthesis and scout-illustrator agents run between the loop and here with write
+# access to PARENT_DIR and have been seen truncating manifest.json's head; this
+# overwrites any such damage with a complete, parseable file. PARENT_DIR may have
+# been renamed by the title-slug step above, so target its current location.
+_manifest_write "$PARENT_DIR/manifest.json" ${MANIFEST_ENTRIES[@]+"${MANIFEST_ENTRIES[@]}"}
 
 # --- Publish: parent synthesis + manifest + any failure placeholders. ---
 # Children that succeeded were already pushed individually inside the loop; this
