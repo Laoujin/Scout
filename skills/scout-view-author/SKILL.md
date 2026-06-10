@@ -86,7 +86,7 @@ For each image slot in your design (hero, card thumbnails, etc.):
    ```
    If a URL comes back, download it:
    ```bash
-   curl -L --max-time 10 -o "<RESEARCH_DIR>/views/<VIEW_NAME>/images/<slug>.jpg" "<og-url>"
+   curl -L --max-time 10 -A "Mozilla/5.0" -o "<RESEARCH_DIR>/views/<VIEW_NAME>/images/<slug>.jpg" "<og-url>"
    ```
    Verify: file exists, >2KB, valid image (`file <path>` returns `JPEG image data` / `PNG image data` / etc.). If valid, reference as `<img src="<VIEW_NAME>/images/<slug>.jpg" alt="...">`.
 
