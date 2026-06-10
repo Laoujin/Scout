@@ -10,6 +10,9 @@ agent — do not call `claude -p`; you and your subagents run on the subscriptio
 ## Step 1 — Topic & options
 
 If `$ARGUMENTS` is non-empty use it as the topic; else ask in chat (plain message).
+**Save the raw topic input verbatim** (the original pasted prompt, *before* Step 2
+sharpens it) to a tempfile — `RAW_PROMPT_FILE=$(mktemp)` then write the exact text
+into it. This is the issue body in Step 6.
 Then call `AskUserQuestion` once:
 1. **Depth** (`Depth`): `survey` (Recommended) · `recon` · `expedition`.
 2. **Format** (`Format`): `auto` (Recommended) · `md` · `html`.
@@ -63,10 +66,11 @@ call per `CHILD`. Each agent's prompt: the full procedure from
 `$SCOUT_DIR/skills/scout/SKILL.md`, plus `TOPIC=<sub-topic title>`,
 `DEPTH=<child depth>`, `FORMAT=<format>`, `DATE=<date>`, `RESEARCH_DIR=<child dir>`,
 and `MODEL=<friendly label of the model running this session, e.g. "Opus 4.8">`.
-It must write `<child dir>/index.{md,html}` with full frontmatter — including
-`model: "<MODEL>"`, `duration_sec: <its end − start epoch seconds>`, and
-`cost_usd: "sub"` (mirrors what `inject_cost.sh` adds in the CI flow) — and return:
-status, the artifact path, a one-line summary, and its start/end epoch seconds.
+It must write `<child dir>/index.{md,html}` with content frontmatter (title, tags,
+summary, citations, reading_time_min) and return: status, the artifact path, a
+one-line summary, and its start/end epoch seconds. **Do not** ask the child to
+stamp `model` / `duration_sec` / `cost_usd` — those are stamped deterministically
+in Step 6 via `inject-run-metadata.sh` (agents drop them unreliably).
 Children are single-pass (do not nest dispatch) — so a child does **not** draft its
 own cover; covers are added centrally in Step 5.
 
@@ -98,14 +102,15 @@ Read `$SCOUT_DIR/skills/scout/synthesis.md` and follow it:
 3. Write `$PARENT_DIR/index.md` with `layout: expedition`, the `children:`
    frontmatter list (slug/title/depth/status/summary, plus citations &
    reading_time_min for successes — read from each child's frontmatter, else count
-   its `citations*.jsonl`), `cover: cover.svg` only if step 1 wrote it,
-   `duration_sec: <now − START_TS>`, `cost_usd: "sub"`, and 200–600 words of
+   its `citations*.jsonl`), `cover: cover.svg` only if step 1 wrote it, and
+   200–600 words of
    cross-cutting synthesis with inline citations. If <2 children succeeded set
    `synthesis: false` per the skill.
 
 **Single-pass:** dispatch `scout-illustrator` for the single artifact
-(`RESEARCH_DIR=$PARENT_DIR`), and add `model: "<MODEL>"`, `duration_sec`, and
-`cost_usd: "sub"` to its frontmatter. No `manifest.json`, no `children:`.
+(`RESEARCH_DIR=$PARENT_DIR`). `model` / `duration_sec` / `cost_usd` are stamped in
+Step 6 via `inject-run-metadata.sh` (pass `DURATION=<now − START_TS>`). No
+`manifest.json`, no `children:`.
 
 ## Step 6 — Publish
 
@@ -129,5 +134,24 @@ cd "$SCOUT_DIR" && ATLAS_REPO="<atlas_repo>" SLUG="<slug>" DATE="<date>" \
   TOPIC="<brief title>" bash scripts/publish.sh
 ```
 
-It commits + pushes `atlas-checkout/` to Atlas `main` and prints
-`Published: <url>` — surface that URL to the user.
+It commits + pushes `atlas-checkout/` to Atlas `main` and prints `Published: <url>`.
+
+**Provenance issue + metadata (all non-fatal — a gh/network failure must not undo a
+successful publish). Run BEFORE `publish.sh` above so `issue:` is swept into the
+same commit:**
+
+1. Open the issue with the verbatim prompt, then stamp metadata — place these two
+   lines just before the `publish.sh` call:
+   ```
+   ISSUE=$(SCOUT_DIR="$SCOUT_DIR" bash scripts/local-issue.sh open "<brief title>" "$RAW_PROMPT_FILE")
+   MODEL="<friendly session model label, e.g. Opus 4.8>" ISSUE="$ISSUE" \
+     bash scripts/inject-run-metadata.sh "$PARENT_DIR"
+   ```
+   For a single-pass run also pass `DURATION="$(( $(date +%s) - START_TS ))"` on the
+   `inject-run-metadata.sh` line.
+2. After `publish.sh` prints the URL, comment + close the issue:
+   ```
+   SCOUT_DIR="$SCOUT_DIR" bash scripts/local-issue.sh close "$ISSUE" "<published url>"
+   ```
+
+Surface the `Published: <url>` and the issue link to the user.
