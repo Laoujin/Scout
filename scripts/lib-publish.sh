@@ -70,6 +70,21 @@ pr_fallback() {
   fi
 }
 
+# commit_with_identity <commit-msg>
+# Commits staged changes with the standard identity precedence, shared by every
+# Scout commit site so the "Scout instead of the real user" bug can't be reintroduced
+# one script at a time: explicit GIT_AUTHOR_* (CI passes the actor/issue author) →
+# the checkout's own git config (local runs commit as the user) → "Scout" only when
+# no identity is configured at all.
+commit_with_identity() {
+  local an ae
+  an="${GIT_AUTHOR_NAME:-$(git config user.name 2>/dev/null || true)}"
+  ae="${GIT_AUTHOR_EMAIL:-$(git config user.email 2>/dev/null || true)}"
+  git -c user.name="${an:-Scout}" \
+      -c user.email="${ae:-scout@users.noreply.github.com}" \
+    commit -m "$1"
+}
+
 # publish_path <commit-msg> <stage-target> <fallback-branch>
 # Stages <stage-target> (a path or "."), commits, pushes to origin/main with
 # rebase+retry; on rebase conflict or 3 exhausted retries, falls back to
@@ -88,15 +103,7 @@ publish_path() {
     return 2
   fi
 
-  # Identity precedence: explicit GIT_AUTHOR_* (CI passes the issue author) →
-  # the checkout's own git config (so local /scout runs commit as the user, not
-  # "Scout") → "Scout" only when no identity is configured at all.
-  local an ae
-  an="${GIT_AUTHOR_NAME:-$(git config user.name 2>/dev/null || true)}"
-  ae="${GIT_AUTHOR_EMAIL:-$(git config user.email 2>/dev/null || true)}"
-  git -c user.name="${an:-Scout}" \
-      -c user.email="${ae:-scout@users.noreply.github.com}" \
-    commit -m "$msg"
+  commit_with_identity "$msg"
 
   local rc=0
   rc=0; try_push || rc=$?

@@ -14,8 +14,12 @@ jobs:
     timeout-minutes: 15
     env:
       ATLAS_REPO: git@github.com-atlas:${{ vars.ATLAS_REPO_OWNER || github.repository_owner }}/${{ vars.ATLAS_REPO_NAME || 'Atlas' }}.git
-      GIT_AUTHOR_NAME: Scout
-      GIT_AUTHOR_EMAIL: scout@users.noreply.github.com
+      # Attribute to whoever owns the run (dispatcher, or the schedule owner for cron),
+      # matching research.yml. triage-health.sh falls back to "Scout" only if unset.
+      GIT_AUTHOR_NAME: ${{ github.actor }}
+      GIT_AUTHOR_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
+      GIT_COMMITTER_NAME: ${{ github.actor }}
+      GIT_COMMITTER_EMAIL: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
     steps:
       - uses: actions/checkout@v5
       - name: Regenerate Atlas health report

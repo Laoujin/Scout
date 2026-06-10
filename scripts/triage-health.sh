@@ -5,6 +5,7 @@
 set -euo pipefail
 
 SCOUT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$SCOUT_DIR/scripts/lib-publish.sh"   # commit_with_identity
 : "${ATLAS_REPO:?set ATLAS_REPO (SSH alias, e.g. git@github.com-atlas:owner/Atlas.git)}"
 
 WORK="$(mktemp -d)"
@@ -24,9 +25,7 @@ if git diff --cached --quiet; then
   exit 0
 fi
 
-git -c user.name="${GIT_AUTHOR_NAME:-Scout}" \
-    -c user.email="${GIT_AUTHOR_EMAIL:-scout@users.noreply.github.com}" \
-  commit -qm "health: $(date -u +%F) triage snapshot"
+commit_with_identity "health: $(date -u +%F) triage snapshot"
 # A concurrent push (e.g. a research run) is rare in this short job; rebase + retry once.
 git push origin main 2>/dev/null \
   || { git fetch -q origin main && git rebase -q origin/main && git push origin main; }
