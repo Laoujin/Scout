@@ -8,6 +8,7 @@ fail() { FAIL_MSGS+=("$1"); FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 
 echo "Testing local-issue.sh..."
 TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/scoutdir" "$TMP/bin"
 
 # A scout checkout whose origin remote determines the target repo.
@@ -20,7 +21,7 @@ cat > "$TMP/bin/gh" <<STUB
 #!/usr/bin/env bash
 echo "\$*" >> "$GH_LOG"
 if [ "\$1 \$2" = "issue create" ]; then
-  while [ \$# -gt 0 ]; do [ "\$1" = "--body-file" ] && { cp "\$2" "$GH_BODY"; }; shift; done
+  while [ \$# -gt 0 ]; do [ "\$1" = "--body-file" ] && { cp "\$2" "$GH_BODY"; break; }; shift; done
   [ "\${GH_FAIL:-0}" = "1" ] && exit 1
   echo "https://github.com/Laoujin/Scout/issues/77"
 fi
@@ -48,10 +49,8 @@ grep -q "issue comment 77 --repo Laoujin/Scout --body Published: https://laoujin
 grep -q "issue close 77" "$GH_LOG" && pass "close closes the issue" || fail "issue not closed: $(cat "$GH_LOG")"
 
 # --- non-fatal: gh create failure yields empty number, exit 0 ---
-set +e
 NUM2="$(PATH="$TMP/bin:$PATH" SCOUT_DIR="$TMP/scoutdir" GH_FAIL=1 \
         bash "$REPO_ROOT/scripts/local-issue.sh" open "T" "$PROMPT")"; RC=$?
-set -e
 [ "$RC" = "0" ] && pass "open exits 0 on gh failure" || fail "open exit=$RC on gh failure"
 [ -z "$NUM2" ] && pass "open prints empty number on gh failure" || fail "open printed '$NUM2' on failure"
 
@@ -61,7 +60,6 @@ PATH="$TMP/bin:$PATH" SCOUT_DIR="$TMP/scoutdir" \
   bash "$REPO_ROOT/scripts/local-issue.sh" close "" "url"
 [ ! -s "$GH_LOG" ] && pass "close with empty number does nothing" || fail "close ran gh: $(cat "$GH_LOG")"
 
-rm -rf "$TMP"
 echo
 echo "Results: $PASS passed, $FAIL failed"
 if [ $FAIL -gt 0 ]; then printf '  %s\n' "${FAIL_MSGS[@]}"; exit 1; fi
