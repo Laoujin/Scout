@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Deterministically stamp model / duration_sec / cost_usd (+ issue on the parent)
-# into a /scout expedition's frontmatter — agent-independent, mirroring
-# inject_cover.sh. Idempotent: inserts a field only when absent, never overwrites.
+# Deterministically stamp model / duration_sec / cost_usd / issue into a /scout
+# expedition's frontmatter — agent-independent, mirroring inject_cover.sh.
+# Idempotent: inserts a field only when absent, never overwrites.
 # Child duration comes from manifest.json (end-start); parent duration is the
 # manifest wall-clock (max end - min start), or the DURATION env for single-pass.
+# issue is stamped on the parent AND all children when ISSUE is set (mirrors CI).
 #
 # Usage: MODEL="Opus 4.8" [COST=sub] [ISSUE=42] [DURATION=<sec>] \
 #          inject-run-metadata.sh <research-dir>
@@ -69,5 +70,6 @@ if [ -f "$MANIFEST" ]; then
     _stamp "$C" model "\"$MODEL\""
     _stamp "$C" cost_usd "\"$COST\""
     _stamp "$C" duration_sec "$dur"
+    if [ -n "$ISSUE" ]; then _stamp "$C" issue "$ISSUE"; fi
   done < <(jq -r '.[] | "\(.slug)\t\(.end - .start)"' "$MANIFEST")
 fi
