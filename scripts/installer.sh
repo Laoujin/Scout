@@ -143,6 +143,13 @@ gh label create scout-research \
   --repo "$SCOUT_OWNER/$SCOUT_NAME" >/dev/null 2>&1 || true
 ok
 
+step "Creating scout-local-research label..."
+gh label create scout-local-research \
+  --color 0e7490 \
+  --description "Scout started with /scout slash command on subscription" \
+  --repo "$SCOUT_OWNER/$SCOUT_NAME" >/dev/null 2>&1 || true
+ok
+
 SCOUT_DIR="/work/$SCOUT_NAME"
 rm -rf "$SCOUT_DIR"
 step "Cloning into $SCOUT_DIR..."

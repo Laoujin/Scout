@@ -112,6 +112,51 @@ Read `$SCOUT_DIR/skills/scout/synthesis.md` and follow it:
 Step 6 via `inject-run-metadata.sh` (pass `DURATION=<now − START_TS>`). No
 `manifest.json`, no `children:`.
 
+## Step 5.5 — HTML views
+
+Offer bespoke HTML "views" of the pages you just wrote, then author the ticked ones.
+This runs **before** Step 6 so the views land in the same commit as the canonical. Do
+NOT call `view-candidacy.sh` or `views-dispatch.sh` — they shell out to `claude -p`
+(API). You do the judging and the dispatch yourself, on the subscription.
+
+**1. Judge (inline).** Read `$SCOUT_DIR/skills/scout/view-candidacy.md` and apply it
+yourself. Build its inputs from what you already wrote in Steps 3–5: `RUN_KIND`
+(`decompose` for an expedition, else `single`), `PARENT_PATH`, and a `PAGES` array —
+one entry per page actually written (parent + each successful child for an
+expedition; just the parent for single-pass), each carrying
+`row`/`slug`/`path`/`title`/`summary`/`depth`/`citations`/`format` read from that
+page's frontmatter. Produce the skill's JSON: per page `should_offer_view` plus
+`view_name`/`title_suffix`/`vibe_hint`. Follow its criteria and override rules —
+force the **expedition** parent to be offered (a single-pass page is judged on its
+merits, not force-offered), skip a page whose canonical is already `format: html`,
+skip pages with ≤2 citations, and never reuse a `view_name` across sibling children.
+
+**2. Checklist (in chat).** Render the candidacy as a checklist and ask the user to
+confirm. Pre-tick recommended pages with their register; leave the rest unticked:
+
+```
+- [x] **<parent title>** — register: <view_name>
+- [x] <child-slug> — register: <view_name>
+- [ ] <child-slug>
+```
+
+Tell the user they can tick/untick any line (including all on / all off) and change a
+register. **Stop until they reply.** If they untick everything, skip to Step 6.
+
+**3. Author (parallel sub-agents).** For each ticked page — `<research-dir>` is
+`$PARENT_DIR` for the parent, the child dir for a child — create its
+`<research-dir>/views/` directory, then dispatch ALL views in ONE message — one
+`Agent` call per ticked page. `scout-view-author` is a skill, not an agent type, so
+(mirroring the Step 5 illustrator fallback) give a `general-purpose` agent the body of
+`$SCOUT_DIR/skills/scout-view-author/SKILL.md` as its brief, plus:
+`CANONICAL_PATH=<research-dir>/index.{md,html}`, `RESEARCH_DIR=<research-dir>`,
+`VIEW_NAME=<view_name>`, `TITLE_SUFFIX=<title_suffix>`, `VIBE_HINT=<vibe_hint>`. Each
+agent writes `views/<view_name>.html` (+ `views/<view_name>.links.json` and any
+`views/<view_name>/images/`) and returns a one-line status + the view path.
+
+If a view agent fails or returns empty, tell the user and let them choose: retry,
+drop, or proceed. A failed view never blocks Step 6 — publish proceeds without it.
+
 ## Step 6 — Publish
 
 **File into the series first (if one was approved in Step 2).** Run this *before*
