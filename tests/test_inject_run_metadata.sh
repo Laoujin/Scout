@@ -92,6 +92,30 @@ else
 fi
 [ "$(fm "$G/index.md" model)" = '"Opus 4.8"' ] && pass "ghost parent still stamped" || fail "ghost parent not stamped"
 
+# Non-default COST env is honoured
+K="$TMP/cost"; mkdir -p "$K"
+printf -- '---\ntitle: K\n---\nbody\n' > "$K/index.md"
+MODEL="Opus 4.8" COST="12.34" bash "$REPO_ROOT/scripts/inject-run-metadata.sh" "$K"
+[ "$(fm "$K/index.md" cost_usd)" = '"12.34"' ] && pass "non-default COST honoured" || fail "cost='$(fm "$K/index.md" cost_usd)'"
+
+# DURATION env is ignored when a manifest is present (manifest wall-clock wins)
+W="$TMP/withman"; mkdir -p "$W/x"
+printf -- '---\ntitle: W\n---\nbody\n' > "$W/index.md"
+printf -- '---\ntitle: X\n---\nbody\n' > "$W/x/index.md"
+cat > "$W/manifest.json" <<'JSON'
+[
+  {"slug":"x","title":"X","depth":"deep","status":"success","start":100,"end":160}
+]
+JSON
+MODEL="Opus 4.8" DURATION=9999 bash "$REPO_ROOT/scripts/inject-run-metadata.sh" "$W"
+[ "$(fm "$W/index.md" duration_sec)" = '60' ] && pass "manifest wall-clock wins over DURATION env" || fail "parent dur='$(fm "$W/index.md" duration_sec)' (want 60)"
+
+# index.html artifact is stamped (not just index.md)
+H="$TMP/html"; mkdir -p "$H"
+printf -- '---\ntitle: H\n---\n<p>body</p>\n' > "$H/index.html"
+MODEL="Opus 4.8" DURATION=5 bash "$REPO_ROOT/scripts/inject-run-metadata.sh" "$H"
+[ "$(fm "$H/index.html" model)" = '"Opus 4.8"' ] && pass "index.html artifact stamped" || fail "html model='$(fm "$H/index.html" model)'"
+
 echo
 echo "Results: $PASS passed, $FAIL failed"
 if [ $FAIL -gt 0 ]; then printf '  %s\n' "${FAIL_MSGS[@]}"; exit 1; fi

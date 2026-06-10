@@ -21,7 +21,7 @@ _stamp() {
   local file="$1" key="$2" value="$3" end tmp
   [ -f "$file" ] || return 0
   if awk -v k="$key" '
-        /^---[[:space:]]*$/ { if (++n==2) exit }
+        /^---$/ { if (++n==2) exit }
         n==1 && $0 ~ "^"k":" { found=1; exit }
         END { exit !found }' "$file"; then
     return 0   # already present
