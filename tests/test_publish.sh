@@ -270,6 +270,18 @@ else
 fi
 rm -rf "$tmp"
 
+# --- push from a non-main branch lands on origin/main (worktree case) ---
+WORK="$(mktemp -d)"
+WT_REMOTE="$WORK/wt-remote.git"; git init -q --bare "$WT_REMOTE"
+WT_SRC="$WORK/wt-src"; git clone -q "$WT_REMOTE" "$WT_SRC"
+( cd "$WT_SRC" && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m seed \
+  && git push -q origin HEAD:main && git checkout -q -b scout/2026-06-02-x \
+  && echo hi > f.txt && git add -A && git -c user.email=t@t -c user.name=t commit -qm work )
+( cd "$WT_SRC" && source "$REPO_ROOT/scripts/lib-publish.sh" && try_push >/dev/null 2>&1 )
+landed="$(git --git-dir="$WT_REMOTE" cat-file -e refs/heads/main:f.txt && echo yes)"
+[ "$landed" = yes ] && pass "try_push HEAD->main from feature branch" || fail "try_push did not land on main"
+rm -rf "$WORK"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] && exit 0 || exit 1

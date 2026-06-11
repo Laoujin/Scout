@@ -21,7 +21,7 @@ is_non_ff() {
 # Mirrors git's own stderr to stderr so CI logs are unchanged on real errors.
 try_push() {
   local err rc=0
-  err=$(git push origin main 2>&1) || rc=$?
+  err=$(git push origin HEAD:main 2>&1) || rc=$?
   [ -n "$err" ] && printf '%s\n' "$err" >&2
   if [ "$rc" -eq 0 ]; then return 0; fi
   if is_non_ff "$err"; then return 1; fi
