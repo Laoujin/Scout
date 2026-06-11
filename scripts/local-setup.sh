@@ -1,55 +1,52 @@
 #!/usr/bin/env bash
-# Setup for an interactive (subscription) Scout run. Resolves SCOUT_DIR +
-# ATLAS_REPO, clones Atlas fresh, computes a unique research dir, makes child
-# dirs, and prints KEY=VALUE lines for the /scout command. No claude -p — the
-# interactive session is the research agent.
+# Per-run setup for the interactive (subscription) Scout flow. Given a registered
+# Atlas checkout (ATLAS_DIR) and a worktree home (WT_HOME), fetch origin/main and
+# add an isolated git worktree on a fresh scout/<date>-<slug> branch. No clone, no
+# rm -rf: parallel runs get independent worktrees and never clobber each other.
 set -euo pipefail
 
 TITLE="${1:?usage: local-setup.sh <title>}"
+ATLAS_DIR="${ATLAS_DIR:?ATLAS_DIR is required (registered Atlas checkout; see atlas-config.sh)}"
+WT_HOME="${WT_HOME:?WT_HOME is required (worktree home dir; see atlas-config.sh)}"
+DATE="${DATE:-$(date +%F)}"
 
-# Resolve SCOUT_DIR: explicit pointer, else walk up to the playbook.
+# Resolve SCOUT_DIR for slug.sh: explicit pointer, else walk up to the playbook.
 if [ -f "$HOME/.scout/dir" ]; then
   SCOUT_DIR="$(cat "$HOME/.scout/dir")"
 else
   d="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   while [ "$d" != "/" ] && [ ! -f "$d/skills/scout/SKILL.md" ]; do d="$(dirname "$d")"; done
-  [ -f "$d/skills/scout/SKILL.md" ] || {
-    echo "Error: cannot locate SCOUT_DIR (no skills/scout/SKILL.md above $(pwd) and no ~/.scout/dir)" >&2
-    exit 1; }
+  [ -f "$d/skills/scout/SKILL.md" ] || { echo "Error: cannot locate SCOUT_DIR" >&2; exit 1; }
   SCOUT_DIR="$d"
 fi
-
-# Resolve ATLAS_REPO: env override, else docker/.env, else error.
-if [ -z "${ATLAS_REPO:-}" ] && [ -f "$SCOUT_DIR/docker/.env" ]; then
-  ATLAS_REPO="$(grep -E '^ATLAS_REPO=' "$SCOUT_DIR/docker/.env" | head -1 | cut -d= -f2-)"
-fi
-[ -n "${ATLAS_REPO:-}" ] || {
-  echo "Error: set ATLAS_REPO (env) or add it to \$SCOUT_DIR/docker/.env" >&2
-  exit 1; }
-
-DATE="${DATE:-$(date +%F)}"
-
-cd "$SCOUT_DIR"
 # shellcheck source=scripts/slug.sh
 source "$SCOUT_DIR/scripts/slug.sh"
 
-rm -rf atlas-checkout
-git clone --depth=1 --filter=blob:none "$ATLAS_REPO" atlas-checkout >/dev/null 2>&1 || {
-  echo "Error: failed to clone Atlas from $ATLAS_REPO (check SSH key / ~/.ssh/config alias / network)" >&2
-  exit 1; }
+git -C "$ATLAS_DIR" worktree prune >/dev/null 2>&1 || true
+git -C "$ATLAS_DIR" fetch origin main >/dev/null 2>&1 || {
+  echo "Error: failed to fetch origin/main in $ATLAS_DIR" >&2; exit 1; }
 
-# Unique slug against the freshly-cloned Atlas — it reflects what is actually
-# published, so this catches collisions from other machines / async runs too.
+# Unique slug vs what's published (origin/main), live branches, and live worktrees.
 BASE_SLUG="$(slugify "$TITLE")"
 SLUG="$BASE_SLUG"; n=2
-while [ -d "atlas-checkout/research/${DATE}-${SLUG}" ]; do
+while git -C "$ATLAS_DIR" cat-file -e "origin/main:research/${DATE}-${SLUG}" 2>/dev/null \
+   || git -C "$ATLAS_DIR" show-ref --verify --quiet "refs/heads/scout/${DATE}-${SLUG}" \
+   || [ -e "$WT_HOME/${DATE}-${SLUG}" ]; do
   SLUG="${BASE_SLUG}-${n}"; n=$((n + 1))
 done
-PARENT_DIR="$SCOUT_DIR/atlas-checkout/research/${DATE}-${SLUG}"
+
+BRANCH="scout/${DATE}-${SLUG}"
+WORKTREE="$WT_HOME/${DATE}-${SLUG}"
+mkdir -p "$WT_HOME"
+git -C "$ATLAS_DIR" worktree add -b "$BRANCH" "$WORKTREE" origin/main >/dev/null 2>&1 || {
+  echo "Error: git worktree add failed for $WORKTREE" >&2; exit 1; }
+
+PARENT_DIR="$WORKTREE/research/${DATE}-${SLUG}"
 mkdir -p "$PARENT_DIR"
 
-printf 'SCOUT_DIR=%s\n' "$SCOUT_DIR"
-printf 'ATLAS_REPO=%s\n' "$ATLAS_REPO"
+printf 'ATLAS_DIR=%s\n' "$ATLAS_DIR"
+printf 'WORKTREE=%s\n' "$WORKTREE"
+printf 'BRANCH=%s\n' "$BRANCH"
 printf 'DATE=%s\n' "$DATE"
 printf 'SLUG=%s\n' "$SLUG"
 printf 'PARENT_DIR=%s\n' "$PARENT_DIR"
