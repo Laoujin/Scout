@@ -66,7 +66,8 @@ untick it or change the group. Carry the approved `<series-slug>` (and optional
 
 Locate the helper: if `~/.scout/dir` exists, use
 `$(cat ~/.scout/dir)/scripts/local-setup.sh`; otherwise this command file lives in
-`<scout>/.claude/commands/`, so use `<scout>/scripts/local-setup.sh`.
+`<scout>/.claude/commands/`, so use `<scout>/scripts/local-setup.sh`. This resolved
+path is `<scout>` — i.e. `SCOUT_DIR=<scout>` — used wherever `$SCOUT_DIR` appears below.
 
 Build `SUB_TOPICS_TSV` (one `title<TAB>depth` line per approved sub-topic; empty
 for single-pass) and run it with the resolved paths:
