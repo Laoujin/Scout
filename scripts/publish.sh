@@ -31,6 +31,11 @@ DATE="${DATE:-$(date +%F)}"
 COMMIT_MSG="$(printf 'research: %s %s\n\nTopic: %s' "$DATE" "$SLUG" "$TOPIC")"
 [ "$PUBLISH_MODE" = legacy ] && BRANCH="scout/${DATE}-${SLUG}"
 
+# Worktree mode intentionally doesn't pass ATLAS_REPO; derive it from the
+# worktree's origin so the PR-fallback compare URL has a value to parse.
+# Only fill when unset/empty so an explicitly-set ATLAS_REPO still wins.
+[ "$PUBLISH_MODE" = worktree ] && : "${ATLAS_REPO:=$(git -C "$WORKTREE" remote get-url origin)}"
+
 rc=0; publish_path "$COMMIT_MSG" "." "$BRANCH" || rc=$?
 case "$rc" in
   0) ;;

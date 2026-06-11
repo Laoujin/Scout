@@ -312,6 +312,14 @@ git -C "$AT2" show-ref --verify --quiet refs/heads/scout/2026-06-02-place \
   && fail "branch not deleted" || pass "branch deleted on success"
 rm -rf "$WORKW"
 
+# --- compare_url parses ssh, host-alias, https; empty for file paths ---
+( source "$REPO_ROOT/scripts/lib-publish.sh"
+  [ "$(compare_url 'git@github.com:Laoujin/Atlas.git' b)" = 'https://github.com/Laoujin/Atlas/compare/main...b?expand=1' ] || exit 1
+  [ "$(compare_url 'git@github.com-atlas:Laoujin/Atlas.git' b)" = 'https://github.com/Laoujin/Atlas/compare/main...b?expand=1' ] || exit 1
+  [ "$(compare_url 'https://github.com/Laoujin/Atlas' b)" = 'https://github.com/Laoujin/Atlas/compare/main...b?expand=1' ] || exit 1
+  [ -z "$(compare_url '/tmp/some.git' b)" ] || exit 1
+) && pass "compare_url handles ssh/host-alias/https/file" || fail "compare_url parse"
+
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
 [ "$FAIL" = "0" ] && exit 0 || exit 1

@@ -42,14 +42,18 @@ rebase_onto_remote() {
 }
 
 # compare_url <atlas-repo-url> <branch>
-# Derives the GitHub compare URL from ATLAS_REPO (git@...:owner/repo.git
-# or file path). Returns empty string if ATLAS_REPO doesn't look like a
-# GitHub SSH URL (test/file-URL case).
+# Derives the GitHub compare URL from ATLAS_REPO. Parses SSH
+# (git@host:owner/repo.git), host-alias SSH (git@host-x:owner/repo.git), and
+# HTTPS (https://host/owner/repo). Returns empty string if ATLAS_REPO doesn't
+# look like a URL (bare file path / test case).
 compare_url() {
-  local repo="$1" branch="$2"
-  [[ "$repo" == *":"* ]] || { echo ""; return; }
-  local slug="${repo#*:}"; slug="${slug%.git}"
-  echo "https://github.com/${slug}/compare/main...${branch}?expand=1"
+  local repo="$1" branch="$2" u path
+  u="${repo%.git}"
+  if [[ "$u" == http*://* ]]; then path="${u#*://}"; path="${path#*/}"
+  elif [[ "$u" == *:* ]]; then path="${u##*:}"
+  else echo ""; return; fi
+  [ -n "$path" ] || { echo ""; return; }
+  echo "https://github.com/${path}/compare/main...${branch}?expand=1"
 }
 
 # pr_fallback <branch> <atlas-repo> [issue-comment-args...]
