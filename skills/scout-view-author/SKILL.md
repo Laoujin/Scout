@@ -92,11 +92,16 @@ For each image slot, **match the source to the subject** and exhaust the real-im
      head -1 | grep -oE 'content="[^"]+"' | sed 's/content="//;s/"$//'
    ```
 
-Download every candidate (Commons `thumburl` or OG url) the same way, then verify:
+Download every candidate (Commons `thumburl` or OG url) to a temp file, verify it, then **convert to WebP** — a raw 4–12 MB OG/PNG hero is what makes Atlas slow to publish and pushes it toward the 1 GB GitHub Pages cap. Always optimize at authoring time:
 ```bash
-curl -L --max-time 10 -A "Mozilla/5.0" -o "<RESEARCH_DIR>/views/<VIEW_NAME>/images/<slug>.jpg" "<image-url>"
+dir="<RESEARCH_DIR>/views/<VIEW_NAME>/images"; mkdir -p "$dir"
+curl -L --max-time 10 -A "Mozilla/5.0" -o "$dir/<slug>.dl" "<image-url>"
+# verify BEFORE converting: exists, >2KB, real image
+file "$dir/<slug>.dl" | grep -qE 'image data' && [ "$(stat -c%s "$dir/<slug>.dl")" -gt 2048 ] || { rm -f "$dir/<slug>.dl"; }
+# shrink to <=1600px longest edge, strip metadata, encode WebP q80; then drop the temp
+convert "$dir/<slug>.dl" -resize '1600x1600>' -strip -quality 80 "$dir/<slug>.webp" && rm -f "$dir/<slug>.dl"
 ```
-Verify: file exists, >2KB, valid image (`file <path>` returns `JPEG image data` / `PNG image data` / etc.). If valid, reference as `<img src="<VIEW_NAME>/images/<slug>.jpg" alt="...">`.
+If valid, reference the WebP: `<img src="<VIEW_NAME>/images/<slug>.webp" alt="...">`. Never reference the `.dl` temp or commit raw `.jpg`/`.png` into a view — WebP only.
 
 3. **Existing assets in the canonical's directory.** If `RESEARCH_DIR/cover.svg` exists, you can use it as `<img src="../cover.svg">` for hero or accent.
 
