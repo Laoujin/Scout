@@ -39,10 +39,18 @@ LAY="$WORK/lay"; mkdir -p "$LAY"; cp -r "$ATLAS" "$LAY/atlas"; mkdir -p "$LAY/sc
 OUT="$(bash "$AC" detect-sibling "$LAY/scout")"
 [ "$OUT" = "$LAY/atlas" ] && pass "detect-sibling finds ../atlas" || fail "detect-sibling: $OUT"
 
+# resolve-worktrees before save -> exit 3
+bash "$AC" resolve-worktrees >/dev/null 2>&1
+[ $? -eq 3 ] && pass "resolve-worktrees unset -> 3" || fail "resolve-worktrees should exit 3 when unset"
+
 # save-worktrees plain -> persists abs path, creates dir
 WT="$WORK/wts"
 OUT="$(bash "$AC" save-worktrees "$WT")"
 [ -d "$WT" ] && [ "$(cat "$SCOUT_CONFIG_DIR/worktrees-dir")" = "$OUT" ] && pass "save-worktrees persists" || fail "save-worktrees failed"
+
+# resolve-worktrees after save -> prints saved path, exit 0
+OUT="$(bash "$AC" resolve-worktrees)"; rc=$?
+[ $rc -eq 0 ] && [ "$OUT" = "$WT" ] && pass "resolve-worktrees returns saved" || fail "resolve-worktrees after save failed"
 
 # save-worktrees inside-atlas -> appends worktrees/ to .git/info/exclude (idempotent)
 mkdir -p "$ATLAS/.git/info"
