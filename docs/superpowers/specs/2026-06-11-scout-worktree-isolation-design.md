@@ -94,11 +94,15 @@ Inputs (env/args): `ATLAS_DIR`, `WT_HOME`, `TITLE`, `SUB_TOPICS_TSV`. No more `A
 
 ### 3. `publish.sh` — push from the worktree, then clean up
 
-Inputs (env): `WORKTREE`, `BRANCH`, `ATLAS_DIR`, plus existing `TOPIC`/`SLUG`/`DATE`.
+**Dual-mode (decided during implementation).** `publish.sh` is a *shared* entry point — the CI scripts (`run.sh`, `run-decompose.sh`) invoke it for the parent commit too. So it branches on `WORKTREE`:
+- **`WORKTREE` set → worktree mode** (local flow): the steps below.
+- **`WORKTREE` unset → legacy mode** (CI): byte-for-byte the pre-change behavior (`cd atlas-checkout`, `ATLAS_REPO`-based URL, no worktree cleanup). CI is container-isolated, so this path stays untouched. (The original spec assumed `publish.sh` was local-only and could *require* `WORKTREE`; that broke `test_run_decompose_per_child_push.sh`. Dual-mode is the fix and keeps "CI out of scope" honest.)
+
+Inputs in worktree mode (env): `WORKTREE`, `BRANCH`, `ATLAS_DIR`, plus existing `TOPIC`/`SLUG`/`DATE`.
 
 1. `cd "$WORKTREE"`; reuse `publish_path` (stage → commit → push to `main` with rebase-retry). Because the worktree's HEAD is `scout/$DATE-$SLUG` (not `main`), `try_push` must push **`HEAD:main`**, not `main`. The rebase-retry now handles the **genuine** concurrent-publish race (two runs pushing to `main`) correctly. Pushing `HEAD:main` does not move the shared checkout's local `main` ref — only `origin/main` advances; the user's main checkout picks it up on its next `git pull`.
 2. Derive the Pages URL from `git -C "$WORKTREE" remote get-url origin` (parse `owner/repo` for both SSH `git@…:owner/repo.git` and HTTPS `https://github.com/owner/repo` forms) → `https://<owner>.github.io/<repo>/research/<DATE>-<SLUG>/`.
-3. **On success:** `git -C "$ATLAS_DIR" worktree remove "$WORKTREE"` and `git -C "$ATLAS_DIR" branch -D "$BRANCH"`. **On failure:** leave the worktree in place and print its path for inspection.
+3. **On success:** `git -C "$ATLAS_DIR" worktree remove "$WORKTREE"` and `git -C "$ATLAS_DIR" branch -D "$BRANCH"` — at the **end** of the script, *after* the optional soft-fail/issue/views blocks (those read `$RESEARCH_DIR`, which lives inside the worktree). Non-fatal: a remove failure prints "remove it manually" rather than failing the already-successful publish. **On failure:** leave the worktree in place for inspection. The URL parse also handles the host-alias SSH form `git@github.com-atlas:owner/repo.git`.
 
 ### 4. `scout.md` — thread the new values
 
