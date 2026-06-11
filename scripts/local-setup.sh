@@ -23,8 +23,8 @@ fi
 source "$SCOUT_DIR/scripts/slug.sh"
 
 git -C "$ATLAS_DIR" worktree prune >/dev/null 2>&1 || true
-git -C "$ATLAS_DIR" fetch origin main >/dev/null 2>&1 || {
-  echo "Error: failed to fetch origin/main in $ATLAS_DIR" >&2; exit 1; }
+err="$(git -C "$ATLAS_DIR" fetch origin main 2>&1)" || {
+  echo "Error: failed to fetch origin/main in $ATLAS_DIR: $err" >&2; exit 1; }
 
 # Unique slug vs what's published (origin/main), live branches, and live worktrees.
 BASE_SLUG="$(slugify "$TITLE")"
@@ -38,8 +38,10 @@ done
 BRANCH="scout/${DATE}-${SLUG}"
 WORKTREE="$WT_HOME/${DATE}-${SLUG}"
 mkdir -p "$WT_HOME"
-git -C "$ATLAS_DIR" worktree add -b "$BRANCH" "$WORKTREE" origin/main >/dev/null 2>&1 || {
-  echo "Error: git worktree add failed for $WORKTREE" >&2; exit 1; }
+# worktree add is the atomic backstop for the slug race: if a concurrent run
+# grabbed the same branch between the uniqueness check and here, this fails loudly.
+err="$(git -C "$ATLAS_DIR" worktree add -b "$BRANCH" "$WORKTREE" origin/main 2>&1)" || {
+  echo "Error: git worktree add failed for $WORKTREE: $err" >&2; exit 1; }
 
 PARENT_DIR="$WORKTREE/research/${DATE}-${SLUG}"
 mkdir -p "$PARENT_DIR"
@@ -53,7 +55,7 @@ printf 'PARENT_DIR=%s\n' "$PARENT_DIR"
 printf 'START_TS=%s\n' "$(date +%s)"
 
 if [ -n "${SUB_TOPICS_TSV:-}" ]; then
-  while IFS=$'\t' read -r ctitle cdepth; do
+  while IFS=$'\t' read -r ctitle _; do
     [ -n "$ctitle" ] || continue
     cslug="$(slugify "$ctitle")"
     mkdir -p "$PARENT_DIR/$cslug"
