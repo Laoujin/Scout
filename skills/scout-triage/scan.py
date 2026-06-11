@@ -19,6 +19,22 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+try:  # dimension check degrades to size-only when Pillow is absent
+    from PIL import Image
+    HAVE_PIL = True
+except Exception:
+    HAVE_PIL = False
+
+# View images are web assets: shrunk to <=1600px WebP at authoring time
+# (scout-view-author) and bulk-backfilled by atlas/scripts/optimize-images.py.
+# Anything heavier is publish bloat — Atlas rebuilds the whole site per push and
+# GitHub Pages caps the published site at 1 GB.
+MAX_IMG_EDGE = 1600          # longest side, px
+MAX_IMG_BYTES = 500 * 1024   # 500 KB
+IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+# image path inside a quote/paren (html src="", css url(), markdown ](...))
+IMG_REF_RE = re.compile(r"""['"(]\s*([\w][\w./-]*?\.(?:jpe?g|png|webp|gif))""", re.IGNORECASE)
+
 # Body shorter than this (chars, after frontmatter) with a failure marker = genuine
 # failure (content is gone). Calibrated against "Research failed: child run.sh exit 1".
 GENUINE_FAILURE_MAX_BODY = 200
@@ -33,14 +49,14 @@ SEVERITY = {  # ordering for the grouped report
     "MANIFEST_MISMATCH": 4, "MISSING_COST": 5, "MISSING_COVER": 6,
     "MISSING_MODEL": 7, "MISSING_DURATION": 8, "MISSING_ISSUE": 9,
     "SLUG_DOUBLED_DATE": 10, "SLUG_REPEAT_TOKEN": 11, "LEDGER_MISMATCH": 12,
-    "SERIES_MISSING_ENTRY": 2,
+    "SERIES_MISSING_ENTRY": 2, "IMAGE_MISSING": 2, "IMAGE_OVERSIZED": 13, "IMAGE_ORPHAN": 14,
 }
 
 # Critical = the research is actually broken (delete / re-run / repair). Everything
 # else is hygiene (cosmetic metadata gaps) — kept off the homepage pill so a backlog
 # of legacy metadata gaps can't drown the "X is broken" signal.
 CRITICAL = {"DEAD", "GENUINE_FAILURE", "STRAY_DIR", "MANIFEST_MISMATCH",
-            "LEDGER_MISMATCH", "FALSE_FLAG", "SERIES_MISSING_ENTRY"}
+            "LEDGER_MISMATCH", "FALSE_FLAG", "SERIES_MISSING_ENTRY", "IMAGE_MISSING"}
 
 
 def severity_of(category):
@@ -247,6 +263,58 @@ def check_series(root, findings):
                 f"listed in series '{current}' but research/{m.group(1)}/ does not exist")
 
 
+def image_dims(path):
+    """(w, h) or None when Pillow is unavailable / the file is unreadable."""
+    if not HAVE_PIL:
+        return None
+    try:
+        with Image.open(path) as im:
+            return im.size
+    except Exception:
+        return None
+
+
+def check_images(folder, findings):
+    """Per-expedition image checks (one rglob covers child views too):
+      IMAGE_MISSING  — a view references a local image that isn't on disk (broken <img>)
+      IMAGE_ORPHAN   — an image on disk that no view references (dead build weight)
+      IMAGE_OVERSIZED— an image past the WebP/size budget (publish bloat)."""
+    used = set()
+    missing = set()  # (view_file, ref) — dedup repeats within a file
+    for tf in folder.rglob("*"):
+        if not tf.is_file() or tf.suffix.lower() not in (".html", ".md", ".json"):
+            continue
+        text = tf.read_text(encoding="utf-8", errors="replace")
+        for m in IMG_REF_RE.finditer(text):
+            ref = m.group(1)
+            if "://" in ref:  # absolute/remote — not a local asset
+                continue
+            try:
+                target = (tf.parent / ref).resolve()
+            except OSError:
+                continue
+            used.add(target)
+            if not target.exists():
+                missing.add((tf, ref))
+    for tf, ref in sorted(missing, key=lambda x: (str(x[0]), x[1])):
+        add(findings, "IMAGE_MISSING", tf, f"references '{ref}' but that file is not on disk — broken image")
+
+    for img in folder.rglob("*"):
+        if not img.is_file() or img.suffix.lower() not in IMAGE_EXTS:
+            continue
+        if img.resolve() not in used:
+            add(findings, "IMAGE_ORPHAN", img, "on disk but referenced by no view — dead weight in the build")
+        problems = []
+        dims = image_dims(img)
+        if dims and max(dims) > MAX_IMG_EDGE:
+            problems.append(f"{dims[0]}×{dims[1]}px (>{MAX_IMG_EDGE})")
+        size = img.stat().st_size
+        if size > MAX_IMG_BYTES:
+            problems.append(f"{size // 1024}KB (>{MAX_IMG_BYTES // 1024}KB)")
+        if problems:
+            add(findings, "IMAGE_OVERSIZED", img, "; ".join(problems) + " — re-encode to WebP ≤1600px")
+
+
 def scan(root):
     findings = []
     check_series(root, findings)
@@ -256,6 +324,7 @@ def scan(root):
             add(findings, "SLUG_DOUBLED_DATE", folder, "slug repeats its date prefix — duplicate/early-failed run")
         for tok in slug_repeat_token(slug):
             add(findings, "SLUG_REPEAT_TOKEN", folder, f"token '{tok}' repeats in slug — possible doubled name")
+        check_images(folder, findings)
 
         node = read_node(folder)
         kids = [d for d in child_dirs(folder) if read_node(d)]
