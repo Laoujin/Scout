@@ -28,6 +28,12 @@ mkdir -p "$RES/2026-01-03-clean"
 printf -- '---\ntitle: "C"\nmodel: "Opus 4.8"\nduration_sec: 5\ncost_usd: "sub"\ncover: cover.svg\n---\n%s\n' "$BODY" > "$RES/2026-01-03-clean/index.md"
 printf '<svg/>' > "$RES/2026-01-03-clean/cover.svg"
 
+# clean HTML fragment: a leading "<!-- format=html -->" comment precedes the --- fence.
+# The frontmatter below it is complete, so this must parse clean (no findings).
+mkdir -p "$RES/2026-01-04-htmlfrag"
+printf -- '<!-- format=html: fragment only; layout provides doctype/head/body/back-link -->\n---\ntitle: "HF"\nmodel: "Opus 4.8"\nduration_sec: 5\ncost_usd: "sub"\ncover: cover.svg\n---\n%s\n' "$BODY" > "$RES/2026-01-04-htmlfrag/index.html"
+printf '<svg/>' > "$RES/2026-01-04-htmlfrag/cover.svg"
+
 # series manifest: one real member (2026-01-03-clean) + one phantom (no folder)
 mkdir -p "$ROOT/_data"
 printf -- '- slug: demo\n  title: Demo\n  blurb: x\n  entries:\n    - 2026-01-03-clean\n    - 2026-01-09-ghost-no-folder\n' > "$ROOT/_data/series.yml"
@@ -75,6 +81,12 @@ jq -e '.hygiene[] | select(.slug=="2026-01-02-hygiene") | .items[0].findings | m
 
 jq -e '.critical[] | select(.slug=="2026-01-09-ghost-no-folder")' <<<"$HEALTH" >/dev/null \
   && pass "phantom entry surfaces in health critical tier" || fail "phantom entry not in health critical tier"
+
+if jq -e '[.critical[],.hygiene[]] | map(.slug) | index("2026-01-04-htmlfrag")' <<<"$HEALTH" >/dev/null; then
+  fail "html-fragment leaf (leading comment) should parse clean, not be flagged"
+else
+  pass "html-fragment leaf with leading comment parses clean"
+fi
 
 rm -rf "$ROOT"
 echo

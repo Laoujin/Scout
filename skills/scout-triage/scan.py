@@ -53,15 +53,25 @@ STOPWORDS = {"the", "and", "for", "with", "near", "weekend", "michelin", "dinner
 
 
 def split_frontmatter(text):
-    """Return (frontmatter_text, body) splitting on the first two '---' fences."""
-    if not text.startswith("---"):
-        return "", text
+    """Return (frontmatter_text, body) splitting on the first two '---' fences.
+
+    Tolerates a leading banner before the opening fence — blank lines and/or
+    single-line HTML comments (html fragments carry a `<!-- format=html ... -->`
+    line on top), so their frontmatter is still parsed rather than treated as
+    absent (which would falsely flag every field as missing)."""
     parts = text.split("\n")
-    if parts[0].strip() != "---":
+    start = 0
+    while start < len(parts):
+        s = parts[start].strip()
+        if s == "" or (s.startswith("<!--") and s.endswith("-->")):
+            start += 1
+            continue
+        break
+    if start >= len(parts) or parts[start].strip() != "---":
         return "", text
-    for i in range(1, len(parts)):
+    for i in range(start + 1, len(parts)):
         if parts[i].strip() == "---":
-            return "\n".join(parts[1:i]), "\n".join(parts[i + 1:])
+            return "\n".join(parts[start + 1:i]), "\n".join(parts[i + 1:])
     return "", text  # no closing fence
 
 
