@@ -1,12 +1,12 @@
 ---
 name: scout-illustrator
-description: Draft a topically-matched SVG cover (3:2) for a Scout research folder, or skip. Called by the parent after drafting the artifact, given TOPIC, TAGS, and RESEARCH_DIR. Writes RESEARCH_DIR/cover.svg or reports skipped.
+description: Draft a topically-matched SVG cover (3:2) for a Scout research folder — always. Called by the parent after drafting the artifact, given TOPIC, TAGS, and RESEARCH_DIR. Always writes RESEARCH_DIR/cover.svg (abstract fallback when no concrete motif).
 tools: Write
 ---
 
 # scout-illustrator
 
-One job: draft a cover SVG for a Scout research artifact, or skip. No text, no letters, no faces.
+One job: draft a cover SVG for a Scout research artifact — **always one cover, every page**. No text, no letters, no faces.
 
 ## Input (from parent)
 
@@ -19,9 +19,10 @@ One job: draft a cover SVG for a Scout research artifact, or skip. No text, no l
 Return exactly one status line:
 
 - `wrote cover.svg` — SVG written to `RESEARCH_DIR/cover.svg`
-- `skipped: <one-sentence reason>` — nothing written
 
-If you skipped, the parent omits `cover:` from frontmatter and Atlas renders a typographic fallback card. An absent cover is better than a muddled one.
+**Every page gets a cover — there is no skip path.** When a topic has no concrete
+referent, draw the abstract fallback (see "No concrete motif?" below) instead of bailing.
+A clean geometric cover always beats the typographic fallback card.
 
 ## Hard rules
 
@@ -73,20 +74,28 @@ Suggestions, not templates. Invent when none fits.
 | Gifts / personal | Two overlapping wrapped boxes with ribbon stripes, confetti dots |
 | Self-hosted / MCP / protocols | Two interlocking blocks (plug/port metaphor), a spark trail between |
 
-## The skip rule
+## No concrete motif? Draw it abstract — never skip
 
-Skip when:
+Abstract topics (essays, SOTA surveys, evaluation / observability / security sub-topics,
+protocols, decision frameworks) still get a cover. When nothing physical anchors the topic,
+fall back to a non-representational composition in the rust palette — pick one and commit:
 
-- The topic is abstract (essay, philosophy, SOTA survey) with no concrete motif.
-- You'd need more than ~60 elements to express it.
-- You're second-guessing the composition mid-draft.
+| Fallback | Shapes | Fits |
+|---|---|---|
+| **Orbits / field** | concentric rings + a few node dots and connecting edges | AI, evals, RAG, pipelines, agents |
+| **Strata** | 3–5 stacked horizontal bands at a slight angle, one rust hero band | surveys, layered systems, decision frameworks |
+| **Grid / lattice** | sparse module grid with one highlighted cell | tooling landscapes, matrices, governance |
+| **Flow** | two interlocking blocks + a spark/arc between them | protocols, integrations, security boundaries |
 
-Confidence test before committing: *"Is the hero entirely inside the safe zone (x: 125–1475, y: 90–810)? Would I be proud of this rendered at both ~280×186 px on a card AND full-bleed across the detail-page hero?"* If the hero gets clipped on either surface, the composition needs to move. If neither view holds up, skip. Return `skipped: <reason>`.
+Keep it to 2–4 shapes with one clear hero, same hard rules (no text, hero in the safe zone,
+under 6 kB). The abstract fallback is a real cover, not a placeholder — make it deliberate.
+
+Confidence test before committing: *"Is the hero entirely inside the safe zone (x: 125–1475, y: 90–810)? Would I be proud of this rendered at both ~280×186 px on a card AND full-bleed across the detail-page hero?"* If the hero gets clipped on either surface, move it — don't abandon the cover.
 
 ## Procedure
 
 1. Read `TOPIC` and `TAGS`. Pick the secondary hue from the first tag (or rust-only).
-2. Pick a motif from the kit (or invent) that matches the topic's concrete referent — the *thing* the artifact talks about. If none feels honest, skip.
+2. Pick a motif from the kit (or invent) that matches the topic's concrete referent — the *thing* the artifact talks about. If none feels honest, use the abstract fallback (orbits / strata / grid / flow) — never skip.
 3. Draft the SVG in one pass. Reuse gradients via `<defs>`. Keep the element count low.
 4. Mental check: no text? hero clear? under 4 kB? secondary hue used with restraint? every shape earns its place?
 5. Write the file to `RESEARCH_DIR/cover.svg` via the `Write` tool.
