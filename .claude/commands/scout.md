@@ -7,6 +7,33 @@ allowed-tools: AskUserQuestion, Agent, Bash, Read, Write, WebSearch, WebFetch
 `$ARGUMENTS` is the research topic (free text, may be empty). You ARE the research
 agent — do not call `claude -p`; you and your subagents run on the subscription.
 
+## Step 0 — Resolve Atlas checkout & worktree home
+
+Locate `atlas-config.sh` (next to this command: `<scout>/scripts/atlas-config.sh`).
+
+1. **Atlas checkout.** Run `bash <scout>/scripts/atlas-config.sh resolve-atlas`.
+   - Exit 0 → use the printed absolute path as `ATLAS_DIR`.
+   - Non-zero → first run. Call `AskUserQuestion` once. If
+     `bash <scout>/scripts/atlas-config.sh detect-sibling <scout>` prints a path,
+     offer it as the recommended option. Options:
+     - **Use detected checkout** `<printed path>` (when present)
+     - **Provide a path** to an existing Atlas checkout
+     - **Clone fresh** into `~/.scout/atlas` (ask for the repo URL; default
+       `git@github.com:Laoujin/Atlas`; `git clone` it, then continue)
+     Persist with `bash <scout>/scripts/atlas-config.sh save-atlas "<chosen path>"`
+     (it validates git + origin and stores the absolute path). Use its echo as `ATLAS_DIR`.
+2. **Worktree home.** Run `bash <scout>/scripts/atlas-config.sh resolve-worktrees`.
+   - Exit 0 → use the printed path as `WT_HOME`.
+   - Non-zero → `AskUserQuestion` once. Options:
+     - **`~/.scout/atlas-worktrees/`**
+     - **Custom** — the user types a path
+     - **`<ATLAS_DIR>/worktrees/`** (inside the checkout)
+     For the inside-Atlas choice, persist with
+     `save-worktrees "<ATLAS_DIR>/worktrees" "<ATLAS_DIR>"` (wires `.git/info/exclude`);
+     otherwise `save-worktrees "<chosen path>"`. Use its echo as `WT_HOME`.
+
+`ATLAS_DIR`'s `origin` remote is the publish target — there is no `ATLAS_REPO` anymore.
+
 ## Step 1 — Topic & options
 
 If `$ARGUMENTS` is non-empty use it as the topic; else ask in chat (plain message).
@@ -26,8 +53,8 @@ topic into the structured brief. For `expedition`, also produce its
 their edits. Stop until they approve. The approved sub-topic set (title + depth
 each) decides the mode: sub-topics kept → **expedition**; none → **single-pass**.
 
-**Series match.** Read the Atlas series list from `<scout>/../atlas/_data/series.yml`
-(the sibling Atlas checkout; skip this whole step if the file is absent). Pass it to
+**Series match.** Read the Atlas series list from `$ATLAS_DIR/_data/series.yml`
+(the checkout resolved in Step 0; skip this whole step if the file is absent). Pass it to
 the sharpening as `sharpen.md`'s `Existing series:` input and apply its rule 9: if the
 brief *confidently* belongs to exactly one existing series, propose a `scout-series`
 block — ticked `- [x]`, with `› <group-label>` only when that series has `groups:`
@@ -42,16 +69,16 @@ Locate the helper: if `~/.scout/dir` exists, use
 `<scout>/.claude/commands/`, so use `<scout>/scripts/local-setup.sh`.
 
 Build `SUB_TOPICS_TSV` (one `title<TAB>depth` line per approved sub-topic; empty
-for single-pass) and run it:
+for single-pass) and run it with the resolved paths:
 
 ```
-SUB_TOPICS_TSV=$'Routing angle\tdeep\nState angle\tsurvey' \
+ATLAS_DIR="<ATLAS_DIR>" WT_HOME="<WT_HOME>" SUB_TOPICS_TSV=$'Routing angle\tdeep\nState angle\tsurvey' \
   bash <scout>/scripts/local-setup.sh "<brief title>"
 ```
 
-Parse its output for `SCOUT_DIR`, `ATLAS_REPO`, `DATE`, `SLUG`, `PARENT_DIR`,
-`START_TS`, and the `CHILD=<slug><TAB><dir>` lines. Read the playbooks under
-`$SCOUT_DIR/skills/scout/`.
+Parse its output for `ATLAS_DIR`, `WORKTREE`, `BRANCH`, `DATE`, `SLUG`,
+`PARENT_DIR`, `START_TS`, and the `CHILD=<slug><TAB><dir>` lines. Read the
+playbooks under `$SCOUT_DIR/skills/scout/`.
 
 ## Step 4 — Research
 
@@ -180,25 +207,26 @@ The expedition **parent** synthesis index is intentionally not frontmatter-valid
 
 **File into the series first (if one was approved in Step 2).** Run this *before*
 `publish.sh` so the `series.yml` edit is swept into the same commit (mirrors
-`run-decompose.sh`'s wiring). `add-to-series.sh` edits the cloned checkout's copy
+`run-decompose.sh`'s wiring). `add-to-series.sh` edits the worktree's copy
 and never creates a new series:
 
 ```
 bash "$SCOUT_DIR/scripts/add-to-series.sh" \
-  "$SCOUT_DIR/atlas-checkout/_data/series.yml" \
+  "$WORKTREE/_data/series.yml" \
   "<date>-<slug>" "<series-slug>" "<group-label>"   # omit group-label for a flat series
 ```
 
 Then forward the values from Step 3 so the commit message and published URL are
-correct (`publish.sh` defaults them to `unknown` otherwise, and needs
-`ATLAS_REPO` to build the URL):
+correct (`publish.sh` defaults them to `unknown` otherwise, and needs `ATLAS_DIR`
+to build the URL from its `origin` remote):
 
 ```
-cd "$SCOUT_DIR" && ATLAS_REPO="<atlas_repo>" SLUG="<slug>" DATE="<date>" \
-  TOPIC="<brief title>" bash scripts/publish.sh
+cd "<scout>" && WORKTREE="<WORKTREE>" BRANCH="<BRANCH>" ATLAS_DIR="<ATLAS_DIR>" \
+  SLUG="<slug>" DATE="<date>" TOPIC="<brief title>" bash scripts/publish.sh
 ```
 
-It commits + pushes `atlas-checkout/` to Atlas `main` and prints `Published: <url>`.
+It commits + pushes the run's `WORKTREE` to Atlas `main` (as `HEAD:main`), then
+removes the worktree + branch on success, and prints `Published: <url>`.
 
 **Provenance issue + metadata (all non-fatal — a gh/network failure must not undo a
 successful publish). Run BEFORE `publish.sh` above so `issue:` is swept into the
