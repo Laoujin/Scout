@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Commit + push whatever Scout wrote into atlas-checkout/_research/.
+# Commit + push whatever Scout wrote into the run's worktree.
 # Atlas is a Jekyll site; GitHub Pages rebuilds the index from frontmatter on push.
 
 set -euo pipefail
@@ -8,20 +8,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/lib-publish.sh
 source "$SCRIPT_DIR/lib-publish.sh"
 
-ATLAS_DIR="atlas-checkout"
+WORKTREE="${WORKTREE:?WORKTREE is required (per-run worktree path from local-setup.sh)}"
+BRANCH="${BRANCH:?BRANCH is required (scout/<date>-<slug>)}"
+ATLAS_DIR="${ATLAS_DIR:?ATLAS_DIR is required (registered Atlas checkout)}"
 TOPIC="${TOPIC:-research}"
 SLUG="${SLUG:-unknown}"
 DATE="${DATE:-$(date +%F)}"
 
-if [ ! -d "$ATLAS_DIR/.git" ]; then
-  echo "Error: $ATLAS_DIR does not exist or is not a git checkout." >&2
+if [ ! -e "$WORKTREE/.git" ]; then
+  echo "Error: $WORKTREE is not a git worktree." >&2
   exit 1
 fi
 
-cd "$ATLAS_DIR"
+cd "$WORKTREE"
 
 COMMIT_MSG="$(printf 'research: %s %s\n\nTopic: %s' "$DATE" "$SLUG" "$TOPIC")"
-BRANCH="scout/${DATE}-${SLUG}"
 
 rc=0; publish_path "$COMMIT_MSG" "." "$BRANCH" || rc=$?
 case "$rc" in
@@ -30,9 +31,12 @@ case "$rc" in
   *) exit 1 ;;
 esac
 
-# Derive the Pages URL from ATLAS_REPO (git@github.com-atlas:<owner>/<repo>.git).
-atlas_slug="${ATLAS_REPO#*:}"; atlas_slug="${atlas_slug%.git}"
-owner="${atlas_slug%%/*}"; repo="${atlas_slug##*/}"
+# Derive the Pages URL from the worktree's origin remote (the publish target).
+# Handles SSH (git@host:owner/repo.git), host-alias SSH, and HTTPS URLs.
+origin_url="$(git -C "$WORKTREE" remote get-url origin)"
+u="${origin_url%.git}"
+if [[ "$u" == http*://* ]]; then path="${u#*://}"; path="${path#*/}"; else path="${u##*:}"; fi
+owner="${path%%/*}"; repo="${path##*/}"
 ATLAS_URL="https://${owner,,}.github.io/${repo}/research/${DATE}-${SLUG}/"
 echo "Published: ${ATLAS_URL}"
 
@@ -71,3 +75,10 @@ if [ -n "${ISSUE_NUMBER:-}" ] && [ -n "${GH_TOKEN:-}" ] && [ -n "${GH_REPO:-}" ]
       || echo "publish.sh: views-comment.sh failed (non-fatal)" >&2
   fi
 fi
+
+# Success: retire this run's worktree + branch (non-fatal — publish already done).
+# Runs LAST so the SOFT_FAIL/issue blocks above can still read RESEARCH_DIR (which
+# lives inside the worktree) before the worktree is deleted.
+git -C "$ATLAS_DIR" worktree remove "$WORKTREE" 2>/dev/null \
+  || echo "publish.sh: could not remove worktree $WORKTREE (remove it manually)" >&2
+git -C "$ATLAS_DIR" branch -D "$BRANCH" >/dev/null 2>&1 || true

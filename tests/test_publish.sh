@@ -15,8 +15,10 @@ declare -a FAIL_MSGS
 pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL_MSGS+=("$1"); FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 
-# setup_tmp: tmpdir with bare atlas-remote.git (1 initial commit on main)
-# and a working clone at atlas-checkout/ with a staged artifact.
+# setup_tmp: tmpdir with bare atlas-remote.git (1 initial commit on main),
+# a registered Atlas checkout at atlas-checkout/ (= ATLAS_DIR), and a per-run
+# worktree at wt/ (branch scout/2026-04-23-test off origin/main) holding the
+# staged artifact — the layout local-setup.sh produces.
 # Echoes the tmpdir path.
 setup_tmp() {
   local tmp; tmp=$(mktemp -d)
@@ -25,18 +27,22 @@ setup_tmp() {
   git clone -q --bare "$tmp/seed" "$tmp/atlas-remote.git" 2>/dev/null
   rm -rf "$tmp/seed"
   git clone -q "$tmp/atlas-remote.git" "$tmp/atlas-checkout"
-  mkdir -p "$tmp/atlas-checkout/_research/2026-04-23-test"
-  echo "# test artifact" > "$tmp/atlas-checkout/_research/2026-04-23-test/index.md"
+  git -C "$tmp/atlas-checkout" worktree add -q -b scout/2026-04-23-test "$tmp/wt" origin/main
+  mkdir -p "$tmp/wt/_research/2026-04-23-test"
+  echo "# test artifact" > "$tmp/wt/_research/2026-04-23-test/index.md"
   echo "$tmp"
 }
 
-# run_publish: runs publish.sh with tmp as CWD and test env.
+# run_publish: runs publish.sh with the worktree env local-setup.sh would pass.
 # Writes combined stdout+stderr to $tmp/publish.log; sets global RC.
 RC=0
 run_publish() {
   local tmp="$1"
-  ( cd "$tmp" && env \
+  ( cd "$tmp/atlas-checkout" && env \
       ATLAS_REPO="git@github.com-atlas:test/atlas.git" \
+      WORKTREE="$tmp/wt" \
+      BRANCH="scout/2026-04-23-test" \
+      ATLAS_DIR="$tmp/atlas-checkout" \
       DATE="2026-04-23" \
       SLUG="test" \
       TOPIC="test topic" \
@@ -169,7 +175,7 @@ rm -rf "$tmp"
 
 # --- Case 7: mixed-success expedition surfaces failed children in SOFT_FAIL_LOG ---
 tmp=$(setup_tmp)
-PARENT="$tmp/atlas-checkout/_research/2026-04-23-test"
+PARENT="$tmp/wt/_research/2026-04-23-test"
 mkdir -p "$PARENT/a" "$PARENT/b"
 cat > "$PARENT/a/index.md" <<MD
 ---
@@ -187,8 +193,9 @@ title: B
 placeholder
 MD
 SOFT_LOG="$tmp/soft.log"
-( cd "$tmp" && env \
+( cd "$tmp/atlas-checkout" && env \
     ATLAS_REPO="git@github.com-atlas:test/atlas.git" \
+    WORKTREE="$tmp/wt" BRANCH="scout/2026-04-23-test" ATLAS_DIR="$tmp/atlas-checkout" \
     DATE="2026-04-23" SLUG="test" TOPIC="test topic" \
     GH_TOKEN="" GH_REPO="" ISSUE_NUMBER="" \
     SOFT_FAIL_LOG="$SOFT_LOG" \
@@ -217,9 +224,10 @@ fi
 exit 0
 STUB
 chmod +x "$tmp/bin/gh"
-( cd "$tmp" && env \
+( cd "$tmp/atlas-checkout" && env \
     PATH="$tmp/bin:$PATH" \
     ATLAS_REPO="git@github.com-atlas:test/atlas.git" \
+    WORKTREE="$tmp/wt" BRANCH="scout/2026-04-23-test" ATLAS_DIR="$tmp/atlas-checkout" \
     DATE="2026-04-23" SLUG="test" TOPIC="test topic" \
     GH_TOKEN="x" GH_REPO="test/atlas" ISSUE_NUMBER="1" \
     bash "$SCRIPT" >"$tmp/publish.log" 2>&1 )
@@ -237,8 +245,9 @@ rm -rf "$tmp"
 tmp=$(setup_tmp)
 git -C "$tmp/atlas-checkout" config user.name "Local User"
 git -C "$tmp/atlas-checkout" config user.email "local@example.com"
-( cd "$tmp" && env -u GIT_AUTHOR_NAME -u GIT_AUTHOR_EMAIL \
+( cd "$tmp/atlas-checkout" && env -u GIT_AUTHOR_NAME -u GIT_AUTHOR_EMAIL \
     ATLAS_REPO="git@github.com-atlas:test/atlas.git" \
+    WORKTREE="$tmp/wt" BRANCH="scout/2026-04-23-test" ATLAS_DIR="$tmp/atlas-checkout" \
     DATE="2026-04-23" SLUG="test" TOPIC="test topic" \
     GH_TOKEN="" GH_REPO="" ISSUE_NUMBER="" \
     bash "$SCRIPT" >"$tmp/publish.log" 2>&1 )
@@ -255,8 +264,9 @@ rm -rf "$tmp"
 tmp=$(setup_tmp)
 git -C "$tmp/atlas-checkout" config user.name "Local User"
 git -C "$tmp/atlas-checkout" config user.email "local@example.com"
-( cd "$tmp" && env \
+( cd "$tmp/atlas-checkout" && env \
     ATLAS_REPO="git@github.com-atlas:test/atlas.git" \
+    WORKTREE="$tmp/wt" BRANCH="scout/2026-04-23-test" ATLAS_DIR="$tmp/atlas-checkout" \
     DATE="2026-04-23" SLUG="test" TOPIC="test topic" \
     GH_TOKEN="" GH_REPO="" ISSUE_NUMBER="" \
     GIT_AUTHOR_NAME="Issue Author" GIT_AUTHOR_EMAIL="ci@example.com" \
@@ -281,6 +291,26 @@ WT_SRC="$WORK/wt-src"; git clone -q "$WT_REMOTE" "$WT_SRC"
 landed="$(git --git-dir="$WT_REMOTE" cat-file -e refs/heads/main:f.txt && echo yes)"
 [ "$landed" = yes ] && pass "try_push HEAD->main from feature branch" || fail "try_push did not land on main"
 rm -rf "$WORK"
+
+# --- worktree publish: pushes to origin/main, removes worktree + branch ---
+WORKW="$(mktemp -d)"
+PR2="$WORKW/p2-remote.git"; git init -q --bare "$PR2"
+AT2="$WORKW/p2-atlas"; git clone -q "$PR2" "$AT2"
+( cd "$AT2" && mkdir -p research && echo s > research/.keep && git add -A \
+  && git -c user.email=t@t -c user.name=t commit -qm seed && git push -q origin HEAD:main )
+WT2="$WORKW/p2-wts/2026-06-02-place"; mkdir -p "$WORKW/p2-wts"
+git -C "$AT2" worktree add -q -b scout/2026-06-02-place "$WT2" origin/main
+mkdir -p "$WT2/research/2026-06-02-place"
+echo body > "$WT2/research/2026-06-02-place/index.md"
+OUT="$(cd "$AT2" && WORKTREE="$WT2" BRANCH="scout/2026-06-02-place" ATLAS_DIR="$AT2" \
+      SLUG=2026-06-02-place DATE=2026-06-02 TOPIC=t bash "$REPO_ROOT/scripts/publish.sh" 2>&1)"
+echo "$OUT" | grep -q '^Published: https://' && pass "publish prints URL" || fail "no Published URL: $OUT"
+git --git-dir="$PR2" cat-file -e "refs/heads/main:research/2026-06-02-place/index.md" 2>/dev/null \
+  && pass "artifact on origin/main" || fail "artifact not pushed"
+git -C "$AT2" worktree list | grep -q "$WT2" && fail "worktree not removed" || pass "worktree removed on success"
+git -C "$AT2" show-ref --verify --quiet refs/heads/scout/2026-06-02-place \
+  && fail "branch not deleted" || pass "branch deleted on success"
+rm -rf "$WORKW"
 
 echo ""
 echo "Results: $PASS passed, $FAIL failed"
