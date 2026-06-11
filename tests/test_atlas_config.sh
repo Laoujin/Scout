@@ -34,6 +34,12 @@ OUT="$(bash "$AC" resolve-atlas)"; rc=$?
 if bash "$AC" save-atlas "$NOGIT" >/dev/null 2>"$WORK/e1"; then fail "save-atlas should reject non-git"; else
   grep -qi 'origin\|git' "$WORK/e1" && pass "save-atlas clear error" || fail "unclear error"; fi
 
+# save-atlas with empty / missing path -> non-zero, must NOT save CWD
+if bash "$AC" save-atlas "" >/dev/null 2>"$WORK/e2"; then fail "save-atlas '' should error"; else
+  grep -qi 'path not found' "$WORK/e2" && pass "save-atlas '' clear error" || fail "save-atlas '' unclear error"; fi
+if bash "$AC" save-atlas >/dev/null 2>"$WORK/e3"; then fail "save-atlas no-arg should error"; else
+  pass "save-atlas no-arg errors"; fi
+
 # detect-sibling: scout/../atlas valid
 LAY="$WORK/lay"; mkdir -p "$LAY"; cp -r "$ATLAS" "$LAY/atlas"; mkdir -p "$LAY/scout"
 OUT="$(bash "$AC" detect-sibling "$LAY/scout")"

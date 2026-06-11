@@ -2,12 +2,13 @@
 # Resolve / validate / persist the local Atlas checkout and worktree-home paths
 # for the interactive /scout flow. All persisted paths are absolute. The config
 # dir is $SCOUT_CONFIG_DIR (default ~/.scout) so tests can redirect it.
+# Exit codes: 0 ok · 2 invalid input · 3 not configured · (detect-sibling: 1 = not found)
 set -uo pipefail
 CFG_DIR="${SCOUT_CONFIG_DIR:-$HOME/.scout}"
 ATLAS_PTR="$CFG_DIR/atlas"
 WT_PTR="$CFG_DIR/worktrees-dir"
 
-_abs() { ( cd "$1" 2>/dev/null && pwd ); }
+_abs() { [ -n "${1:-}" ] || return 1; ( cd -- "$1" 2>/dev/null && pwd ); }
 
 # Valid = a git working tree that has an 'origin' remote (the publish target).
 _valid_atlas() {
@@ -25,7 +26,7 @@ cmd_resolve_atlas() {
 }
 
 cmd_save_atlas() {
-  local d; d="$(_abs "${1:-}")" || true
+  local d; d="$(_abs "${1:-}")"
   [ -n "$d" ] || { echo "atlas-config: path not found: ${1:-}" >&2; return 2; }
   _valid_atlas "$d" || { echo "atlas-config: not a git checkout with an 'origin' remote: $d" >&2; return 2; }
   mkdir -p "$CFG_DIR"; printf '%s\n' "$d" > "$ATLAS_PTR"; printf '%s\n' "$d"
@@ -45,7 +46,9 @@ cmd_resolve_worktrees() {
 
 cmd_save_worktrees() {
   local p="${1:?usage: save-worktrees <path> [atlas-dir-if-inside]}" inside="${2:-}"
-  mkdir -p "$p"; local d; d="$(_abs "$p")"
+  mkdir -p "$p" || { echo "atlas-config: cannot create worktree home: $p" >&2; return 2; }
+  local d; d="$(_abs "$p")"
+  [ -n "$d" ] || { echo "atlas-config: cannot resolve worktree home: $p" >&2; return 2; }
   mkdir -p "$CFG_DIR"; printf '%s\n' "$d" > "$WT_PTR"
   if [ -n "$inside" ]; then
     local ex="$inside/.git/info/exclude"
