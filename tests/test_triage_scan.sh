@@ -45,8 +45,10 @@ if command -v convert >/dev/null 2>&1; then
   convert -size 2200x1400 xc:navy "$IMGDIR/huge.webp"   # oversized dimensions
   convert -size 300x200  xc:teal "$IMGDIR/used.webp"    # clean + referenced
   convert -size 300x200  xc:red  "$IMGDIR/orphan.webp"  # referenced by nothing
+  # in-bounds dimensions but over the byte budget (random noise -> incompressible)
+  convert -size 1400x1400 xc:gray +noise Random -define webp:lossless=true "$IMGDIR/heavy.webp"
   # 'gone.webp' is referenced but never created -> IMAGE_MISSING (broken <img>)
-  printf '<img src="v/images/huge.webp"><img src="v/images/used.webp"><img src="v/images/gone.webp">' > "$IMGLEAF/views/v.html"
+  printf '<img src="v/images/huge.webp"><img src="v/images/used.webp"><img src="v/images/heavy.webp"><img src="v/images/gone.webp">' > "$IMGLEAF/views/v.html"
 fi
 
 # series manifest: one real member (2026-01-03-clean) + one phantom (no folder)
@@ -107,6 +109,19 @@ fi
 if [ "$IMG_OK" = 1 ]; then
   [ "$(jq -r '[.[] | select(.category=="IMAGE_OVERSIZED") | .path] | map(select(test("huge.webp"))) | length' <<<"$JSON")" = "1" ] \
     && pass "oversized image flagged IMAGE_OVERSIZED" || fail "huge.webp not flagged IMAGE_OVERSIZED"
+
+  # remedy depends on the cause: >1600px -> resize; in-bounds but heavy -> recompress
+  [ "$(jq -r '.[] | select(.category=="IMAGE_OVERSIZED" and (.path|test("huge.webp"))) | .detail' <<<"$JSON" | grep -c "re-encode to WebP ≤1600px")" = "1" ] \
+    && pass "oversized-dimensions image told to resize ≤1600px" || fail "huge.webp lost the resize remedy"
+
+  [ "$(jq -r '[.[] | select(.category=="IMAGE_OVERSIZED") | .path] | map(select(test("heavy.webp"))) | length' <<<"$JSON")" = "1" ] \
+    && pass "in-bounds heavy image flagged IMAGE_OVERSIZED" || fail "heavy.webp not flagged IMAGE_OVERSIZED"
+
+  [ "$(jq -r '.[] | select(.category=="IMAGE_OVERSIZED" and (.path|test("heavy.webp"))) | .detail' <<<"$JSON" | grep -c "re-compress at lower quality")" = "1" ] \
+    && pass "in-bounds heavy image told to recompress, not resize" || fail "heavy.webp missing recompress remedy"
+
+  [ "$(jq -r '.[] | select(.category=="IMAGE_OVERSIZED" and (.path|test("heavy.webp"))) | .detail' <<<"$JSON" | grep -c "re-encode to WebP ≤1600px")" = "0" ] \
+    && pass "in-bounds heavy image not told to resize ≤1600px" || fail "heavy.webp wrongly told to resize"
 
   [ "$(jq -r '[.[] | select(.category=="IMAGE_ORPHAN") | .path] | map(select(test("orphan.webp"))) | length' <<<"$JSON")" = "1" ] \
     && pass "unreferenced image flagged IMAGE_ORPHAN" || fail "orphan.webp not flagged IMAGE_ORPHAN"

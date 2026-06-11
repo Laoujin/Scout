@@ -306,13 +306,21 @@ def check_images(folder, findings):
             add(findings, "IMAGE_ORPHAN", img, "on disk but referenced by no view — dead weight in the build")
         problems = []
         dims = image_dims(img)
-        if dims and max(dims) > MAX_IMG_EDGE:
+        over_edge = bool(dims and max(dims) > MAX_IMG_EDGE)
+        if over_edge:
             problems.append(f"{dims[0]}×{dims[1]}px (>{MAX_IMG_EDGE})")
         size = img.stat().st_size
         if size > MAX_IMG_BYTES:
             problems.append(f"{size // 1024}KB (>{MAX_IMG_BYTES // 1024}KB)")
         if problems:
-            add(findings, "IMAGE_OVERSIZED", img, "; ".join(problems) + " — re-encode to WebP ≤1600px")
+            # Resizing only helps when the image is actually too big on its longest
+            # edge. An in-bounds image that's merely heavy needs re-compression, not
+            # a resize — only say "already ≤1600px" when dims are known and within budget.
+            if not over_edge and dims:
+                remedy = f"already ≤{MAX_IMG_EDGE}px — re-compress at lower quality"
+            else:
+                remedy = f"re-encode to WebP ≤{MAX_IMG_EDGE}px"
+            add(findings, "IMAGE_OVERSIZED", img, "; ".join(problems) + " — " + remedy)
 
 
 def scan(root):
