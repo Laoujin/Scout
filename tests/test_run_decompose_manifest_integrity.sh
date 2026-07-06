@@ -16,7 +16,7 @@ echo "Testing run_decompose_manifest_integrity.sh..."
 
 TMP=$(mktemp -d)
 PARENT_DIR="$TMP/atlas-checkout/research/2026-04-26-test"
-mkdir -p "$TMP/scout/scripts" "$TMP/scout/skills/scout" "$PARENT_DIR" "$TMP/bin"
+mkdir -p "$TMP/scout/scripts" "$TMP/scout/skills/scout-research" "$PARENT_DIR" "$TMP/bin"
 
 # Stub run.sh — writes a successful child index.md.
 cat > "$TMP/scout/scripts/run.sh" <<'STUB'
@@ -44,7 +44,7 @@ exit 0
 STUB
 chmod +x "$TMP/scout/scripts/publish.sh"
 
-echo "stub synthesis skill" > "$TMP/scout/skills/scout/synthesis.md"
+echo "stub synthesis skill" > "$TMP/scout/skills/scout-research/synthesis.md"
 
 # Stub claude — simulates the synthesis agent: writes the parent index.md AND
 # clobbers manifest.json the way the real agents did (head removed, leading ",").

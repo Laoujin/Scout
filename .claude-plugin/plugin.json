@@ -1,0 +1,16 @@
+{
+  "name": "scout",
+  "description": "Personal research engine. /scout:scout runs cited, multi-angle web research on your Claude subscription; /scout:scout-async opens a research Issue for your self-hosted runner.",
+  "version": "0.1.0",
+  "author": { "name": "Laoujin" },
+  "homepage": "https://github.com/Laoujin/Scout",
+  "repository": "https://github.com/Laoujin/Scout",
+  "license": "MIT",
+  "keywords": ["research", "web-research", "citations", "atlas", "jekyll"],
+  "commands": "./.claude/commands",
+  "agents": [
+    "./.claude/agents/scout-illustrator.md",
+    "./.claude/agents/scout-researcher.md",
+    "./.claude/agents/scout-reviewer.md"
+  ]
+}

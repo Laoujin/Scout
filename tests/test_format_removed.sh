@@ -43,7 +43,7 @@ assert_eq "legacy Format ignored: FORMAT=auto" "auto" "$FORMAT"
 # 3. issue-comment.sh body contains no "format:"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-mkdir -p "$TMP/scripts" "$TMP/skills/scout" "$TMP/bin"
+mkdir -p "$TMP/scripts" "$TMP/skills/scout-research" "$TMP/bin"
 # Stub gh so the script doesn't actually post; capture the body via env.
 cat > "$TMP/bin/gh" <<'GHSTUB'
 #!/usr/bin/env bash

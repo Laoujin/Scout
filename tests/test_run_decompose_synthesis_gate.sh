@@ -13,11 +13,11 @@ fail() { FAIL_MSGS+=("$1"); FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 setup_with_n_successes() {
   local n="$1"
   local tmp; tmp=$(mktemp -d)
-  mkdir -p "$tmp/scout/scripts" "$tmp/scout/skills/scout" "$tmp/atlas-checkout"
+  mkdir -p "$tmp/scout/scripts" "$tmp/scout/skills/scout-research" "$tmp/atlas-checkout"
   cp "$REPO_ROOT/scripts/lib-issue-parse.sh" "$tmp/scout/scripts/"
   cp "$REPO_ROOT/scripts/run-decompose.sh"   "$tmp/scout/scripts/"
   cp "$REPO_ROOT/scripts/lib-models.sh"      "$tmp/scout/scripts/"
-  cp "$REPO_ROOT/skills/scout/synthesis.md"  "$tmp/scout/skills/scout/"
+  cp "$REPO_ROOT/skills/scout-research/synthesis.md"  "$tmp/scout/skills/scout-research/"
 
   # run.sh stub: writes success for first $n calls, then failure.
   cat > "$tmp/scout/scripts/run.sh" <<STUB

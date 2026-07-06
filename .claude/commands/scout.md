@@ -7,22 +7,35 @@ allowed-tools: AskUserQuestion, Agent, Bash, Read, Write, WebSearch, WebFetch
 `$ARGUMENTS` is the research topic (free text, may be empty). You ARE the research
 agent — do not call `claude -p`; you and your subagents run on the subscription.
 
+## Step 0a — Resolve `SCOUT_DIR` (do this first)
+
+`SCOUT_DIR` is the Scout install holding `scripts/` and `skills/`. Resolve it once:
+
+- If the text `${CLAUDE_PLUGIN_ROOT}` on this line reads as an absolute path (you're
+  running as an installed plugin), then `SCOUT_DIR=${CLAUDE_PLUGIN_ROOT}`.
+- Otherwise it's still the literal `${CLAUDE_PLUGIN_ROOT}` (you're running from a
+  checkout, not an installed plugin): if `~/.scout/dir` exists use
+  `SCOUT_DIR=$(cat ~/.scout/dir)`; else this command file lives at
+  `<checkout>/.claude/commands/scout.md`, so `SCOUT_DIR=<checkout>`.
+
+Every `$SCOUT_DIR/scripts/…` and `$SCOUT_DIR/skills/…` path below resolves against it.
+
 ## Step 0 — Resolve Atlas checkout & worktree home
 
-Locate `atlas-config.sh` (next to this command: `<scout>/scripts/atlas-config.sh`).
+Locate `atlas-config.sh` at `$SCOUT_DIR/scripts/atlas-config.sh`.
 
-1. **Atlas checkout.** Run `bash <scout>/scripts/atlas-config.sh resolve-atlas`.
+1. **Atlas checkout.** Run `bash $SCOUT_DIR/scripts/atlas-config.sh resolve-atlas`.
    - Exit 0 → use the printed absolute path as `ATLAS_DIR`.
    - Non-zero → first run. Call `AskUserQuestion` once. If
-     `bash <scout>/scripts/atlas-config.sh detect-sibling <scout>` prints a path,
+     `bash $SCOUT_DIR/scripts/atlas-config.sh detect-sibling $SCOUT_DIR` prints a path,
      offer it as the recommended option. Options:
      - **Use detected checkout** `<printed path>` (when present)
      - **Provide a path** to an existing Atlas checkout
      - **Clone fresh** into `~/.scout/atlas` (ask for the repo URL; default
        `git@github.com:Laoujin/Atlas`; `git clone` it, then continue)
-     Persist with `bash <scout>/scripts/atlas-config.sh save-atlas "<chosen path>"`
+     Persist with `bash $SCOUT_DIR/scripts/atlas-config.sh save-atlas "<chosen path>"`
      (it validates git + origin and stores the absolute path). Use its echo as `ATLAS_DIR`.
-2. **Worktree home.** Run `bash <scout>/scripts/atlas-config.sh resolve-worktrees`.
+2. **Worktree home.** Run `bash $SCOUT_DIR/scripts/atlas-config.sh resolve-worktrees`.
    - Exit 0 → use the printed path as `WT_HOME`.
    - Non-zero → `AskUserQuestion` once. Options:
      - **`~/.scout/atlas-worktrees/`**
@@ -46,9 +59,8 @@ Then call `AskUserQuestion` once:
 
 ## Step 2 — Sharpen & decompose (in chat)
 
-Read `skills/scout/sharpen.md` (under the `SCOUT_DIR` resolved in Step 3 — if you
-haven't resolved it yet, run Step 3's command first) and follow it to rewrite the
-topic into the structured brief. For `expedition`, also produce its
+Read `$SCOUT_DIR/skills/scout-research/sharpen.md` (`SCOUT_DIR` resolved in Step 0a) and
+follow it to rewrite the topic into the structured brief. For `expedition`, also produce its
 `scout-subtopics` list. Show the brief (and sub-topics) to the user; incorporate
 their edits. Stop until they approve. The approved sub-topic set (title + depth
 each) decides the mode: sub-topics kept → **expedition**; none → **single-pass**.
@@ -64,22 +76,18 @@ untick it or change the group. Carry the approved `<series-slug>` (and optional
 
 ## Step 3 — Setup
 
-Locate the helper: if `~/.scout/dir` exists, use
-`$(cat ~/.scout/dir)/scripts/local-setup.sh`; otherwise this command file lives in
-`<scout>/.claude/commands/`, so use `<scout>/scripts/local-setup.sh`. This resolved
-path is `<scout>` — i.e. `SCOUT_DIR=<scout>` — used wherever `$SCOUT_DIR` appears below.
-
 Build `SUB_TOPICS_TSV` (one `title<TAB>depth` line per approved sub-topic; empty
-for single-pass) and run it with the resolved paths:
+for single-pass) and run `local-setup.sh` (from the `SCOUT_DIR` resolved in Step 0a)
+with the resolved paths:
 
 ```
 ATLAS_DIR="<ATLAS_DIR>" WT_HOME="<WT_HOME>" SUB_TOPICS_TSV=$'Routing angle\tdeep\nState angle\tsurvey' \
-  bash <scout>/scripts/local-setup.sh "<brief title>"
+  bash $SCOUT_DIR/scripts/local-setup.sh "<brief title>"
 ```
 
 Parse its output for `ATLAS_DIR`, `WORKTREE`, `BRANCH`, `DATE`, `SLUG`,
 `PARENT_DIR`, `START_TS`, and the `CHILD=<slug><TAB><dir>` lines. Read the
-playbooks under `$SCOUT_DIR/skills/scout/`.
+playbooks under `$SCOUT_DIR/skills/scout-research/`.
 
 ## Step 4 — Research
 
@@ -91,7 +99,7 @@ frontmatter.
 
 **Expedition:** dispatch ALL children in ONE message (parallel) — one `Agent`
 call per `CHILD`. Each agent's prompt: the full procedure from
-`$SCOUT_DIR/skills/scout/SKILL.md`, plus `TOPIC=<sub-topic title>`,
+`$SCOUT_DIR/skills/scout-research/SKILL.md`, plus `TOPIC=<sub-topic title>`,
 `DEPTH=<child depth>`, `FORMAT=<format>`, `DATE=<date>`, `RESEARCH_DIR=<child dir>`,
 and `MODEL=<friendly label of the model running this session, e.g. "Opus 4.8">`.
 It must write `<child dir>/index.{md,html}` with content frontmatter (title, tags,
@@ -103,14 +111,14 @@ Children are single-pass (do not nest dispatch) — so a child does **not** draf
 own cover; covers are added centrally in Step 5.
 
 **Single-pass:** you do the research yourself per
-`$SCOUT_DIR/skills/scout/SKILL.md` and write `$PARENT_DIR/index.{md,html}`.
+`$SCOUT_DIR/skills/scout-research/SKILL.md` and write `$PARENT_DIR/index.{md,html}`.
 
 If a child returns blocked/empty, tell the user and let them choose: re-dispatch
 that one, drop the angle, or proceed.
 
 ## Step 5 — Cover & synthesize (expedition)
 
-Read `$SCOUT_DIR/skills/scout/synthesis.md` and follow it:
+Read `$SCOUT_DIR/skills/scout-research/synthesis.md` and follow it:
 1. **Covers — parent AND every successful child** (the CI flow gives each angle its
    own cover; match it). In ONE message dispatch `scout-illustrator` once per
    successful `CHILD` (`TOPIC=<child title>`, `TAGS=<child tags>`,
@@ -147,7 +155,7 @@ This runs **before** Step 6 so the views land in the same commit as the canonica
 NOT call `view-candidacy.sh` or `views-dispatch.sh` — they shell out to `claude -p`
 (API). You do the judging and the dispatch yourself, on the subscription.
 
-**1. Judge (inline).** Read `$SCOUT_DIR/skills/scout/view-candidacy.md` and apply it
+**1. Judge (inline).** Read `$SCOUT_DIR/skills/scout-research/view-candidacy.md` and apply it
 yourself. Build its inputs from what you already wrote in Steps 3–5: `RUN_KIND`
 (`decompose` for an expedition, else `single`), `PARENT_PATH`, and a `PAGES` array —
 one entry per page actually written (parent + each successful child for an
@@ -222,7 +230,7 @@ correct (`publish.sh` defaults them to `unknown` otherwise, and needs `ATLAS_DIR
 to build the URL from its `origin` remote):
 
 ```
-cd "<scout>" && WORKTREE="<WORKTREE>" BRANCH="<BRANCH>" ATLAS_DIR="<ATLAS_DIR>" \
+cd "$SCOUT_DIR" && WORKTREE="<WORKTREE>" BRANCH="<BRANCH>" ATLAS_DIR="<ATLAS_DIR>" \
   SLUG="<slug>" DATE="<date>" TOPIC="<brief title>" bash scripts/publish.sh
 ```
 

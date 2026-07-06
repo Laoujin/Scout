@@ -1,6 +1,8 @@
 ---
 name: scout-create-series
 description: Use to CREATE a new Atlas series — pick the title/blurb, triage which existing research belongs in it, choose optional category labels, author a cover SVG, and scaffold the series.yml block + page stub. Human-invoked curation (the complement to series-suggestion, which only auto-adds entries to series that already exist). Run when you want to group already-published research under a new /series/<slug>/ page.
+user-invocable: false
+disable-model-invocation: true
 ---
 
 # Scout create-series — author a new Atlas series

@@ -1,0 +1,12 @@
+{
+  "name": "scout",
+  "description": "Scout — a personal, self-hosted research engine for Claude Code. Cited, multi-angle web research published to your own Atlas site.",
+  "owner": { "name": "Laoujin" },
+  "plugins": [
+    {
+      "name": "scout",
+      "source": "./",
+      "description": "Personal research engine. /scout:scout runs cited, multi-angle web research on your Claude subscription; /scout:scout-async opens a research Issue for your self-hosted runner. Publishes to your Atlas site."
+    }
+  ]
+}

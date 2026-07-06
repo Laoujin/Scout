@@ -15,7 +15,7 @@ echo "Testing run_decompose_series.sh..."
 
 TMP=$(mktemp -d)
 PARENT_DIR="$TMP/atlas-checkout/research/2026-04-26-test"
-mkdir -p "$TMP/scout/scripts" "$TMP/scout/skills/scout" "$PARENT_DIR" \
+mkdir -p "$TMP/scout/scripts" "$TMP/scout/skills/scout-research" "$PARENT_DIR" \
          "$TMP/atlas-checkout/_data" "$TMP/bin"
 
 # Real series.yml with an existing series + group; add-to-series.sh only
@@ -59,7 +59,7 @@ echo "---invocation---" >> "$PUBLISH_LOG"
 STUB
 chmod +x "$TMP/scout/scripts/publish.sh"
 
-echo "stub synthesis skill" > "$TMP/scout/skills/scout/synthesis.md"
+echo "stub synthesis skill" > "$TMP/scout/skills/scout-research/synthesis.md"
 
 # Stub claude — writes a parent synthesis index.md with a known title (drives
 # the slug rename) and emits cost/duration JSON.

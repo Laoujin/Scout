@@ -18,7 +18,7 @@ set -euo pipefail
 
 SCOUT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 source "$SCOUT_DIR/scripts/lib-models.sh"
-SHARPEN_PROMPT="$(cat "$SCOUT_DIR/skills/scout/sharpen.md")"
+SHARPEN_PROMPT="$(cat "$SCOUT_DIR/skills/scout-research/sharpen.md")"
 
 input="Raw topic: ${RAW_TOPIC}
 Depth: ${DEPTH}"

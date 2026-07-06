@@ -14,7 +14,7 @@ echo "Testing run_decompose_publish.sh..."
 
 TMP=$(mktemp -d)
 PARENT_DIR="$TMP/atlas-checkout/research/2026-04-26-test"
-mkdir -p "$TMP/scout/scripts" "$TMP/scout/skills/scout" "$PARENT_DIR" "$TMP/bin"
+mkdir -p "$TMP/scout/scripts" "$TMP/scout/skills/scout-research" "$PARENT_DIR" "$TMP/bin"
 
 # Stub run.sh — writes a successful child index.md at $RESEARCH_DIR with all
 # four metric fields (cost_usd, duration_sec, citations, reading_time_min)
@@ -55,7 +55,7 @@ STUB
 chmod +x "$TMP/scout/scripts/publish.sh"
 
 # Stub synthesis skill (run-decompose only reads its content).
-echo "stub synthesis skill" > "$TMP/scout/skills/scout/synthesis.md"
+echo "stub synthesis skill" > "$TMP/scout/skills/scout-research/synthesis.md"
 
 # Stub claude on PATH — writes a parent index.md so the synthesis fallback
 # path isn't exercised here.

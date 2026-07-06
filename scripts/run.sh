@@ -131,7 +131,7 @@ Use the Scout skill. Write the research artifact to RESEARCH_DIR/index.md (for f
 EOF
 )"
 
-SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout/SKILL.md")"
+SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout-research/SKILL.md")"
 
 # Capture Claude's result JSON to a temp OUTSIDE the working tree, then copy it
 # in after the run. The agent runs with --dangerously-skip-permissions in this

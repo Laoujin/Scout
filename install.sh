@@ -215,42 +215,21 @@ if [[ -f "$INSTALL_DIR/.next" ]]; then
 
 EOF
 
-  # Optional: install the Scout slash commands. /scout-async is copied with the
-  # repo slug substituted; /scout is symlinked to the local checkout so it
-  # self-locates and auto-updates on `git pull`. ~/.scout/dir records the path.
-  read -rp "Install Scout slash commands (/scout, /scout-async) to ~/.claude/commands/? [y/N]: " _ans
-  if [[ "${_ans,,}" =~ ^(y|yes)$ ]]; then
-    _cmddir="$HOME/.claude/commands"
-    mkdir -p "$_cmddir"
-    _scout_local="$CLONE_PATH"   # local Scout checkout created by this installer
-    _atlas_url="https://${ATLAS_OWNER}.github.io/${ATLAS_NAME}/"
+  # The interactive /scout + /scout-async commands ship as a Claude Code plugin,
+  # not copied files. Point the user at it — they install it on whichever machine
+  # they run Claude Code (which may not be this always-on host).
+  cat <<EOF
+  Add the /scout commands to Claude Code (run these in Claude, on the machine
+  where you use it — your fork is the plugin marketplace):
 
-    # /scout-async — copy + substitute (needs the repo slug, can't be a symlink).
-    _async_src="$_scout_local/.claude/commands/scout-async.md"
-    if [[ -f "$_async_src" ]]; then
-      sed -e "s|{{SCOUT_REPO}}|$SCOUT_OWNER/$SCOUT_NAME|g" \
-          -e "s|{{ATLAS_URL}}|$_atlas_url|g" \
-          "$_async_src" > "$_cmddir/scout-async.md"
-      echo "  installed: $_cmddir/scout-async.md → $SCOUT_OWNER/$SCOUT_NAME"
-    else
-      echo "  skipped scout-async: $_async_src missing" >&2
-    fi
+    ${_G}/plugin marketplace add $SCOUT_OWNER/$SCOUT_NAME${_R}
+    ${_G}/plugin install scout@scout${_R}
 
-    # /scout — symlink (self-locating); record the checkout path.
-    mkdir -p "$HOME/.scout"
-    printf '%s\n' "$_scout_local" > "$HOME/.scout/dir"
-    _inter_src="$_scout_local/.claude/commands/scout.md"
-    if [[ -f "$_inter_src" ]]; then
-      if ln -sf "$_inter_src" "$_cmddir/scout.md" 2>/dev/null; then
-        echo "  linked:    $_cmddir/scout.md → $_inter_src"
-      else
-        cp "$_inter_src" "$_cmddir/scout.md"   # filesystems without symlinks
-        echo "  copied:    $_cmddir/scout.md (symlink unavailable; re-run install after updates)"
-      fi
-    else
-      echo "  skipped scout: $_inter_src missing" >&2
-    fi
-  fi
+  Then: ${_B}/scout:scout${_R} researches now on your subscription;
+        ${_B}/scout:scout-async${_R} opens a research Issue for this runner.
+────────────────────────────────────────────────────────────────────────
+
+EOF
 
   rm -f "$INSTALL_DIR/.next"
 fi

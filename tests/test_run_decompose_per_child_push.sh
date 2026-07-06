@@ -16,7 +16,7 @@ ATLAS_REMOTE="$TMP/atlas-remote.git"
 ATLAS_DIR="$TMP/scout/atlas-checkout"
 PARENT_DIR="$ATLAS_DIR/research/2026-04-26-test"
 
-mkdir -p "$TMP/scout/scripts" "$TMP/scout/skills/scout" "$TMP/bin"
+mkdir -p "$TMP/scout/scripts" "$TMP/scout/skills/scout-research" "$TMP/bin"
 
 # --- Fake Atlas remote -------------------------------------------------------
 git -c init.defaultBranch=main init -q "$TMP/seed"
@@ -54,7 +54,7 @@ cp "$REPO_ROOT/scripts/run-decompose.sh"    "$TMP/scout/scripts/"
 cp "$REPO_ROOT/scripts/lib-models.sh"       "$TMP/scout/scripts/"
 # Real publish.sh handles the final parent commit.
 cp "$REPO_ROOT/scripts/publish.sh"          "$TMP/scout/scripts/"
-echo "stub synthesis skill" > "$TMP/scout/skills/scout/synthesis.md"
+echo "stub synthesis skill" > "$TMP/scout/skills/scout-research/synthesis.md"
 
 # --- Stub claude (synthesis pass) ---
 cat > "$TMP/bin/claude" <<STUB

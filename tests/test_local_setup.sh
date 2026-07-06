@@ -7,9 +7,9 @@ pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL_MSGS+=("$1"); FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
 
-# Throwaway SCOUT_DIR (local-setup only needs skills/scout/SKILL.md + slug.sh).
-SCOUTD="$WORK/scout"; mkdir -p "$SCOUTD/skills/scout" "$SCOUTD/scripts"
-touch "$SCOUTD/skills/scout/SKILL.md"
+# Throwaway SCOUT_DIR (local-setup only needs skills/scout-research/SKILL.md + slug.sh).
+SCOUTD="$WORK/scout"; mkdir -p "$SCOUTD/skills/scout-research" "$SCOUTD/scripts"
+touch "$SCOUTD/skills/scout-research/SKILL.md"
 cp "$REPO_ROOT/scripts/slug.sh" "$SCOUTD/scripts/slug.sh"
 FAKE_HOME="$WORK/home"; mkdir -p "$FAKE_HOME/.scout"; printf '%s\n' "$SCOUTD" > "$FAKE_HOME/.scout/dir"
 

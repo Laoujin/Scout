@@ -90,7 +90,7 @@ fi
 PAGES_JSON+=']'
 
 # Compose prompt.
-SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout/view-candidacy.md")"
+SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout-research/view-candidacy.md")"
 PROMPT="$(cat <<EOF
 RUN_KIND: ${RUN_KIND}
 PARENT_PATH: ${PARENT_PATH}

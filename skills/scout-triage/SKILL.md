@@ -1,6 +1,8 @@
 ---
 name: scout-triage
 description: Use when auditing a published Atlas for broken, missing, or wrongly-flagged research — failed/empty expeditions, false ⚠ "degraded" badges, missing cost/cover/issue, doubled-date or duplicate-name slugs, manifest/ledger drift. Run periodically or after a batch of expeditions to find what went wrong.
+user-invocable: false
+disable-model-invocation: true
 ---
 
 # Scout triage — auditing Atlas research health

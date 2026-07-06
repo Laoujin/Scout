@@ -386,7 +386,7 @@ children: $CHILDREN_JSON
 Synthesis skipped — only $SUCCESS_COUNT sub-topic(s) produced output. See child page(s) below.
 MD
 else
-  SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout/synthesis.md")"
+  SKILL_CONTENT="$(cat "$SCOUT_DIR/skills/scout-research/synthesis.md")"
   PROMPT="$(cat <<EOF
 PARENT_TOPIC: ${PARENT_TOPIC}
 PARENT_DIR: ${PARENT_DIR}

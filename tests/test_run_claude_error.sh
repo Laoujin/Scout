@@ -16,11 +16,11 @@ echo "Testing run.sh Claude-error handling..."
 # JSON result; whether it writes an artifact is controlled by STUB_WRITE_ARTIFACT.
 setup() {
   local tmp; tmp=$(mktemp -d)
-  mkdir -p "$tmp/scout/scripts" "$tmp/scout/skills/scout"
+  mkdir -p "$tmp/scout/scripts" "$tmp/scout/skills/scout-research"
   for s in run.sh slug.sh lib-models.sh validate_frontmatter.sh validate_ledger.sh inject_cost.sh; do
     cp "$REPO_ROOT/scripts/$s" "$tmp/scout/scripts/"
   done
-  cp "$REPO_ROOT/skills/scout/SKILL.md" "$tmp/scout/skills/scout/"
+  cp "$REPO_ROOT/skills/scout-research/SKILL.md" "$tmp/scout/skills/scout-research/"
 
   cat > "$tmp/claude" <<'STUB'
 #!/usr/bin/env bash

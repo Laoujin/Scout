@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Snapshot tests for skills/scout/sharpen.md.
+# Snapshot tests for skills/scout-research/sharpen.md.
 #
 # Three modes:
 #   SCOUT_SKIP_CLAUDE=1 ... bash tests/test_sharpen_snapshots.sh

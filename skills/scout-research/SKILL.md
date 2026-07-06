@@ -1,6 +1,8 @@
 ---
-name: scout
+name: scout-research
 description: Research a topic on the web with configurable depth and output format, producing a cited artifact to publish to Atlas. Invoke when Scout's `run.sh` passes you a topic prompt.
+user-invocable: false
+disable-model-invocation: true
 ---
 
 # Scout — the research playbook
@@ -94,7 +96,7 @@ Depth selects both the target length and the process shape. The tiers are distin
 | Length target | ~400 words, fits on one page | 2–4 pages | as long as needed |
 | Citations target | 5–8 | 15–30 | 40+ |
 
-**For `depth=deep`, follow the extended procedure in `skills/scout/deep.md`** — it supersedes the single-session Procedure below from step 3 onward (planning, dispatch, merge, review, fix). Steps 1–2 (parse inputs, pick source rubric) and the final write step still apply.
+**For `depth=deep`, follow the extended procedure in `skills/scout-research/deep.md`** — it supersedes the single-session Procedure below from step 3 onward (planning, dispatch, merge, review, fix). Steps 1–2 (parse inputs, pick source rubric) and the final write step still apply.
 
 ## Output contract (hard rules)
 
@@ -194,7 +196,7 @@ Example body structures (not prescriptive):
 3. Research loop: WebSearch to discover URLs, WebFetch to read. Every WebSearch query includes the literal year from DATE (e.g., `"static site generator 2026"`, not `"static site generator"`) — the model's training cutoff predates runtime and defaults to stale years otherwise. When WebFetch returns empty or JS-walled content, fall back to `npx playwright chromium -o rendered.html <url>` and read the rendered HTML.
 4. For `depth=standard` and `depth=deep`, append to `RESEARCH_DIR/citations.jsonl` as each usable claim is extracted from a source. For `depth=ceo`, track `{claim, url}` pairs in memory (single pass is short enough). No claim without URL.
 5. Draft the body with inline citations. Use tables for comparisons.
-5.5. **Reflect and requery (standard and deep).** Before the self-check, read the draft alongside the ledger. List 1–3 explicit knowledge gaps: claims that feel thin, perspectives missing, numbers or dates that need corroboration. For each gap, fire one targeted search (WebSearch/WebFetch), append new ledger entries, and revise the draft to incorporate the findings. Hard cap: one reflect round for standard; deep handles its own reflection inside each researcher sub-agent (see `skills/scout/deep.md`). If no gaps are found, state that in a single line at the top of the self-check output.
+5.5. **Reflect and requery (standard and deep).** Before the self-check, read the draft alongside the ledger. List 1–3 explicit knowledge gaps: claims that feel thin, perspectives missing, numbers or dates that need corroboration. For each gap, fire one targeted search (WebSearch/WebFetch), append new ledger entries, and revise the draft to incorporate the findings. Hard cap: one reflect round for standard; deep handles its own reflection inside each researcher sub-agent (see `skills/scout-research/deep.md`). If no gaps are found, state that in a single line at the top of the self-check output.
 6. **Self-check before writing:**
    - Artifact opens with a TL;DR / Decision block (1-3 sentences, cited)?
    - Every claim has ≥1 URL?

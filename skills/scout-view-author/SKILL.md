@@ -1,6 +1,8 @@
 ---
 name: scout-view-author
 description: Author a bespoke, one-off HTML "view" of an existing canonical research page. Takes a canonical path + a view name, produces a self-contained HTML file at <canonical-dir>/views/<view_name>.html with best-effort sourced images. Each view is its own visual world — pick or invent the register that fits THIS topic. Invoked after a research run when the user has selected which pages deserve a richer presentation.
+user-invocable: false
+disable-model-invocation: true
 ---
 
 # Scout View Author

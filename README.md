@@ -87,22 +87,25 @@ Scout replies with a sharpened proposal plus a `- [ ] **Start research**` checkb
 - **Bespoke HTML views**: After publishing to Atlas, Scout proposes which pages would benefit from a one-off styled treatment (magazine, manifesto, …) which sits next to the existing markdown.
 
 
-### `/scout` and `/scout-async` slash commands
+### Add Scout to Claude Code (plugin)
 
-Install both on the machine where you run Claude Code:
-
-```bash
-bash commands/install-scout-command.sh <you>/Scout https://<you>.github.io/Atlas/
-```
-
-`install.sh` also offers this at the end (on the always-on machine where it ran).
-
-- **`/scout`** — researches **now, in your session**, on your Claude subscription (no API), including parallel expeditions. Use at your desk.
-- **`/scout-async`** — opens a Scout Issue for the self-hosted runner (headless, API-billed). Use for hands-off / fire-from-phone / overnight batches.
+Your Scout fork doubles as a Claude Code plugin marketplace. On any machine where you run Claude Code:
 
 ```txt
-/scout Compare the top 3 static site generators in 2026
+/plugin marketplace add <you>/Scout
+/plugin install scout@scout
 ```
+
+That registers two commands. Plugin commands are always namespaced under the plugin name, so you invoke them as:
+
+- **`/scout:scout`** — researches **now, in your session**, on your Claude subscription (no API), including parallel expeditions. Use at your desk.
+- **`/scout:scout-async`** — opens a Scout Issue for the self-hosted runner (headless, API-billed). Use for hands-off / fire-from-phone / overnight batches.
+
+```txt
+/scout:scout Compare the top 3 static site generators in 2026
+```
+
+`/scout:scout-async` figures out your fork slug + Atlas URL from the Atlas checkout `/scout:scout` registers, so run `/scout:scout` once first. Pull updates with `/plugin marketplace update scout`. `install.sh` prints these steps at the end too.
 
 ## Depth tiers
 
@@ -116,7 +119,7 @@ bash commands/install-scout-command.sh <you>/Scout https://<you>.github.io/Atlas
 
 Each depth maps to a model tier to balance quality against the per-run cost of headless Claude Code. Override the tiers per-fork with `SCOUT_MODEL*` Actions Variables — see [Tune model cost](docs/OPERATE.md#tune-model-cost).
 
-See [`skills/scout/SKILL.md`](skills/scout/SKILL.md) for per-tier behaviour and [`skills/scout/deep.md`](skills/scout/deep.md) for the expedition flow.
+See [`skills/scout-research/SKILL.md`](skills/scout-research/SKILL.md) for per-tier behaviour and [`skills/scout-research/deep.md`](skills/scout-research/deep.md) for the expedition flow.
 
 ## Theme Tinkering
 

@@ -15,8 +15,8 @@ if [ -f "$HOME/.scout/dir" ]; then
   SCOUT_DIR="$(cat "$HOME/.scout/dir")"
 else
   d="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  while [ "$d" != "/" ] && [ ! -f "$d/skills/scout/SKILL.md" ]; do d="$(dirname "$d")"; done
-  [ -f "$d/skills/scout/SKILL.md" ] || { echo "Error: cannot locate SCOUT_DIR" >&2; exit 1; }
+  while [ "$d" != "/" ] && [ ! -f "$d/skills/scout-research/SKILL.md" ]; do d="$(dirname "$d")"; done
+  [ -f "$d/skills/scout-research/SKILL.md" ] || { echo "Error: cannot locate SCOUT_DIR" >&2; exit 1; }
   SCOUT_DIR="$d"
 fi
 # shellcheck source=scripts/slug.sh
