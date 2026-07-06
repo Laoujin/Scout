@@ -96,16 +96,16 @@ Your Scout fork doubles as a Claude Code plugin marketplace. On any machine wher
 /plugin install scout@scout
 ```
 
-That registers two commands. Plugin commands are always namespaced under the plugin name, so you invoke them as:
+That registers two commands:
 
-- **`/scout:scout`** — researches **now, in your session**, on your Claude subscription (no API), including parallel expeditions. Use at your desk.
-- **`/scout:scout-async`** — opens a Scout Issue for the self-hosted runner (headless, API-billed). Use for hands-off / fire-from-phone / overnight batches.
+- **`/scout`** — researches **now, in your session**, on your Claude subscription (no API), including parallel expeditions. Use at your desk.
+- **`/scout-async`** — opens a Scout Issue for the self-hosted runner (headless, API-billed). Use for hands-off / fire-from-phone / overnight batches.
 
 ```txt
-/scout:scout Compare the top 3 static site generators in 2026
+/scout Compare the top 3 static site generators in 2026
 ```
 
-`/scout:scout-async` figures out your fork slug + Atlas URL from the Atlas checkout `/scout:scout` registers, so run `/scout:scout` once first. Pull updates with `/plugin marketplace update scout`. `install.sh` prints these steps at the end too.
+`/scout-async` figures out your fork slug + Atlas URL from the Atlas checkout `/scout` registers, so run `/scout` once first. Pull updates with `/plugin marketplace update scout`. `install.sh` prints these steps at the end too.
 
 ## Depth tiers
 

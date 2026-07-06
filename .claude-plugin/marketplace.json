@@ -6,7 +6,7 @@
     {
       "name": "scout",
       "source": "./",
-      "description": "Personal research engine. /scout:scout runs cited, multi-angle web research on your Claude subscription; /scout:scout-async opens a research Issue for your self-hosted runner. Publishes to your Atlas site."
+      "description": "Personal research engine. /scout runs cited, multi-angle web research on your Claude subscription; /scout-async opens a research Issue for your self-hosted runner. Publishes to your Atlas site."
     }
   ]
 }

@@ -1,4 +1,5 @@
 ---
+name: scout
 description: Run a Scout research now on your subscription (no API).
 argument-hint: "[topic]"
 allowed-tools: AskUserQuestion, Agent, Bash, Read, Write, WebSearch, WebFetch
@@ -15,8 +16,8 @@ agent — do not call `claude -p`; you and your subagents run on the subscriptio
   running as an installed plugin), then `SCOUT_DIR=${CLAUDE_PLUGIN_ROOT}`.
 - Otherwise it's still the literal `${CLAUDE_PLUGIN_ROOT}` (you're running from a
   checkout, not an installed plugin): if `~/.scout/dir` exists use
-  `SCOUT_DIR=$(cat ~/.scout/dir)`; else this command file lives at
-  `<checkout>/.claude/commands/scout.md`, so `SCOUT_DIR=<checkout>`.
+  `SCOUT_DIR=$(cat ~/.scout/dir)`; else this skill file lives at
+  `<checkout>/skills/scout/SKILL.md`, so `SCOUT_DIR=<checkout>`.
 
 Every `$SCOUT_DIR/scripts/…` and `$SCOUT_DIR/skills/…` path below resolves against it.
 

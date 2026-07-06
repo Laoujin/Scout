@@ -1,6 +1,6 @@
 ---
 name: scout-illustrator
-description: Draft a topically-matched SVG cover (3:2) for a Scout research folder — always. Called by the parent after drafting the artifact, given TOPIC, TAGS, and RESEARCH_DIR. Always writes RESEARCH_DIR/cover.svg (abstract fallback when no concrete motif).
+description: INTERNAL Scout sub-agent — dispatch ONLY via subagent_type from the Scout research flow; never auto-select it for a general user request. Draft a topically-matched SVG cover (3:2) for a Scout research folder — always. Called by the parent after drafting the artifact, given TOPIC, TAGS, and RESEARCH_DIR. Always writes RESEARCH_DIR/cover.svg (abstract fallback when no concrete motif).
 tools: Write
 ---
 

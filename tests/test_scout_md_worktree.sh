@@ -3,7 +3,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PASS=0; FAIL=0; declare -a FAIL_MSGS
 pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL_MSGS+=("$1"); FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
-MD="$REPO_ROOT/.claude/commands/scout.md"
+MD="$REPO_ROOT/skills/scout/SKILL.md"
 
 grep -q 'atlas-checkout' "$MD" && fail "still references atlas-checkout" || pass "no atlas-checkout refs"
 grep -q 'atlas-config.sh' "$MD" && pass "references atlas-config.sh" || fail "missing atlas-config.sh"

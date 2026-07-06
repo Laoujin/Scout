@@ -1,7 +1,9 @@
 ---
+name: scout-async
 description: Open a Scout research Issue (async runner).
 argument-hint: "[topic]"
 allowed-tools: AskUserQuestion, Bash, Read
+disable-model-invocation: true
 ---
 
 `$ARGUMENTS` is the research topic (free text, may be empty).
@@ -10,7 +12,7 @@ allowed-tools: AskUserQuestion, Bash, Read
 
 The issue must be opened on **your** Scout fork, and the published artifact lands on
 **your** Atlas site. Derive both from your already-registered Atlas checkout — nothing
-is baked into this command.
+is baked into this skill.
 
 1. Resolve `SCOUT_DIR` (holds `scripts/`): if the text `${CLAUDE_PLUGIN_ROOT}` on this
    line reads as an absolute path (installed plugin), use it; else if `~/.scout/dir`
@@ -21,7 +23,7 @@ is baked into this command.
      - `ATLAS_URL` = derive from `git -C "$ATLAS_DIR" remote get-url origin`: for
        `…github.com[:/]<owner>/<repo>(.git)`, it is `https://<owner>.github.io/<repo>/`.
    - **Non-zero** (no Atlas registered yet) → ask the user in chat for their Scout fork
-     slug (`<owner>/Scout`) and Atlas URL, and use those. Suggest they run `/scout:scout`
+     slug (`<owner>/Scout`) and Atlas URL, and use those. Suggest they run `/scout`
      once to register their Atlas checkout so this is automatic next time.
 
 Use the resolved `SCOUT_REPO` and `ATLAS_URL` in Step 3.

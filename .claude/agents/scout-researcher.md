@@ -1,6 +1,6 @@
 ---
 name: scout-researcher
-description: Researches a single sub-question for a Scout deep run. Invoked by the parent planner once per sub-question; runs searches, extracts cited claims into a per-agent ledger file, returns a condensed findings summary to the parent.
+description: INTERNAL Scout sub-agent — dispatch ONLY via subagent_type from the Scout research flow; never auto-select it for a general user request. Researches a single sub-question for a Scout deep run. Invoked by the parent planner once per sub-question; runs searches, extracts cited claims into a per-agent ledger file, returns a condensed findings summary to the parent.
 tools: WebSearch, WebFetch, Bash, Write, Read
 ---
 

@@ -225,8 +225,8 @@ EOF
     ${_G}/plugin marketplace add $SCOUT_OWNER/$SCOUT_NAME${_R}
     ${_G}/plugin install scout@scout${_R}
 
-  Then: ${_B}/scout:scout${_R} researches now on your subscription;
-        ${_B}/scout:scout-async${_R} opens a research Issue for this runner.
+  Then: ${_B}/scout${_R} researches now on your subscription;
+        ${_B}/scout-async${_R} opens a research Issue for this runner.
 ────────────────────────────────────────────────────────────────────────
 
 EOF

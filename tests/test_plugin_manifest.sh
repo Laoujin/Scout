@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Asserts the Claude Code plugin + marketplace manifests are well-formed and that
-# ONLY /scout:scout and /scout:scout-async are user-invocable — every skill is inert
-# (a bundled file read by path), so nothing else clutters the slash menu.
+# Asserts the Claude Code plugin + marketplace manifests are well-formed, and that
+# exactly two skills (scout, scout-async) are user-invocable as bare /scout and
+# /scout-async while every other skill is inert (a bundled file read by path).
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PASS=0; FAIL=0; declare -a FAIL_MSGS
 pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
@@ -23,45 +23,57 @@ jq -e . "$PLG" >/dev/null 2>&1 && pass "plugin.json is valid JSON" || fail "plug
 SRC="$(jq -r '.plugins[0].source' "$MKT")"
 [ -d "$REPO_ROOT/$SRC" ] && pass "plugin source path exists ($SRC)" || fail "plugin source path missing: $SRC"
 
-# --- plugin.json shape + referenced component dirs exist ---
+# --- plugin.json: name, and it registers NEITHER commands NOR agents ---
+# commands are skills now; agents are deliberately unregistered so they can't
+# auto-delegate in a user's session — they stay in .claude/agents/ for the CI runner.
 [ "$(jq -r '.name' "$PLG")" = "scout" ] && pass "plugin.json name = scout" || fail "plugin.json name not scout"
-CMD_DIR="$(jq -r '.commands' "$PLG")"
-[ -d "$REPO_ROOT/$CMD_DIR" ] && pass "commands dir exists ($CMD_DIR)" || fail "commands dir missing: $CMD_DIR"
-while IFS= read -r a; do
-  [ -f "$REPO_ROOT/$a" ] && pass "agent file exists ($a)" || fail "agent file missing: $a"
-done < <(jq -r '.agents[]' "$PLG")
+jq -e 'has("commands")' "$PLG" >/dev/null 2>&1 \
+  && fail "plugin.json should not declare 'commands' (commands are skills)" \
+  || pass "plugin.json has no 'commands' field"
+jq -e 'has("agents")' "$PLG" >/dev/null 2>&1 \
+  && fail "plugin.json should not register agents (would make them auto-delegatable)" \
+  || pass "plugin.json does not register agents"
 
-# --- the two user-invocable commands are present, and no placeholders survive ---
-for c in scout scout-async; do
-  f="$REPO_ROOT/$CMD_DIR/$c.md"
-  [ -f "$f" ] && pass "command $c.md present" || fail "command $c.md missing"
+# --- agents live in .claude/agents/ (CI-only) and carry the internal-only guard ---
+for a in scout-illustrator scout-researcher scout-reviewer; do
+  f="$REPO_ROOT/.claude/agents/$a.md"
+  [ -f "$f" ] && pass "agent $a present in .claude/agents (for CI)" || fail "agent $a missing from .claude/agents"
+  grep -qi 'INTERNAL Scout sub-agent' "$f" && pass "agent $a guarded against auto-select" || fail "agent $a missing internal-only guard"
 done
-grep -RIl '{{SCOUT_REPO}}\|{{ATLAS_URL}}' "$REPO_ROOT/$CMD_DIR" >/dev/null 2>&1 \
-  && fail "install-time placeholders still in command files" \
-  || pass "no {{...}} install-time placeholders in commands"
 
-# --- every skill is inert (not user-invocable, not model-invoked) ---
+# --- the two invocable entry skills: name → bare /scout & /scout-async, user-invocable ---
+for s in scout scout-async; do
+  f="$REPO_ROOT/skills/$s/SKILL.md"
+  [ -f "$f" ] && pass "skill $s present" || { fail "skill $s missing"; continue; }
+  grep -qx "name: $s" "$f" && pass "skill $s has name: $s (→ /$s)" || fail "skill $s missing 'name: $s'"
+  grep -q 'user-invocable: false' "$f" && fail "skill $s must stay user-invocable" || pass "skill $s is user-invocable"
+done
+grep -RIl '{{SCOUT_REPO}}\|{{ATLAS_URL}}' "$REPO_ROOT/skills/scout" "$REPO_ROOT/skills/scout-async" >/dev/null 2>&1 \
+  && fail "install-time placeholders still in entry skills" \
+  || pass "no {{...}} install-time placeholders in entry skills"
+
+# --- every OTHER skill is inert (not user-invocable, not model-invoked) ---
 for s in "$REPO_ROOT"/skills/*/SKILL.md; do
   name="$(basename "$(dirname "$s")")"
+  case "$name" in scout|scout-async) continue ;; esac
   grep -qx 'user-invocable: false' "$s" && pass "skill $name: user-invocable: false" \
     || fail "skill $name missing 'user-invocable: false'"
   grep -qx 'disable-model-invocation: true' "$s" && pass "skill $name: disable-model-invocation: true" \
     || fail "skill $name missing 'disable-model-invocation: true'"
 done
 
-# --- collider rename is complete ---
+# --- the internal research playbook is scout-research, not colliding with the scout skill ---
 [ -f "$REPO_ROOT/skills/scout-research/SKILL.md" ] && pass "skills/scout-research exists" || fail "skills/scout-research missing"
-[ ! -d "$REPO_ROOT/skills/scout" ] && pass "old skills/scout removed" || fail "old skills/scout still present"
 grep -qx 'name: scout-research' "$REPO_ROOT/skills/scout-research/SKILL.md" \
-  && pass "playbook renamed to scout-research (no /scout:scout skill collision)" \
-  || fail "skills/scout-research still named 'scout' (would collide with the scout command)"
+  && pass "playbook named scout-research (distinct from the scout skill)" \
+  || fail "skills/scout-research not named scout-research"
 
-# --- no functional file still points at the old skills/scout/ path ---
-if grep -rn 'skills/scout[/"]' "$REPO_ROOT/scripts" "$REPO_ROOT/.claude" "$REPO_ROOT/skills" 2>/dev/null \
-     | grep -vE 'skills/scout-(research|triage|create-series|view-author)' | grep -q .; then
-  fail "a functional file still references old skills/scout/ path"
+# --- no stale references to the pre-rename playbook sub-files under skills/scout/ ---
+if grep -rn 'skills/scout/\(sharpen\|deep\|synthesis\|view-candidacy\)\.md' \
+     "$REPO_ROOT/scripts" "$REPO_ROOT/skills" 2>/dev/null | grep -q .; then
+  fail "a file still references a pre-rename playbook path under skills/scout/"
 else
-  pass "no functional refs to old skills/scout/ path"
+  pass "no stale skills/scout/ playbook refs"
 fi
 
 echo; echo "Results: $PASS passed, $FAIL failed"

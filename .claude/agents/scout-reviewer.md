@@ -1,6 +1,6 @@
 ---
 name: scout-reviewer
-description: Post-write reviewer for Scout deep runs. Reads the drafted artifact and the merged citation ledger, returns a delta list of issues to fix. Does not write or edit. Invoked once by the parent after the writer drafts, before publish.
+description: INTERNAL Scout sub-agent — dispatch ONLY via subagent_type from the Scout research flow; never auto-select it for a general user request. Post-write reviewer for Scout deep runs. Reads the drafted artifact and the merged citation ledger, returns a delta list of issues to fix. Does not write or edit. Invoked once by the parent after the writer drafts, before publish.
 tools: Read
 ---
 
