@@ -18,6 +18,7 @@ The canonical is unchanged. You write a new file at `<canonical-dir>/views/<view
 ```
 CANONICAL_PATH:  <absolute path to the canonical's index.md or index.html>
 RESEARCH_DIR:    <absolute path to the canonical's directory>
+SCOUT_DIR:       <absolute path to the Scout install, holds scripts/>
 VIEW_NAME:       <slug for the view file, e.g. "magazine" or "manifesto" or "corkboard">
 TITLE_SUFFIX:    <optional human-readable name shown in the pill, e.g. "Magazine">
 VIBE_HINT:       <optional, one-sentence hint about the desired register, e.g. "tactile and intimate" or "brutalist statement">
@@ -76,34 +77,29 @@ Views are fixed HTML+CSS. **No `<script>` tags.** No filter chips that don't fil
 
 ### 4. Image strategy — best effort, real images first
 
-Real images dramatically change how a view feels. Try hard. There is no cap — fetch as many as the topic earns. Each download still has a 10-second timeout and the >2KB / valid-magic file checks; abandon a single fetch if it stalls or returns junk, but keep going for the next slot.
+Real images dramatically change how a view feels. Try hard. There is no cap — fetch as many as the topic earns.
 
-For each image slot, **match the source to the subject** and exhaust the real-image sources below before any gradient. The `og:image` of a cited page only exists for the specific named thing that page is about — it is useless for a generic subject (a dish, a festival, an animal, a landmark). That mismatch is what produces gradient-filled card grids; Commons is the fix.
+The whole chain lives in **`<SCOUT_DIR>/scripts/fetch-image.sh`**. Use it; never hand-roll the `curl`/`convert`/`rm` pipeline inline.
 
-1. **Wikimedia Commons — primary for generic & photogenic subjects.** Dishes, landmarks, festivals, markets, flora/fauna, generic activities — the things no single citation page has an `og:image` for — almost always have a Commons photo (license-clean, hotlink-safe). Search the API; the **UA header is mandatory** — Commons returns an empty body without one:
-   ```bash
-   curl -sL --max-time 10 -A "Mozilla/5.0" \
-     "https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=<subject>&gsrnamespace=6&gsrlimit=5&prop=imageinfo&iiprop=url|mime&iiurlwidth=1200&format=json"
-   ```
-   Each result carries a 1200px `thumburl`. Pick the most on-subject one and download it (same UA). Prefer a specific match (`Cendol in Penang`) over a generic one, but a clean generic shot beats a gradient every time.
-
-2. **OG image extraction — primary for named venues/products/businesses.** When the slot is a specific named entity with its own site (restaurant, hotel, attraction, conference), pull its `og:image`. `WebFetch` strips `<head>`, so use `curl`:
-   ```bash
-   curl -sL --max-time 10 -A "Mozilla/5.0" "<source-url>" | \
-     grep -oiE '<meta[^>]+(property|name)="(og:image|twitter:image)"[^>]*content="[^"]+"' | \
-     head -1 | grep -oE 'content="[^"]+"' | sed 's/content="//;s/"$//'
-   ```
-
-Download every candidate (Commons `thumburl` or OG url) to a temp file, verify it, then **convert to WebP** — a raw 4–12 MB OG/PNG hero is what makes Atlas slow to publish and pushes it toward the 1 GB GitHub Pages cap. Always optimize at authoring time:
 ```bash
-dir="<RESEARCH_DIR>/views/<VIEW_NAME>/images"; mkdir -p "$dir"
-curl -L --max-time 10 -A "Mozilla/5.0" -o "$dir/<slug>.dl" "<image-url>"
-# verify BEFORE converting: exists, >2KB, real image
-file "$dir/<slug>.dl" | grep -qE 'image data' && [ "$(stat -c%s "$dir/<slug>.dl")" -gt 2048 ] || { rm -f "$dir/<slug>.dl"; }
-# shrink to <=1600px longest edge, strip metadata, encode WebP q80; then drop the temp
-convert "$dir/<slug>.dl" -resize '1600x1600>' -strip -quality 80 "$dir/<slug>.webp" && rm -f "$dir/<slug>.dl"
+bash <SCOUT_DIR>/scripts/fetch-image.sh commons "<subject>"
+bash <SCOUT_DIR>/scripts/fetch-image.sh og "<source-url>"
+bash <SCOUT_DIR>/scripts/fetch-image.sh fetch "<RESEARCH_DIR>/views/<VIEW_NAME>/images" "<slug>" "<image-url>"
 ```
-If valid, reference the WebP: `<img src="<VIEW_NAME>/images/<slug>.webp" alt="...">`. Never reference the `.dl` temp or commit raw `.jpg`/`.png` into a view — WebP only.
+
+`commons` prints a 1200px thumburl, `og` prints the page's `og:image`, `fetch` prints `<slug>.webp`. Exit 1 means *this source came up empty — try the next one*, never "give up on the slot". `fetch` creates the dir, enforces a 10s timeout, rejects non-images and anything under 2KB, downscales to 1600px longest edge, encodes WebP q80, and cleans up its temp file. It is the only thing that may write into the images dir.
+
+**Run each call as its own separate Bash invocation, with the path written out in full.** Do not chain them with `&&`, `||`, `;` or a pipe, do not wrap them in `$(…)`, and do not hoist the path into a shell variable. A local run permission-checks *each subcommand of a compound command separately*, so any chain re-introduces the prompt-per-image that this script exists to remove. Read the URL from one call's output, then pass it as an argument to the next.
+
+For each image slot, **match the source to the subject** and exhaust both real-image sources before any gradient. The `og:image` of a cited page only exists for the specific named thing that page is about — it is useless for a generic subject (a dish, a festival, an animal, a landmark). That mismatch is what produces gradient-filled card grids; Commons is the fix.
+
+1. **Wikimedia Commons (`commons`) — primary for generic & photogenic subjects.** Dishes, landmarks, festivals, markets, flora/fauna, generic activities — the things no single citation page has an `og:image` for — almost always have a Commons photo, license-clean and hotlink-safe. Prefer a specific subject (`cendol penang`) over a generic one (`dessert`), but a clean generic shot beats a gradient every time.
+
+2. **OG extraction (`og`) — primary for named venues/products/businesses.** When the slot is a specific named entity with its own site (restaurant, hotel, attraction, conference), pull its `og:image`. Pass the entity's own URL, not a listicle that mentions it.
+
+So per slot: try `commons` first for a generic subject (or `og` first for a named entity); if it exits 1, try the other; if both come up dry, fall back to a gradient. Then hand the winning URL to `fetch` — as a separate call.
+
+A raw 4–12 MB OG/PNG hero is what makes Atlas slow to publish and pushes it toward the 1 GB GitHub Pages cap — which is why every image goes through `fetch`. Reference the WebP it prints: `<img src="<VIEW_NAME>/images/<slug>.webp" alt="...">`. Never commit a raw `.jpg`/`.png` into a view — WebP only.
 
 3. **Existing assets in the canonical's directory.** If `RESEARCH_DIR/cover.svg` exists, you can use it as `<img src="../cover.svg">` for hero or accent.
 

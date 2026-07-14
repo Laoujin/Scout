@@ -225,6 +225,7 @@ register. **Stop until they reply.** If they untick everything, skip to Step 6.
 (mirroring the Step 5 illustrator fallback) give a `general-purpose` agent the body of
 `$SCOUT_DIR/skills/scout-view-author/SKILL.md` as its brief, plus:
 `CANONICAL_PATH=<research-dir>/index.{md,html}`, `RESEARCH_DIR=<research-dir>`,
+`SCOUT_DIR=$SCOUT_DIR` (the agent needs it to reach `scripts/fetch-image.sh`),
 `VIEW_NAME=<view_name>`, `TITLE_SUFFIX=<title_suffix>`, `VIBE_HINT=<vibe_hint>`. Each
 agent writes `views/<view_name>.html` (+ `views/<view_name>.links.json` and any
 `views/<view_name>/images/`) and returns a one-line status + the view path.
