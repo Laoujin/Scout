@@ -62,24 +62,62 @@ Then call `AskUserQuestion` once:
 
 Read `$SCOUT_DIR/skills/scout-research/sharpen.md` (`SCOUT_DIR` resolved in Step 0a) and
 follow it to rewrite the topic into the structured brief. For `expedition`, also produce its
-`scout-subtopics` list. Show the brief (and sub-topics) to the user; incorporate
-their edits. Stop until they approve. The approved sub-topic set (title + depth
-each) decides the mode: sub-topics kept → **expedition**; none → **single-pass**.
+`scout-subtopics` list.
 
 **Series match.** Read the Atlas series list from `$ATLAS_DIR/_data/series.yml`
 (the checkout resolved in Step 0; skip this whole step if the file is absent). Pass it to
 the sharpening as `sharpen.md`'s `Existing series:` input and apply its rule 9: if the
 brief *confidently* belongs to exactly one existing series, propose a `scout-series`
-block — ticked `- [x]`, with `› <group-label>` only when that series has `groups:`
-(pick the single best-fitting label). Show the block under the brief; the user may
-untick it or change the group. Carry the approved `<series-slug>` (and optional
-`<group-label>`) into Step 6. If no confident match, propose nothing.
+block per `sharpen.md`'s format. If no confident match, propose nothing.
+
+### Gate 1 — approve the brief (chat)
+
+Show the brief and — each only if sharpen produced one — the `scout-subtopics` and
+`scout-series` blocks, verbatim (their `- [x]` / `- [ ]` marks, `(depth)` codes and
+rationales). **Stop until the user approves.**
+
+Every *edit* happens here, because a checkbox can only select — it can't reword a
+brief, change an angle's `(depth)`, invent an angle, or move a series group. Feedback
+of any kind means a re-sharpen round, then show Gate 1 again.
+
+### Gate 2 — select the angles (AskUserQuestion)
+
+Once the user approves, call `AskUserQuestion` **once**. Build its questions from the
+approved blocks, skipping any question whose list is empty. If that leaves no questions
+at all (no sub-topics and no series match), skip Gate 2 entirely and continue as
+single-pass.
+
+| Question    | Header        | Kind          | Options                                        |
+|-------------|---------------|---------------|------------------------------------------------|
+| Core angles | `Core angles` | multiSelect   | the stated (`- [x]`) angles, first 4           |
+| More angles | `More angles` | multiSelect   | stated angles 5–8; only when there are >4      |
+| Also cover? | `Also cover?` | multiSelect   | the suggested (`- [ ]`) completeness angles    |
+| Series      | `Series`      | single-select | `Yes — <slug> › <group>` / `No`                |
+
+- Option `label` is the angle title (trim to ~5 words); `description` carries its
+  `(depth)` and one-line rationale.
+- **Nothing is pre-ticked** — `AskUserQuestion` has no `- [x]` equivalent. An angle
+  runs only if the user ticks it. Gate 1 is where they saw what Scout recommends.
+- **A question needs ≥2 options.** Any list above holding exactly *one* entry is asked
+  as a **single-select Yes/No** instead. `Series` always is — sharpen matches at most
+  one series.
+- The 4-question budget always fits: sharpen caps sub-topics at 8 with ≤3 completeness
+  suggestions, so the worst case (5 stated + 3 suggested + series) is exactly 4.
+- An **Other** answer on any question is re-sharpen feedback — go back to Gate 1.
+
+**The Gate-2 selection is what runs** — not the list shown at Gate 1. The ticked angles
+are the sub-topic set Step 3 turns into `SUB_TOPICS_TSV`; an unticked angle is dropped,
+stated or suggested alike. Each angle keeps the full title and `(depth)` it carried at
+Gate 1; the ~5-word trim is display-only. ≥1 angle ticked → **expedition**; none ticked
+(or no `scout-subtopics` block at all) → **single-pass**. A `Yes` on `Series` carries
+`<series-slug>` (and optional `<group-label>`) into Step 6; a `No` means no series
+filing.
 
 ## Step 3 — Setup
 
-Build `SUB_TOPICS_TSV` (one `title<TAB>depth` line per approved sub-topic; empty
-for single-pass) and run `local-setup.sh` (from the `SCOUT_DIR` resolved in Step 0a)
-with the resolved paths:
+Build `SUB_TOPICS_TSV` (one `title<TAB>depth` line per sub-topic ticked in Step 2's
+Gate 2; empty for single-pass) and run `local-setup.sh` (from the `SCOUT_DIR` resolved
+in Step 0a) with the resolved paths:
 
 ```
 ATLAS_DIR="<ATLAS_DIR>" WT_HOME="<WT_HOME>" SUB_TOPICS_TSV=$'Routing angle\tdeep\nState angle\tsurvey' \
@@ -215,10 +253,10 @@ problem, show it to the user and let them fix-and-revalidate or publish as-is. L
 The expedition **parent** synthesis index is intentionally not frontmatter-validated
 (its hand-written summary is kept out of the YAML validator, matching CI).
 
-**File into the series first (if one was approved in Step 2).** Run this *before*
-`publish.sh` so the `series.yml` edit is swept into the same commit (mirrors
-`run-decompose.sh`'s wiring). `add-to-series.sh` edits the worktree's copy
-and never creates a new series:
+**File into the series first (only if the user answered `Yes` to Step 2's `Series`
+question).** Run this *before* `publish.sh` so the `series.yml` edit is swept into the
+same commit (mirrors `run-decompose.sh`'s wiring). `add-to-series.sh` edits the
+worktree's copy and never creates a new series:
 
 ```
 bash "$SCOUT_DIR/scripts/add-to-series.sh" \
