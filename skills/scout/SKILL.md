@@ -2,7 +2,7 @@
 name: scout
 description: Run a Scout research now on your subscription (no API).
 argument-hint: "[topic]"
-allowed-tools: AskUserQuestion, Agent, Bash, Read, Write, WebSearch, WebFetch
+allowed-tools: AskUserQuestion, Agent, Bash, Bash(bash */scripts/fetch-image.sh *), Read, Write, WebSearch, WebFetch
 ---
 
 `$ARGUMENTS` is the research topic (free text, may be empty). You ARE the research

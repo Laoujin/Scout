@@ -171,6 +171,12 @@ grep -q 'SCOUT_DIR=\$SCOUT_DIR' "$REPO_ROOT/skills/scout/SKILL.md" \
   && pass "local /scout path passes SCOUT_DIR to the view agent" \
   || fail "local /scout path does not pass SCOUT_DIR to the view agent"
 
+# The plugin installs under a versioned dir (…/cache/scout/scout/<version>/), so the
+# grant must not pin a version — it would go stale on the next release.
+grep -qE '^allowed-tools:.*Bash\(bash \*/scripts/fetch-image\.sh \*\)' "$REPO_ROOT/skills/scout/SKILL.md" \
+  && pass "/scout grants fetch-image.sh path-agnostically" \
+  || fail "/scout allowed-tools lacks a path-agnostic fetch-image.sh grant"
+
 echo
 echo "Results: $PASS passed, $FAIL failed"
 if [ "$FAIL" -gt 0 ]; then
