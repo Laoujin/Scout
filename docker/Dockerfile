@@ -5,6 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git curl ca-certificates openssh-client libicu72 util-linux gnupg jq python3 \
+      imagemagick webp \
       libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libxkbcommon0 \
       libxcomposite1 libxdamage1 libxrandr2 libxfixes3 \
       libgbm1 libasound2 libpango-1.0-0 libcairo2 libgtk-3-0 \
