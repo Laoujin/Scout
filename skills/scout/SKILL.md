@@ -194,8 +194,10 @@ This runs **before** Step 6 so the views land in the same commit as the canonica
 NOT call `view-candidacy.sh` or `views-dispatch.sh` — they shell out to `claude -p`
 (API). You do the judging and the dispatch yourself, on the subscription.
 
-**1. Judge (inline).** Read `$SCOUT_DIR/skills/scout-research/view-candidacy.md` and apply it
-yourself. Build its inputs from what you already wrote in Steps 3–5: `RUN_KIND`
+### Judge (inline)
+
+Read `$SCOUT_DIR/skills/scout-research/view-candidacy.md` and apply it yourself. Build
+its inputs from what you already wrote in Steps 3–5: `RUN_KIND`
 (`decompose` for an expedition, else `single`), `PARENT_PATH`, and a `PAGES` array —
 one entry per page actually written (parent + each successful child for an
 expedition; just the parent for single-pass), each carrying
@@ -206,22 +208,41 @@ force the **expedition** parent to be offered (a single-pass page is judged on i
 merits, not force-offered), skip a page whose canonical is already `format: html`,
 skip pages with ≤2 citations, and never reuse a `view_name` across sibling children.
 
-**2. Checklist (in chat).** Render the candidacy as a checklist and ask the user to
-confirm. Pre-tick recommended pages with their register; leave the rest unticked:
+### Gate 1 — candidacy table (chat)
 
-```
-- [x] **<parent title>** — register: <view_name>
-- [x] <child-slug> — register: <view_name>
-- [ ] <child-slug>
-```
+Render the judgement as a table, one row per page written in Steps 3–5 —
+**including the pages judged not worth a view**, so the user can promote one.
+Columns: Page | Offer? | Register (`view_name`) | Vibe (`vibe_hint`). The user may
+swap a register, promote a `✗` row, or demote a `✓` row. **Stop until they approve.**
 
-Tell the user they can tick/untick any line (including all on / all off) and change a
-register. **Stop until they reply.** If they untick everything, skip to Step 6.
+A promotion is a user **override**, not a re-judge — the judge's skip rules would only
+re-reject the row. Its `view_name` / `title_suffix` / `vibe_hint` come back `null`, so
+mint them yourself from `view-candidacy.md`'s register vocabulary and show them in the
+table before asking again. A register swap likewise rewrites `view_name` **and** its
+`title_suffix`. A page whose canonical is already `format: html` is **not** promotable
+(the canonical *is* the bespoke HTML) — render it as `—`, not `✗`.
 
-**3. Author (parallel sub-agents).** For each ticked page — `<research-dir>` is
-`$PARENT_DIR` for the parent, the child dir for a child — create its
-`<research-dir>/views/` directory, then dispatch ALL views in ONE message — one
-`Agent` call per ticked page. `scout-view-author` is a skill, not an agent type, so
+This is the only place a register can change — Gate 2 selects, it never edits.
+
+### Gate 2 — select the views (AskUserQuestion)
+
+Once the user approves, call `AskUserQuestion` **once** over only the rows approved
+as `✓` at Gate 1. multiSelect, ≤4 options per question, chunked across up to 3
+questions (an expedition writes at most 9 pages: parent + 8 children) with headers
+`HTML views`, `HTML views 2`, `HTML views 3`. Option `label` is the page title;
+`description` is `<view_name> — <vibe_hint>`.
+
+- **Nothing is pre-ticked** — a view is authored only if the user ticks it.
+- **A question needs ≥2 options.** Exactly one surviving row is asked as a
+  **single-select Yes/No** instead.
+- No surviving rows → skip Gate 2 entirely and go straight to Step 6.
+- An **Other** answer is re-judge feedback — go back to Gate 1.
+
+### Author (parallel sub-agents)
+
+For each ticked page — `<research-dir>` is `$PARENT_DIR` for the parent, the child dir for a
+child — create its `<research-dir>/views/` directory, then dispatch ALL views in ONE message —
+one `Agent` call per ticked page. `scout-view-author` is a skill, not an agent type, so
 (mirroring the Step 5 illustrator fallback) give a `general-purpose` agent the body of
 `$SCOUT_DIR/skills/scout-view-author/SKILL.md` as its brief, plus:
 `CANONICAL_PATH=<research-dir>/index.{md,html}`, `RESEARCH_DIR=<research-dir>`,
