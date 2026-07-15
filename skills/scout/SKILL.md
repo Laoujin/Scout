@@ -2,7 +2,7 @@
 name: scout
 description: Run a Scout research now on your subscription (no API).
 argument-hint: "[topic]"
-allowed-tools: AskUserQuestion, Agent, Bash, Read, Write, WebSearch, WebFetch
+allowed-tools: AskUserQuestion, Agent, Bash, Bash(bash */scripts/fetch-image.sh *), Read, Write, WebSearch, WebFetch
 ---
 
 `$ARGUMENTS` is the research topic (free text, may be empty). You ARE the research
@@ -246,6 +246,7 @@ one `Agent` call per ticked page. `scout-view-author` is a skill, not an agent t
 (mirroring the Step 5 illustrator fallback) give a `general-purpose` agent the body of
 `$SCOUT_DIR/skills/scout-view-author/SKILL.md` as its brief, plus:
 `CANONICAL_PATH=<research-dir>/index.{md,html}`, `RESEARCH_DIR=<research-dir>`,
+`SCOUT_DIR=$SCOUT_DIR` (the agent needs it to reach `scripts/fetch-image.sh`),
 `VIEW_NAME=<view_name>`, `TITLE_SUFFIX=<title_suffix>`, `VIBE_HINT=<vibe_hint>`. Each
 agent writes `views/<view_name>.html` (+ `views/<view_name>.links.json` and any
 `views/<view_name>/images/`) and returns a one-line status + the view path.

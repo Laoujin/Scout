@@ -105,7 +105,18 @@ That registers two commands:
 /scout Compare the top 3 static site generators in 2026
 ```
 
-`/scout-async` figures out your fork slug + Atlas URL from the Atlas checkout `/scout` registers, so run `/scout` once first. Pull updates with `/plugin marketplace update scout`. `install.sh` prints these steps at the end too.
+`/scout-async` figures out your fork slug + Atlas URL from the Atlas checkout `/scout` registers, so run `/scout` once first. `install.sh` prints these steps at the end too.
+
+### Update the plugin
+
+After pushing changes to your fork:
+
+```txt
+claude plugin marketplace update scout
+claude plugin update scout@scout
+```
+
+Restart Claude Code to apply.
 
 ## Depth tiers
 

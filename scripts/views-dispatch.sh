@@ -145,6 +145,7 @@ for entry in "${DISPATCH_ITEMS[@]}"; do
   PROMPT="$(cat <<EOF
 CANONICAL_PATH:  ${CANONICAL}
 RESEARCH_DIR:    ${RESEARCH_DIR_ABS}
+SCOUT_DIR:       ${SCOUT_DIR}
 VIEW_NAME:       ${view_name}
 TITLE_SUFFIX:    ${title_suffix}
 VIBE_HINT:       ${vibe_hint}
