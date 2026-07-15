@@ -1,7 +1,7 @@
 {
   "name": "scout",
   "description": "Personal research engine. /scout runs cited, multi-angle web research on your Claude subscription; /scout-async opens a research Issue for your self-hosted runner.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": { "name": "Laoujin" },
   "homepage": "https://github.com/Laoujin/Scout",
   "repository": "https://github.com/Laoujin/Scout",
