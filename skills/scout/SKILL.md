@@ -55,7 +55,7 @@ If `$ARGUMENTS` is non-empty use it as the topic; else ask in chat (plain messag
 sharpens it) to a tempfile — `RAW_PROMPT_FILE=$(mktemp)` then write the exact text
 into it. This is the issue body in Step 6.
 Then call `AskUserQuestion` once:
-1. **Depth** (`Depth`): `survey` (Recommended) · `recon` · `expedition`.
+1. **Depth** (`Depth`): `expedition` (Recommended) · `survey` · `recon`.
 2. **Format** (`Format`): `auto` (Recommended) · `md` · `html`.
 
 ## Step 2 — Sharpen & decompose (in chat)
@@ -89,18 +89,21 @@ single-pass.
 
 | Question    | Header        | Kind          | Options                                        |
 |-------------|---------------|---------------|------------------------------------------------|
-| Core angles | `Core angles` | multiSelect   | the stated (`- [x]`) angles, first 4           |
-| More angles | `More angles` | multiSelect   | stated angles 5–8; only when there are >4      |
+| Core angles | `Core angles` | multiSelect   | stated (`- [x]`) angles — all here if ≤4; if >4, split evenly with More |
+| More angles | `More angles` | multiSelect   | overflow stated angles when >4; balanced so neither question is left one option |
 | Also cover? | `Also cover?` | multiSelect   | the suggested (`- [ ]`) completeness angles    |
 | Series      | `Series`      | single-select | `Yes — <slug> › <group>` / `No`                |
 
 - Option `label` is the angle title (trim to ~5 words); `description` carries its
-  `(depth)` and one-line rationale.
-- **Nothing is pre-ticked** — `AskUserQuestion` has no `- [x]` equivalent. An angle
-  runs only if the user ticks it. Gate 1 is where they saw what Scout recommends.
-- **A question needs ≥2 options.** Any list above holding exactly *one* entry is asked
-  as a **single-select Yes/No** instead. `Series` always is — sharpen matches at most
-  one series.
+  `(depth)` and one-line rationale. Suffix each recommended (`- [x]`) angle's label with
+  ` (recommended)` so the default picks stand out in the picker.
+- **Nothing is pre-ticked** — `AskUserQuestion` has no `- [x]` equivalent, so an angle
+  runs only if the user ticks it; the ` (recommended)` label suffix flags the ones Scout
+  advises. Gate 1 is where they saw the full rationale.
+- **A question needs ≥2 options.** Balance the stated angles across Core/More so neither
+  is stranded with a single option (5 → 3+2, not 4+1). A list that is *genuinely* one
+  entry — a lone completeness suggestion, or `Series` (sharpen matches at most one) — is
+  asked as a **single-select Yes/No** instead.
 - The 4-question budget always fits: sharpen caps sub-topics at 8 with ≤3 completeness
   suggestions, so the worst case (5 stated + 3 suggested + series) is exactly 4.
 - An **Other** answer on any question is re-sharpen feedback — go back to Gate 1.
