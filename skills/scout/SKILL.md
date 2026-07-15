@@ -218,28 +218,41 @@ Render the judgement as a table, one row per page written in Steps 3–5 —
 Columns: Page | Offer? | Register (`view_name`) | Vibe (`vibe_hint`). The user may
 swap a register, promote a `✗` row, or demote a `✓` row. **Stop until they approve.**
 
-A promotion is a user **override**, not a re-judge — the judge's skip rules would only
-re-reject the row. Its `view_name` / `title_suffix` / `vibe_hint` come back `null`, so
-mint them yourself from `view-candidacy.md`'s register vocabulary and show them in the
-table before asking again. A register swap likewise rewrites `view_name` **and** its
-`title_suffix`. A page whose canonical is already `format: html` is **not** promotable
-(the canonical *is* the bespoke HTML) — render it as `—`, not `✗`.
+The judge returns `null` registers for `✗` rows. Mint a candidate `view_name` /
+`title_suffix` / `vibe_hint` for **every** `✗` row upfront — from `view-candidacy.md`'s
+register vocabulary, unique across siblings — and show it in the table, so every row is
+offer-ready at Gate 2 (the `✗` rows become the opt-in question; no separate promotion
+round needed). A **promotion** is then just the user moving a `✗` row up into the
+recommended tier; a **register swap** rewrites `view_name` **and** its `title_suffix`. A
+page whose canonical is already `format: html` is **not** offerable (the canonical *is*
+the bespoke HTML) — render it as `—`, not `✗`.
 
 This is the only place a register can change — Gate 2 selects, it never edits.
 
 ### Gate 2 — select the views (AskUserQuestion)
 
-Once the user approves, call `AskUserQuestion` **once** over only the rows approved
-as `✓` at Gate 1. multiSelect, ≤4 options per question, chunked across up to 3
-questions (an expedition writes at most 9 pages: parent + 8 children) with headers
-`HTML views`, `HTML views 2`, `HTML views 3`. Option `label` is the page title;
-`description` is `<view_name> — <vibe_hint>`.
+Once the user approves, call `AskUserQuestion` **once**. Split the rows into two tiers —
+the `✓` recommended views and the `✗` opt-in views (registers minted at Gate 1) — and
+build the questions from this table, skipping any question whose list is empty:
 
-- **Nothing is pre-ticked** — a view is authored only if the user ticks it.
-- **A question needs ≥2 options.** Exactly one surviving row is asked as a
-  **single-select Yes/No** instead.
-- No surviving rows → skip Gate 2 entirely and go straight to Step 6.
-- An **Other** answer is re-judge feedback — go back to Gate 1.
+| Question          | Header                          | Kind        | Options                                                                   |
+|-------------------|---------------------------------|-------------|---------------------------------------------------------------------------|
+| Recommended views | `HTML views` (+ `HTML views 2`) | multiSelect | the `✓` pages — all here if ≤4; split evenly across the two headers if >4  |
+| Also render?      | `Also render?`                  | multiSelect | the `✗` pages the judge didn't recommend (up to a second `Also render? 2`) |
+
+- Option `label` is the page title; suffix each **recommended** (`✓`) label with
+  ` (recommended)` so Scout's picks stand out. `description` is `<view_name> — <vibe_hint>`.
+- **Nothing is pre-ticked** — a view is authored only if the user ticks it; the
+  ` (recommended)` suffix flags the ones Scout advises. Gate 1 is where they saw the full
+  rationale.
+- **A question needs ≥2 options.** A tier that is genuinely one entry is asked as a
+  **single-select Yes/No** instead. Balance the `✓` rows across the two `HTML views`
+  headers so neither is stranded with a single option (5 → 3+2, not 4+1).
+- **Budget.** An expedition writes ≤9 pages, the parent is always `✓`, and each question
+  holds ≤4 options — recommended fits in ≤2 `HTML views` questions and opt-in in ≤2
+  `Also render?` questions, always within the 4-question cap.
+- Both tiers empty (single-pass with no `✓` and no `✗`) → skip Gate 2 and go to Step 6.
+- An **Other** answer on either question is re-judge feedback — go back to Gate 1.
 
 ### Author (parallel sub-agents)
 
